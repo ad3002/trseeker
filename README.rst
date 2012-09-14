@@ -102,33 +102,6 @@ Properties
 	print seq_obj.fasta
 	>>> ">[seq_ref]\n[seq_sequence]\n"
 
-- sa_input
-
-::
-
-	print seq_obj.sa_input
-	>>> "[seq_sequence]$"
-
-- ncbi_fasta
-
-::
-
-	print seq_obj.ncbi_fasta
-	>>> ">gi|[seq_gi]|ref|[seq_ref]|[seq_description]\n[seq_sequence]\n"
-
-Methods
-~~~~~~~
-
-- add_sequence_revcom()
-- set_dna_sequence(self, title, sequence, description=None)
-
-Head is a dictionary with gi, ref, description keys.
-
-Chromosome name is **?** or setted with parse_chromosome_name(head["description"]).
-
-Sequence is cleared with clear_sequence(s) function. Lowercase and all non-DNA characters replacing with **n**. If sequence has **n** then it is gapped.
-
-
 
 
 
