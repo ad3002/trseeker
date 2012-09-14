@@ -51,7 +51,6 @@ Yaml file:
 import yaml, os
 
 SETTINGS_FILENAME = "settings.yaml"
-
 NGRAM_LENGTH = 12
 NGRAM_N = 100000000
 
