@@ -27,6 +27,8 @@ Framework состоит из следующих частей
 
 Настройки содержат следующие параметры:
 	
+::
+
 	trseeker:
 	    os: linux64
 	    root_dir: /root/Dropbox/workspace/trseeker
