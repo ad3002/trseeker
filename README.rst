@@ -13,11 +13,15 @@ Framework состоит из следующих частей
 
 В файле settings.py
 
+::
+
 	SETTINGS_FILENAME = "settings.yaml"
 	NGRAM_LENGTH = 12
 	NGRAM_N = 100000000
 
 Настройки можно прочитать и записать:
+
+::
 	
 	from trseeker.settings import load_settings
 	from trseeker.settings import save_settings
@@ -62,6 +66,56 @@ Framework состоит из следующих частей
 
 Avaliable Models
 ================
+
+DNA Sequence
+------------
+
+::
+
+	from trseeker.models.sequence_model import SequenceModel
+
+Attribites:
+
+- seq_gi (int)
+- seq_ref
+- seq_description
+- seq_sequence
+- seq_length (int)
+- seq_gc (float)
+- seq_revcom, reverce complement
+- seq_gapped (int)
+- seq_chr
+- seq_head
+- seq_start_position (int)
+- seq_end_position (int)
+
+Properties:
+
+- length (self.seq_length)
+- sequence (self.seq_sequence)
+- fasta 
+
+::
+
+	print seq_obj.fasta
+	>>> ">[seq_ref]\n[seq_sequence]\n"
+
+- sa_input
+
+::
+
+	print seq_obj.sa_input
+	>>> "[seq_sequence]$"
+
+- ncbi_fasta
+
+::
+
+	print seq_obj.ncbi_fasta
+	>>> ">gi|[seq_gi]|ref|[seq_ref]|[seq_description]\n[seq_sequence]\n"
+
+
+
 
 IO functions
 ============

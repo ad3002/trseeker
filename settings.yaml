@@ -27,4 +27,4 @@ trf_settings:
     overlapping_gc_diff: 0.05
 ngrams_settings:
     ngram_length: 12
-    ngram_m: 10000000    
+    ngram_m: 10000000

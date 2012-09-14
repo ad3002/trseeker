@@ -54,21 +54,6 @@ class SequenceModel(AbstractModel):
 
     float_attributes = ["seq_gc", ]
 
-    def __init__(self):
-
-        self.seq_gi = None
-        self.seq_ref = None
-        self.seq_description = None
-        self.seq_sequence = None
-        self.seq_length = None
-        self.seq_gc = None
-        self.seq_revcom = None
-        self.seq_gaped = None
-        self.seq_chr = None
-        self.seq_head = None
-        self.seq_start_position = None
-        self.seq_end_position = None
-
     @property
     def length(self):
         """ Return a sequence length."""
