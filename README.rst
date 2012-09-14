@@ -263,7 +263,7 @@ Dataset model
 
 ::
 
-	from trseeker.models.odataset_model import DatasetModel		
+	from trseeker.models.dataset_model import DatasetModel		
 
 Attributes:
 
@@ -278,7 +278,26 @@ Attributes:
 - dataset_trs_mean_gc (float)
 - dataset_trs_fraq (float)
 
+Blast Results Model
+-------------------
 
+::
+
+	from trseeker.models.blast_model import BlastResultModel		
+
+Attributes:
+
+- query_id
+
+Methods
+
+- read_blast_file(blast_file, length)
+
+::
+
+	from trseeker.models.blast_model read_blast_file
+
+	...
 
 IO functions
 ============
