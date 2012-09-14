@@ -137,7 +137,7 @@ Head is a dictionary with gi, ref, description keys.
 
 Chromosome name is **?** or setted with parse_chromosome_name(head["description"]).
 
-Sequence is cleared with clear_sequence(s) function. Lowercase and all non-DNA characters replacing with **n**. If sequence has **n** then it is gapped.
+Sequence is cleared with clear_sequence(s) function. Lowercase and all non-DNA characters replacing with **n**. If the sequence has **n** then it is gapped.
 
 TRF results
 -----------
@@ -182,6 +182,65 @@ Attributes:
 - trf_bands_refgenome
 - trf_repbase
 - trf_strand
+
+Methods
+
+- set_project_data(project), set self.project to given project
+- set_raw_trf(head, body, line), head, body and line from TRF parser
+- get_index_repr()
+
+::
+	
+	print trf_obj.get_index_repr()
+	'''
+	Tab delimted string with \n-symbol:
+	trf_id
+	trf_period
+	trf_array_length
+	trf_pvar
+	trf_gi
+	trf_l_ind
+	trf_r_ind
+	trf_chr
+	'''
+
+- get_numerical_repr()
+
+::
+	print trf_obj.get_numerical_repr()
+	>>> [trf_period]\t[trf_array_length]\t[trf_array_gc]\n
+
+- get_fasta_repr(), where head is trf_obj.trf_id and sequence is trf_obj.trf_array
+- get_monomer_fasta_repr(), where head is trf_obj.trf_id and sequence is trf_obj.trf_consensus
+- get_family_repr()
+
+::
+	
+	print trf_obj.get_family_repr()
+	'''
+	Tab delimted string with \n-symbol:
+	trf_id
+	trf_period
+	trf_array_length
+	trf_array_gc
+	trf_pvar
+	trf_gi
+	trf_l_ind
+	trf_r_ind
+	trf_chr
+	trf_repbase
+	trf_superfamily
+	trf_family
+	trf_subfamily
+	'''
+
+For network slice added one more index - gid (group id)
+
+::
+
+	from trseeker.models.trf_model import NetworkSliceModel	
+
+	slice_obj = NetworkSliceModel()
 
 
 
