@@ -242,6 +242,42 @@ For network slice added one more index - gid (group id)
 
 	slice_obj = NetworkSliceModel()
 
+Organism model
+--------------
+
+::
+
+	from trseeker.models.organism_model import OrganismModel		
+
+Attributes:
+
+- organism_taxon
+- organism_common_name
+- organism_acronym
+- organism_description
+- organism_wgs_projects
+- organism_genome_assemblies
+
+Dataset model
+-------------
+
+::
+
+	from trseeker.models.odataset_model import DatasetModel		
+
+Attributes:
+
+- dataset_taxon
+- dataset_id
+- dataset_sources
+- dataset_description
+- dataset_gc (float)
+- dataset_length (int)
+- dataset_trs_n (int)
+- dataset_trs_length (int)
+- dataset_trs_mean_gc (float)
+- dataset_trs_fraq (float)
+
 
 
 IO functions

@@ -7,7 +7,7 @@
 
 from PyExp.models.abstract_model import AbstractModel
 
-class Dataset(AbstractModel):
+class DatasetModel(AbstractModel):
     """ Class for dataset wrapping.
 
     Dumpable attributes:
