@@ -89,6 +89,57 @@ Attribites
 - seq_start_position (int)
 - seq_end_position (int)
 
+Properties
+
+- length (self.seq_length)
+- sequence (self.seq_sequence)
+- fasta 
+
+::
+
+	print seq_obj.fasta
+	>>> ">[seq_ref]\n[seq_sequence]\n"
+
+- sa_input
+
+::
+
+	print seq_obj.sa_input
+	>>> "[seq_sequence]$"
+
+- ncbi_fasta
+
+::
+
+	print seq_obj.ncbi_fasta
+	>>> ">gi|[seq_gi]|ref|[seq_ref]|[seq_description]\n[seq_sequence]\n"
+
+Methods
+
+- add_sequence_revcom()
+- set_dna_sequence(self, title, sequence, description=None)
+
+::
+
+	self.seq_ref = title
+    
+- set_ncbi_sequence(self, head, sequence)
+
+::
+	
+	(self.seq_gi, self.seq_ref, self.seq_description) = parse_fasta_head(head)
+
+Chromosome name is **?** or setted with parse_chromosome_name(head).
+
+- set_gbff_sequence(self, head, sequence)
+
+Head is a dictionary with gi, ref, description keys.
+
+Chromosome name is **?** or setted with parse_chromosome_name(head["description"]).
+
+Sequence is cleared with clear_sequence(s) function. Lowercase and all non-DNA characters replacing with **n**. If sequence has **n** then it is gapped.
+
+
 
 
 
