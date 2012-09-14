@@ -139,7 +139,49 @@ Chromosome name is **?** or setted with parse_chromosome_name(head["description"
 
 Sequence is cleared with clear_sequence(s) function. Lowercase and all non-DNA characters replacing with **n**. If sequence has **n** then it is gapped.
 
+TRF results
+-----------
 
+::
+
+	from trseeker.models.trf_model import TRModel
+
+Attributes:
+
+- project, project name
+- id (int)
+- trf_id (int)
+- trf_l_ind (int)
+- trf_r_ind (int)
+- trf_period (int)
+- trf_n_copy (float)
+- trf_pmatch (float)
+- trf_pvar (float)
+- trf_consensus
+- trf_array
+- trf_array_gc (float)
+- trf_consensus_gc (float)
+- trf_gi
+- trf_head
+- trf_param
+- trf_array_length (int)
+- trf_chr
+- trf_joined (int)
+- trf_superfamily
+- trf_superfamily_self
+- trF_superfamily_ref
+- trf_family
+- trf_subfamily
+- trf_subsubfamily
+- trf_family_network
+- trf_family_self
+- trf_family_ref
+- trf_hor (int)
+- trf_n_chrun (int)
+- trf_chr_refgenome
+- trf_bands_refgenome
+- trf_repbase
+- trf_strand
 
 
 
