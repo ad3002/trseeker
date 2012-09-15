@@ -630,7 +630,7 @@ Useful functions:
 	for seq_obj in sc_iter_gbff(file_name):
 		print seq_obj.length
 
-	from trseeker.seqio.gbff_file import sc_iter_gbff
+	from trseeker.seqio.gbff_file import sc_iter_gbff_simple
 
 	for (gi, sequence) in sc_iter_gbff_simple(file_name):
 		print gi
@@ -639,6 +639,46 @@ Useful functions:
 
 	sc_parse_gbff_in_folder("/home/user/", "/home/user/fasta", "fa", "mouse")
 
+TRF file
+--------
+
+Useful functions:
+
+- sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project=None)
+
+::
+	
+	from trseeker.seqio.trf_file import TRFFileIO
+
+	from trseeker.seqio.trf_file import sc_parse_raw_trf_folder
+
+	sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project="mouse_genome")
+
+	
+
+
+TR file
+-------
+
+::
+	
+	from trseeker.seqio.tr_file import 
+
+
+Ngram file
+----------
+
+::
+	
+	from trseeker.seqio.ngram_file import 
+
+
+Blast results file
+------------------
+
+::
+	
+	from trseeker.seqio.blast_file import 
 
 
 

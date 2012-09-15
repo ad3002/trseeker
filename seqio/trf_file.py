@@ -65,15 +65,10 @@ class TRFFileIO(AbstractBlockFileIO):
         
     """
 
-    def __init__(self, use_mongodb=False):
+    def __init__(self):
         """ Overrided. Hardcoded start token."""
         token = "Sequence:"
         super(TRFFileIO, self).__init__(token)
-        self.use_mongodb = use_mongodb
-        if use_mongodb:
-            db = MongoDBReader()
-            db = db.get_trdb_conn()
-            self.mongodb_table = db.tandem_repeats
 
     def iter_parse(self, trf_file, filter=True):
         """ Iterate over raw trf data and yield TRFObjs."""
@@ -111,9 +106,6 @@ class TRFFileIO(AbstractBlockFileIO):
                         trf_obj.set_project_data(project)
 
                     fw.write(str(trf_obj))
-
-                    if self.use_mongodb:
-                        self.write_to_mongodb(self.mongodb_table, trf_obj.__dict__)
 
                     trf_id += 1
         return trf_id
@@ -274,15 +266,6 @@ class TRFFileIO(AbstractBlockFileIO):
 
         return obj1
 
-def sc_trf_mongodb_reader(project):
-    """ Iter over trf file."""
-    reader = TRFFileIO(use_mongodb=True)
-    query = {"project":project["title"],
-             "trf_array_length": {"$gt":project["parameters"]["array_length_for_large_trs"]}}
-    for item in reader.read_from_mongodb(reader.mongodb_table, query):
-        yield item
-
-
 def sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project=None):
     """ Parse raw TRF output in given folder to output_trf_file."""
     reader = TRFFileIO()
@@ -292,17 +275,3 @@ def sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project=None):
     for file_path in sc_iter_filepath_folder(trf_raw_folder, mask="dat"):
         print "Start parse file %s..." % file_path
         trf_id = reader.parse_to_file(file_path, output_trf_file, trf_id=trf_id, project=project)
-
-def sc_trf_mongodb_update(query_dict, update_dict):
-    """ Shortcut for update TRF mongodb.
-    
-    Example:
-    
-    >>> query_dict = {'trf_array_length':96}
-    >>> update_dict = {"id":0}
-    
-    """
-    trf_file = TRFFileIO(use_mongodb=True)
-    for x in trf_file.read_from_mongodb(trf_file.mongodb_table, query_dict):
-        trf_file.update_mongodb(trf_file.mongodb_table, {"_id":x._id}, {"$set":update_dict})
-
