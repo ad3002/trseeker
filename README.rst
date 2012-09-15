@@ -287,17 +287,42 @@ Blast Results Model
 
 Attributes:
 
-- query_id
+- query_id (int)
+- query_gi (int)
+- query_ref
+- subject_id
+- subject_gi(int)
+- subject_ref
+- query_start (int)
+- query_end (int)
+- subject_start (int)
+- subject_end (int)
+- evalue  (float)
+- bit_score (flaot)
+- score (int)
+- alignment_length (int)
+- proc_identity (float)
+- identical (int)
+- mismatches (int)
+- positives (int)
+- gap_opens (int)
+- gaps (int)
+- proc_positives (float)
+- frames
+- query_frame (int)
+- subject_frame (int)
+- fraction_of_query (float)  
 
 Methods
 
-- read_blast_file(blast_file, length)
+- read_blast_file(blast_file, length), return subject_ref -> list of matches (BlastResultModel models).
 
 ::
 
 	from trseeker.models.blast_model read_blast_file
 
-	...
+	ref_to_blast_obj = read_blast_file(file_name)
+	
 
 IO functions
 ============
