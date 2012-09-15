@@ -486,7 +486,7 @@ Tab file
 	reader.read_from_file(file_name)
 
 
-Usuful functions:
+Useful functions:
 
 - sc_iter_tab_file(input_file, data_type, remove_starts_with=None)
 - sc_iter_simple_tab_file(input_file)
@@ -521,6 +521,126 @@ Usuful functions:
 
 Block file
 ----------
+
+::
+	
+	from trseeker.seqio.block_file import AbstractBlockFileIO
+
+	reader = AbstractBlockFileIO(token, **args)
+	for (head, body, start, next) in reader.read_online(file_name):
+		pirnt head
+
+Fasta file
+----------
+
+::
+	
+	from trseeker.seqio.fasta_file import FastaFileIO
+
+	reader = FastaFileIO()
+
+Useful functions:
+
+- sc_iter_fasta(file_name)
+- sc_iter_fasta_simple(file_name)
+- save_all_seq_with_exact_substring(fasta_file, substring, output_file)
+
+::
+
+	from trseeker.seqio.fasta_file import sc_iter_fasta
+
+	for seq_obj in sc_iter_fasta(file_name):
+		print seq_obj.sequence
+
+	from trseeker.seqio.fasta_file import sc_iter_fasta_simple
+
+	for (gi, sequence) in sc_iter_fasta_simple(file_name):
+		print gi
+
+	from trseeker.seqio.fasta_file import save_all_seq_with_exact_substring
+
+	save_all_seq_with_exact_substring(fasta_file, substring, output_file)
+
+FTP IO
+------
+
+::
+	
+	from trseeker.seqio.frt_io import AbstractFtpIO
+
+	reader = AbstractFtpIO(ftp_address=address)
+
+	reader.connect()
+
+	reader.cd(['/home', 'user', 'data'])
+
+	reader.ls()
+	>>> ['readme.txt', 'data.fa']
+
+	reader.get(file, output_file)
+
+	reader.unzip(file_name)
+
+NCBI ftp
+--------
+
+::
+	
+	from trseeker.seqio.ncbi_ftp import NCBIFtpIO
+
+	reader = NCBIFtpIO()
+
+	reader.download_wgs_fasta(wgs_list, file_suffix, output_folder)
+
+	reader.download_all_wgs_in_fasta(output_folder)
+
+	reader.download_all_wgs_in_gbff(output_folder)
+
+Mongo db reader
+---------------
+
+Not implemented yet.
+
+::
+	
+	from trseeker.seqio.mongodb_reader import MongoDBReader
+
+	reader = MongoDBReader()
+	db = reader.get_trdb_conn()
+
+GBFF file
+---------
+
+::
+	
+	from trseeker.seqio.gbff_file import GbffFileIO
+
+	reader = GbffFileIO()
+
+Useful functions:
+
+- sc_iter_gbff(file_name)
+- sc_iter_gbff_simple(file_name)
+- sc_parse_gbff_in_folder(gbbf_folder, fasta_folder, fasta_postfix, mask)
+
+::
+	
+	from trseeker.seqio.gbff_file import sc_iter_gbff
+
+	for seq_obj in sc_iter_gbff(file_name):
+		print seq_obj.length
+
+	from trseeker.seqio.gbff_file import sc_iter_gbff
+
+	for (gi, sequence) in sc_iter_gbff_simple(file_name):
+		print gi
+
+	from trseeker.seqio.gbff_file import sc_parse_gbff_in_folder
+
+	sc_parse_gbff_in_folder("/home/user/", "/home/user/fasta", "fa", "mouse")
+
+
+
 
 Toolkit
 =======
