@@ -105,12 +105,7 @@ class TabDelimitedFileIO(AbstractFileIO):
         with open(output_file, "w") as fh:
             fh.writelines(self._data)
 
-    def sort(self, sort_func, reversed=False):
-        """ Sort data with sort_func and reversed param."""
-        assert hasattr(sort_func, "__call__")
-        self._data.sort(key=sort_func, reverse=reversed)
-
-def sc_iter_tab_file(input_file, data_type, skip_starts_with=None):
+def sc_iter_tab_file(input_file, data_type, remove_starts_with=None):
     """ Iter over tab file, yield an object of given data_type."""
     if skip_starts_with:
         with open(input_file, "r") as fh:
@@ -132,6 +127,9 @@ def sc_iter_simple_tab_file(input_file):
             yield data
 
 def sc_read_dictionary(dict_file, value_func=None):
+    """ Read file of tab-dilimited pairs.
+    key\tvalue
+    """
     result = {}
     with open(dict_file) as fh:
         for data in csv.reader(fh, delimiter='\t', quoting=csv.QUOTE_NONE):
@@ -147,11 +145,4 @@ def sc_read_simple_tab_file(input_file):
         for data in csv.reader(fh, delimiter='\t', quoting=csv.QUOTE_NONE):
             result.append(data)
     return result
-
-
-
-
-
-
-
 

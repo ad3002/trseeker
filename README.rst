@@ -474,5 +474,52 @@ Additional function
 IO functions
 ============
 
+Tab file
+--------
+
+::
+
+	from trseeker.seqio.tab_file import TabDelimitedFileIO
+
+	reader = TabDelimitedFileIO(skip_first=False, format_func=None, delimiter='\t', skip_startswith='#')
+
+	reader.read_from_file(file_name)
+
+
+Usuful functions:
+
+- sc_iter_tab_file(input_file, data_type, remove_starts_with=None)
+- sc_iter_simple_tab_file(input_file)
+- sc_read_dictionary(dict_file, value_func=None)
+- sc_read_simple_tab_file(input_file)
+
+::
+	from trseeker.seqio.tab_file import sc_iter_tab_file
+
+	for wgs_obj in sc_iter_tab_file(file_name, WGSModel):
+		print wgs_obj.wgs_taxon
+
+	from trseeker.seqio.tab_file import sc_iter_simple_tab_file
+
+	for item in sc_iter_simple_tab_file(file_name):
+		print item[0]
+
+	from trseeker.seqio.tab_file import sc_read_dictionary
+
+	for data in sc_read_dictionary(file_name):
+		for key, value in data.items():
+			print key, value
+
+	from trseeker.seqio.tab_file import sc_read_simple_tab_file
+
+	for data in sc_read_simple_tab_file(file_name):
+		for item in data:
+			print "id = ", item[0]	
+
+
+
+Block file
+----------
+
 Toolkit
 =======
