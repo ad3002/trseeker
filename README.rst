@@ -494,6 +494,7 @@ Usuful functions:
 - sc_read_simple_tab_file(input_file)
 
 ::
+	
 	from trseeker.seqio.tab_file import sc_iter_tab_file
 
 	for wgs_obj in sc_iter_tab_file(file_name, WGSModel):
