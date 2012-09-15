@@ -33,8 +33,7 @@ class NgramModel(AbstractModel):
                            "edf",
                            ]
     int_attributes = ["id",
-                      "rev_id",
-                      
+                      "rev_id",                      
                       "df",
                       "edf",
                       ]

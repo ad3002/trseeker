@@ -313,16 +313,163 @@ Attributes:
 - subject_frame (int)
 - fraction_of_query (float)  
 
-Methods
+Additional functions:
 
 - read_blast_file(blast_file, length), return subject_ref -> list of matches (BlastResultModel models).
 
 ::
 
-	from trseeker.models.blast_model read_blast_file
+	from trseeker.models.blast_model import read_blast_file
 
 	ref_to_blast_obj = read_blast_file(file_name)
+
+Chromosome model
+----------------
+
+::
+
+	from trseeker.models.chromosome_model import ChromosomeModel
+
+Attributes:
+
+- chr_genome
+- chr_number
+- chr_taxon
+- chr_prefix
+- chr_gpid
+- chr_acronym
+- chr_contigs
+- chr_length
+- chr_mean_gc
+- chr_trs_all
+- chr_trs_3000
+- chr_trs_all_proc
+- chr_trs_3000_proc
+- chr_trs_all_length
+- chr_trs_3000_length
+- genome_gaps
+- chr_sum_gc
 	
+WGS model
+---------
+
+::
+
+	from trseeker.models.wgs_model import WGSModel
+
+Attributes:
+
+- wgs_prefix
+- wgs_taxon
+- wgs_gpid
+- wgs_acronym
+- wgs_contigs (int)
+- wgs_length (int)
+- wgs_mean_gc (float)
+- wgs_trs_all (int)
+- wgs_trs_3000 (int)
+- wgs_trs_1000 (int)
+- wgs_trs_500 (int)
+- wgs_trs_all_proc (float)
+- wgs_trs_3000_proc (float)
+- wgs_trs_1000_proc (float)
+- wgs_trs_500_proc (float)
+- wgs_trs_all_length (int)
+- wgs_trs_3000_length (int)
+- wgs_trs_1000_length (int)
+- wgs_trs_500_length (int)
+- wgs_sum_gc (float)
+
+Methods:
+
+- wgs-obj.clear_trf(), clear trf information (set to 0)
+
+Genome model
+------------
+
+::
+
+	from trseeker.models.genome_model import GenomeModel
+
+- genome_taxon
+- genome_prefix
+- genome_gpid
+- genome_acronym
+- genome_chromosomes
+- genome_contigs
+- genome_length
+- genome_mean_gc
+- genome_trs_all
+- genome_trs_3000
+- genome_trs_all_proc
+- genome_trs_3000_proc
+- genome_trs_all_length
+- genome_trs_3000_length
+- genome_gaps
+- genome_sum_gc
+
+Ngram model
+-----------
+
+::
+
+	from trseeker.models.ngram_model import NgramModel
+
+	ngram_obj = NgramModel(seq_f, seq_r)
+	ngram_obj.add_tr(trf_obj, tf)
+
+	print ngram_obj
+	>>> '[fseq]\t[rseq]\t[tf]\t[df]\t[len taxons]\t[len fams]\n'
+
+	print ngram_obj.get_families()
+	>>> ???
+
+Attributes
+
+- seq_r
+- seq_f
+- tf (float)
+- df (int)
+- taxons (set)
+- trs (set)
+- families (dict)
+
+Ngrams model
+------------
+
+::
+
+	from trseeker.models.ngrams_model import NgramModel
+
+Attributes
+
+- id (int)
+- rev_id (int)
+- ngram
+- rev_ngram
+- tf (float)
+- df (int)
+- etf (float)
+- edf (int)
+
+NgramToTRModel model
+--------------------
+
+::
+
+	from trseeker.models.ngrams_model import NgramToTRModel
+
+Attributes
+
+- id (int)
+- trids (list int)
+- tfs (list int)
+
+Additional function
+
+- sc_ngram_reader(file_name), yield NgramModel
+- sc_ngram_trid_reader(file_name), yield (ngram id, [(seq id, tf), ...])
+
 
 IO functions
 ============

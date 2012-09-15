@@ -79,9 +79,6 @@ class WGSModel(AbstractModel):
                         "wgs_sum_gc",
 
                         ]
-    list_attributes = []
-    list_attributes_types = {}
-    other_attributes = {}
 
     def __init__(self, prefix, taxon, gpid, acronym=None):
         
