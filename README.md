@@ -1,6 +1,6 @@
 # Trseeker: a Python framework for working with noncoding DNA
 
-Framework состоит из следующих частей
+Framework состоит из следующих частей:
 
 - модели данных
 - чтение/запись данных согласно моделям
@@ -8,7 +8,7 @@ Framework состоит из следующих частей
 
 ## Настройки фреймворка
 
-В файле settings.py
+В файле settings.py:
 
 	SETTINGS_FILENAME = "settings.yaml"
 	NGRAM_LENGTH = 21
@@ -61,7 +61,7 @@ Framework состоит из следующих частей
 
 	from trseeker.models.sequence_model import SequenceModel
 
-Attribites
+Attribites:
 
 - seq_gi (int)
 - seq_ref
@@ -82,15 +82,18 @@ Properties
 - sequence (self.seq_sequence)
 - fasta 
 
+
 	print seq_obj.fasta
 	>>> ">[seq_ref]\n[seq_sequence]\n"
 
 - sa_input
 
+
 	print seq_obj.sa_input
 	>>> "[seq_sequence]$"
 
 - ncbi_fasta
+
 
 	print seq_obj.ncbi_fasta
 	>>> ">gi|[seq_gi]|ref|[seq_ref]|[seq_description]\n[seq_sequence]\n"
@@ -100,11 +103,13 @@ Methods:
 - add_sequence_revcom()
 - set_dna_sequence(self, title, sequence, description=None)
 
+
 	self.seq_ref = title
     
 - set_ncbi_sequence(self, head, sequence)
 
 Chromosome name is **?** or setted with parse_chromosome_name(head).
+
 	
 	(self.seq_gi, self.seq_ref, self.seq_description) = parse_fasta_head(head)
 
