@@ -149,8 +149,6 @@ def create_mathematice_dataset_by_family(trs_dataset, path_to_mathematica_folder
           path = default_file
           family = "OTHER"
 
-        
-
     math_string = BUBBLE_CHART_TEMPLATE % join_legends(legends)
     print math_string
     return math_string

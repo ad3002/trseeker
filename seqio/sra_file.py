@@ -8,3 +8,35 @@
 SRA files.
 TODO: implement this.
 '''
+
+class FastqObj(object):
+
+	def __init__(self, head, seq, strain, qual):
+		self.head = head
+		self.seq = seq
+		self.qual = qual
+		self.strain = strain
+		self.id = head.strip().split()[0].replace("@","")
+
+	@property
+	def fastq(self):
+		return "%s%s%s%s" % (
+					self.head,
+					self.seq,
+					self.strain,
+					self.qual,
+			)
+
+def fastq_reader(fastq_file):
+
+	with open(fastq_file) as fh:
+		while True:
+			try:
+				head = fh.readline()
+				seq = fh.readline()
+				strain = fh.readline()
+				qual = fh.readline()
+				fastq_obj = FastqObj(head, seq, strain, qual)
+				yield fastq_obj
+			except:
+				break

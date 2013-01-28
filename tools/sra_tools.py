@@ -76,7 +76,9 @@ def write_fastaq_repeats(input_file, output_file, min_tf=1000):
                 fw.write(">%s-%s\n%s\n" % (i, SRA[k], k))
 
 def seq_to_bin(seq):
-    ''' Write binary representation of sequence.'''
+    ''' Write binary representation of sequence.
+    TODO: fixit
+    '''
     LBT = {'a':'00',
      'c':'01',
      'g':'10',
@@ -92,7 +94,10 @@ def seq_to_bin(seq):
     return eval(b)
 
 def bin_to_seq(bseq):
-    ''' Write string representation of binary sequence data.'''
+    ''' Write string representation of binary sequence data.
+    TODO: fixit
+    '''
+
     BLT = {'00' : 'a',
        '01':'c',
        '10':'g',

@@ -9,21 +9,13 @@ Functions related to TRs group analysis.
 '''
 from trseeker.tools.statistics import get_mean
 
-class TRsGroups(object):
-    ''' Class for TRs groups.'''
-    def __init__(self):
-        self.trid = None
-        self.superfamily = []
-        self.family = []
-        self.subfamily = []
-        self.repbase = set()
-        self.other = set()
-        self.unit = None
-
 def get_index(i):
     ''' Get next family index.'''
     s = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    return s[i]
+    if i<len(s):
+        return s[i]
+    else:
+        return "X%s" % i
 
 def get_popular(s):
     ''' Get most frequent element of list.'''
@@ -38,7 +30,7 @@ def get_popular(s):
 def get_family_name(ids, seen_units):
     ''' Get unit and letter for family.'''
     
-    # read units to pmatcb
+    # read units to pmatch
     units = {}
     for trf_obj in ids:
         units.setdefault(trf_obj.trf_period, [])

@@ -195,7 +195,7 @@ def get_all_gi_from_blast(blast_file, mode="gi"):
 def get_all_blast_obj_from_blast(blast_file, mode="ref"):
     ''' Get all gi to blast_obj list dictionary from blast output.'''
     result = {}
-    for blast_obj in sc_iter_tab_file(blast_file, BlastResultModel, skip_starts_with="#"):
+    for blast_obj in sc_iter_tab_file(blast_file, BlastResultModel, remove_starts_with="#"):
         if mode == "gi":
             id = blast_obj.subject_gi
         elif mode == "ref":
@@ -206,7 +206,6 @@ def get_all_blast_obj_from_blast(blast_file, mode="ref"):
         result[id].append(blast_obj)
     return result
         
-
 def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file, skip_by_family=None, is_huge_alpha=False):
     ''' Search TRs in given DB.
     '''
@@ -258,9 +257,6 @@ def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file,
             alpha_sets[u.trf_id] = trids
             print "ADDED ALPHA by %s with length %s" % (u.trf_id, len(trids)) 
             
-        
-
-
 def _get_trids_from_blast_file(blast_output_file):
     '''
     '''

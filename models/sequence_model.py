@@ -28,8 +28,6 @@ class SequenceModel(AbstractModel):
     - seq_start_position (int)
     - seq_end_position (int)
         
-
-        
     """
 
     dumpable_attributes = ["seq_gi",
@@ -69,7 +67,7 @@ class SequenceModel(AbstractModel):
         """ Return a fasta representation."""
         if not self.seq_head:
           self.seq_head = ">%s" % self.seq_ref
-        return "%s\n%s\n" % (self.seq_head, self.seq_sequence)
+        return "%s\n%s\n" % (self.seq_head.strip(), self.seq_sequence.strip())
 
     @property
     def sa_input(self):

@@ -107,10 +107,10 @@ class TabDelimitedFileIO(AbstractFileIO):
 
 def sc_iter_tab_file(input_file, data_type, remove_starts_with=None):
     """ Iter over tab file, yield an object of given data_type."""
-    if skip_starts_with:
+    if remove_starts_with:
         with open(input_file, "r") as fh:
             data = fh.readlines()
-        data = [x for x in data if not x.startswith(skip_starts_with)]
+        data = [x for x in data if not x.startswith(remove_starts_with)]
         with open(input_file, "w") as fh:
             fh.writelines(data)
     with open(input_file) as fh:

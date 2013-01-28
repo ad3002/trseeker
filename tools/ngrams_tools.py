@@ -97,3 +97,13 @@ def get_ngram_common_distance(ngrams_a, ngrams_b):
     common_ngrams = [ngram for ngram, fr in ngrams_a.items() if ngram in ngrams_b]
     return len(common_ngrams)
 
+def get_repeatness_coefficent(length, k, kmern):
+    ''' Return repeatness coefficient. From 0 (e.g. polyA) to 1 (unique sequence).
+    '''
+    N = length - k + 1.
+    return kmern * (N-1) / (N**2)
+
+def get_expessiveness_coefficent(kmern, k):
+    ''' Return expressivenesss coefficient.
+    '''
+    return kmern * 1. / 4^k

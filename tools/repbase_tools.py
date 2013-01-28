@@ -37,7 +37,7 @@ def _join_repbase_fastas(fasta_file, fasta_output, index_file_name=None, file_na
     return i
 
 def join_repbase_files(input_folder, output_file):
-    ''' Function join all Repbase fasta files in one huge fasta; reformat headers for compatibility with NCBI tools'''
+    ''' Function join all Repbase fasta files in one huge fasta; reformat headers for compatibility with NCBI tools.'''
     start_id = 0
     for input_file in sc_iter_filepath_folder(input_folder, mask="."):
         if not input_file.endswith("ref"):

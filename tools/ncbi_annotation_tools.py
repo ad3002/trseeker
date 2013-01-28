@@ -8,7 +8,6 @@
 Readers for various NCBI data.
 '''
 
-
 def get_ideogram_dict(idiogram_file, mode="NCBI"):
     ''' Read ideogram file and return return dict chr -> list: 
 

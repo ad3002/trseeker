@@ -22,13 +22,13 @@ def save_ngram_index(ngram_index_file, hash2id, result_tf,
             if not hash in seen_rev:
                 rev_id = hash2id[hash2rev[hash]]
                 data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (id,
-                                                             rev_id,
-                                                             hash,
-                                                             hash2rev[hash],
-                                                             result_tf[id],
-                                                             result_df[id],
-                                                             result_rtf[id],
-                                                             result_rdf[id])
+                                 rev_id,
+                                 hash,
+                                 hash2rev[hash],
+                                 result_tf[id],
+                                 result_df[id],
+                                 result_rtf[id],
+                                 result_rdf[id])
                 fh.write(data)
 
 

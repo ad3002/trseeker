@@ -123,7 +123,7 @@ def _join_gapped(blast_dataset, gap_size, min_align,):
 
 def _filter_blast_dataset(blast_dataset, min_length):
     ''' Filter by minimal alignment length.
-    
+
     - E: skip short aligns
     '''
     # E: skip short aligns 
@@ -157,8 +157,9 @@ def get_blast_result(blast_file, length, gap_size=1000, min_align=500, min_lengt
     blast_dataset = _remove_nested_join_overlap(blast_dataset)
     blast_dataset = _join_gapped(blast_dataset, gap_size, min_align)
     blast_dataset = _filter_blast_dataset(blast_dataset, min_length)
+    if not format_function:
+        format_function = format_function_self
     result = _format_output(blast_dataset, format_function)
-
     return result
 
 def update_with_repbase_blast_result(trs_dataset, annotation_self_folder, filters):

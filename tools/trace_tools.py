@@ -17,7 +17,6 @@ def unclip_trace_file(fasta_file, clip_file, uncliped_file):
 
     id2clip = {}
 
-
     if os.path.isfile(clip_file):
         for (id, start, end) in sc_iter_simple_tab_file(clip_file):
             if id == "TI":

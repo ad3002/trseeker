@@ -240,7 +240,6 @@ def init_graph_networkx(network_data, start=0, precise=1, trf_large_index_file=N
         G.add_edge(a, b)
     return G
 
-
 def analyse_networkx(G, network_data, output_file_pattern, trf_large_index_file):
     ''' Analize network and save slices.
     G is a networkx graph
@@ -293,5 +292,3 @@ def analyse_networkx(G, network_data, output_file_pattern, trf_large_index_file)
 
         G.remove_edge(a_nodes[k], b_nodes[k])
         last = val
-
-

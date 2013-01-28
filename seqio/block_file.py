@@ -11,7 +11,7 @@ Classes:
 - AbstractBlockFileIO(AbstractFileIO)
     
 """
-
+import gzip
 from PyExp.readers.abstract_reader import AbstractFileIO
 
 class AbstractBlockFileIO(AbstractFileIO):
@@ -62,9 +62,15 @@ class AbstractBlockFileIO(AbstractFileIO):
 
     def read_online(self, input_file):
         """ Overrided. Yield items from data online from input_file."""
-        with open(input_file, "rb") as fh:
+        if input_file.endswith(".gz"):
+            fh = gzip.open(input_file, 'rb')
             for head, body, start, next in self.gen_block_sequences(self.token, fh):
                 yield (head, body, start, next)
+            fh.close()
+        else:
+            with open(input_file, "rb") as fh:
+                for head, body, start, next in self.gen_block_sequences(self.token, fh):
+                    yield (head, body, start, next)
 
     def get_block_sequence(self, head_start, next_head, fh):
         """ Get a data block (head, seq, head_start, head_end).

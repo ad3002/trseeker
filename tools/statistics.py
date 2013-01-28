@@ -81,7 +81,8 @@ def get_element_frequences(data):
     return d
 
 def get_simple_statistics(data):
-    ''' Return tuple containing simple statistics for given list.
+    ''' Return dictionary containing simple statistics for given list. 
+    Dictionary keys: mean, variance, sigma, sample_derivation.
     
     >>> result = {
     >>>    'mean': get_mean(data),

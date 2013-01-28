@@ -34,6 +34,7 @@ class TRModel(AbstractModel):
     - trf_n_copy, 
     - trf_pmatch,
     - trf_pvar,
+    - trf_entropy,
     - trf_array_length, 
     - trf_joined, 
     - trf_chr
@@ -114,6 +115,7 @@ class TRModel(AbstractModel):
                            "trf_n_copy",
                            "trf_pmatch",
                            "trf_pvar",
+                           "trf_entropy",
                            "trf_consensus",
                            "trf_array",
                            "trf_array_gc",
@@ -155,6 +157,7 @@ class TRModel(AbstractModel):
 
     float_attributes = [
                            "trf_n_copy",
+                           "trf_entropy",
                            "trf_pmatch",
                            "trf_pvar",
                            "trf_array_gc",

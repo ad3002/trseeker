@@ -38,6 +38,23 @@ def get_revcomp(sequence):
     c = __complementary
     return ''.join(c.get(nucleotide, '') for nucleotide in reversed(sequence))
 
+def fix_strand(sequence):
+    ''' Return normalized sequence with following rules:
+    1) if T > A then return reverse complement
+    2) if A == T and G > C  then return reverse complement
+    3) else return sequence
+    '''
+    A = sequence.count('a')
+    T = sequence.count('t')
+    if T > A:
+        return get_revcomp(sequence)
+    if T == A:
+        C = sequence.count('c')
+        G = sequence.count('g')
+        if G > C:
+            return get_revcomp(sequence)
+    return sequence
+
 def get_gc(sequence):
     ''' Count GC content.
     '''
@@ -96,7 +113,7 @@ def restriction(sequence, pattern, end=""):
     return fragments
             
 def restriction_fragments_n(sequence, pattern):
-    '''Return number of fragments after restriction of sequence with given pattern
+    '''Return number of fragments after restriction of sequence with given pattern.
     
     - patterm: reg_exp
     '''

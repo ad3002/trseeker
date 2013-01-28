@@ -31,7 +31,7 @@ def sort_dictionary_by_value(d, reverse=False):
     return result
 
 def remove_duplicates_and_sort(data):
-    ''' Rremove duplicates from list and sort it.'''
+    ''' Remove duplicates from list and sort it.'''
     data = list(set(data))
     data.sort()
     return data
@@ -41,7 +41,7 @@ def remove_duplicates(data):
     return list(set(data))
 
 def remove_redundancy(alist):
-    ''' Remove redundancy or empty elements in given list
+    ''' Remove redundancy or empty elements in given list.
     '''
     s = set()
     for item in alist:
@@ -50,8 +50,7 @@ def remove_redundancy(alist):
     return list(s)
 
 def clear_fragments_redundancy(data, extend=False, same_case_func=None):
-    ''' Remove nested fragments
-    data format [start, end, ...]
+    ''' Remove nested fragments, ata format [start, end, ...].
     '''
     data.sort()
 
@@ -127,5 +126,3 @@ def clear_fragments_redundancy(data, extend=False, same_case_func=None):
 
         extended = False
     yield data[last], extended
-
-

@@ -124,7 +124,6 @@ def trf_filter_by_monomer_length(trf_file, output_file, cutoff):
 
 def trf_filter_exclude_by_gi_list(trf_file, output_file, gi_list_to_exclude):
     """ Create output TRF file with tandem repeats with GI that don't match GI_LIST
-    
     List of GI, see TRF and FA specifications, GI is first value in TRF row.
     """
     with open(output_file, "w") as fw:

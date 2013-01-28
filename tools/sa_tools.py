@@ -6,6 +6,7 @@
 #@contact: ad3002@gmail.com 
 '''
 Functions related to suffix array construction.
+TODO: checkit
 '''
 import os
 import pickle
@@ -64,7 +65,7 @@ def sa_input_to_fasta(input_file, output_file):
             fw.write(">%s\n%s\n" % (i, item))
 
 def pickle_dictionary_for_docid_trid(sa_doc_index, doc_to_trf_file, trf_to_doc_file):
-    ''' Function precompiles doc2id and id2doc pickled dictionary
+    ''' Function precompiles doc2id and id2doc pickled dictionary.
     '''
     doc_to_trf = {}
     trf_to_doc = {}
@@ -86,7 +87,7 @@ def pickle_dictionary_for_docid_trid(sa_doc_index, doc_to_trf_file, trf_to_doc_f
             pickle.dump(trf_to_doc, tdfh)
 
 def filter_sa_dataset(sa_file, output_file, min_tf, min_df):
-    ''' Function filters and writes sa data with given min tf and df
+    ''' Function filters and writes sa data with given min tf and df.
     '''
     dataset = []
     with open(sa_file) as fh:
@@ -125,7 +126,3 @@ def iterate_sa_corpus(corpus):
             break
         yield corpus[left_pos + 1:right_pos]
         left_pos = right_pos
-
-
-
-

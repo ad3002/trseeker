@@ -60,7 +60,6 @@ def load_genome_projects(subgroup):
     genome_projects = []
     for line in csv.DictReader(data, delimiter='\t'):
         if line["SubGroup"]in subgroup and line["WGS"] != "-":
-            #print "%s\t%s\t%s\t%s" % (line["Organism/Name"], line["Status"], line["Chromosomes"], line["WGS"])
             name = line["Organism/Name"].replace(".","").replace("(","").replace(")","").replace("-","_")
             wgs = line["WGS"].replace("01","").replace("02","").replace("03","").replace("04","")
             genome_projects.append((name, line["Status"], line["Chromosomes"], wgs))
@@ -83,10 +82,9 @@ def load_genome_projects_exclude(notsubgroups):
             r[line["SubGroup"]] += 1
     return genome_projects
 
-
-
 def print_add_project_data(genome_projects, pid_type, pr_type):
     ''' Print data for initiating PySatDNA projects.
+    TODO: fixit
     '''
     name2wgs = {}
     for item in genome_projects:
@@ -131,14 +129,3 @@ def print_add_project_data(genome_projects, pid_type, pr_type):
         pid = "%s_%s" % (pid_type, name)
         print  "(pid_%s, project_data_%s),\n" % (pid, pid)
     print "]"
-
-
-# projects = load_genome_projects("Mammals")
-# print_add_project_data(projects, "mammals", "mammals_wgs")
-
-# for x in load_genome_projects(["Mammals", "Insects"]):
-#     print x
-
-d = ["Other Animals", "Amphibians", "Flatworms", "Reptiles", "Fishes", "Roundworms", "Birds"]
-projects = load_genome_projects(d)
-print_add_project_data(projects, "animals", "animals_wgs")

@@ -63,7 +63,7 @@ def re_get_plus_minus(sequence):
     '''
     return [re_translate(sequence), get_revcomp(re_translate(sequence))]
 
-def re_get_mutation(sequence):
+def re_get_mutations(sequence):
     ''' Return list of sequences where one letter changed to N
     
     >>>get_mutation("ACNT")
