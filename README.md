@@ -662,6 +662,7 @@ from trseeker.seqio.trf_file import sc_parse_raw_trf_folder
 
 for trf_obj in TRFFileIO(file_name, filter=True):
 	print trf_obj.trf_id
+```
 
 ```python
 sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project="mouse_genome")
@@ -670,15 +671,21 @@ sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project="mouse_genome")
 При чтение данных TRF происходит их фильтрация по следующим параметрам:
 
 1. Убираются все вложенные поля меньшей длины.
-2. Если поля overlapping, то если overlap_proc_diff >= settings["trf_settings"]["overlapping_cutoff_proc"] and gc_dif <= settings["trf_settings"]["overlapping_gc_diff"] - поля объяединяются в одно поле. Иначе считаем, что это отдельные поля.
+2. Если поля overlapping, то если 
+
+```python
+overlap_proc_diff >= settings["trf_settings"]["overlapping_cutoff_proc"] and gc_dif <= settings["trf_settings"]["overlapping_gc_diff"]
+``` 
+поля объяединяются в одно поле. Иначе считаем, что это отдельные поля.
 3. Если поля совпадают, то выбирается то которое с большим trf_pmatch.
 
 TODO: убрать пересечение, так как это видимо в том числе и ошибки ассмеблера и это будет мешать корректной классификации.
 
-TR file
--------
+### TR file
 
-	from trseeker.seqio.tr_file import *
+```python
+from trseeker.seqio.tr_file import *
+```
 
 Functions:
 
