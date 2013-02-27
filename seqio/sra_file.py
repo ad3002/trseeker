@@ -27,6 +27,10 @@ class FastqObj(object):
 					self.qual,
 			)
 
+	@property
+	def sequence(self):
+		return self.seq.strip().lower()
+
 def fastq_reader(fastq_file):
 
 	with open(fastq_file) as fh:
