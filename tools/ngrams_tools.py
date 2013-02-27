@@ -8,6 +8,7 @@
 Functions related to ngram (k-mer).
 '''
 from collections import defaultdict
+from trseeker.tools.sequence_tools import fix_strand
 
 def generate_ngrams(text, n=12):
     ''' Yields all ngrams of length n from given text. 
@@ -107,3 +108,20 @@ def get_expessiveness_coefficent(kmern, k):
     ''' Return expressivenesss coefficient.
     '''
     return kmern * 1. / 4^k
+
+def count_kmer_tfdf(sequence, tf_dict, df_dict, k):
+    ''' Update tf and df data with k-mers from given sequence.
+    '''
+    seen = set()
+    local_tf = defaultdict(int)
+    local_df = defaultdict(int)
+    for (ngram, tf, nf) in get_ngrams_freq(sequence, m=100000, n=k):
+        if 'n' in ngram:
+            continue
+        seen.add(ngram)
+        tf_dict[ngram] += tf
+        local_tf[ngram] += tf
+    for ngram in seen:
+        df_dict[ngram] += 1
+        local_df[ngram] += 1
+    return tf_dict, df_dict, local_tf, local_df
