@@ -1,11 +1,47 @@
 # Trseeker: a Python framework for working with noncoding DNA
 
+## Contents
+
+- [Introduction](#_toolkit_intro)
+- [Settings](#_toolkit_settings)
+- [Models](#_models)
+    - [DNA Sequence](#_models_seq)
+    - [Tandem repeat](#_models_trf)
+    - [Organism](#_models_organism)
+    - [Dataset](#_models_dataset)
+    - [Blast output](#_models_blast)
+    - [Chromosome](#_models_chr)
+    - [WGS assembly](#_models_wgs)
+    - [Genome](#_models_genome)
+    - [Kmer](#_models_kmer)
+    - [Kmers](#_models_kmers)
+    - [Kmers from TRs](#_models_kmersTR)
+- [Readers](#_io)
+    - [Tab file](#_io_tab)
+    - [Block file](#_io_block)
+    - [Fasta file](#_io_fasta)
+    - [GBFF file](#_io_gbff)
+    - [FTP](#_io_ftp)
+    - [NCBI FTP](#_io_ncbi_ftp)
+    - [MONGO DB](#_io_mongo)
+    - [TRF output](#_io_trf)
+    - [TRs file](#_io_trs)
+    - [Ngram file](#_io_ngram)
+    - [Blast output](#_io_blast)
+    - [Fastq file](#_io_sra)
+- [Toolkit](#_tools)
+    - [Tupip](#_tools_tuplip)
+
+
+<a name="_toolkit_intro"/>
+## Introduction
 Framework состоит из следующих частей:
 
 - модели данных
 - чтение/запись данных согласно моделям
 - инструменты работы с этими данными
 
+<a name="_toolkit_settings"/>
 ## Настройки фреймворка
 
 В файле settings.py:
@@ -60,9 +96,9 @@ ngrams_settings:
     ngram_length: 23
     ngram_m: 10000000
 ```
-
+<a name="_models"/>
 ## Avaliable Models
-
+<a name="_models_seq"/>
 ### DNA Sequence
 
 ```python
@@ -134,6 +170,7 @@ Chromosome name is **?** or setted with parse_chromosome_name(head["description"
 
 Sequence is cleared with clear_sequence(s) function. Lowercase and all non-DNA characters replacing with **n**. If the sequence has **n** then it is gapped.
 
+<a name="_models_trf"/>
 ### TRF results
 
 ```python
@@ -237,7 +274,7 @@ from trseeker.models.trf_model import NetworkSliceModel
 
 slice_obj = NetworkSliceModel()
 ```
-
+<a name="_models_organism"/>
 ### Organism model
 
 ```python
@@ -253,6 +290,7 @@ Attributes:
 - organism_wgs_projects
 - organism_genome_assemblies
 
+<a name="_models_dataset"/>
 ### Dataset model
 
 ```python
@@ -272,6 +310,7 @@ Attributes:
 - dataset_trs_mean_gc (float)
 - dataset_trs_fraq (float)
 
+<a name="_models_blast"/>
 ### Blast Results Model
 
 ```python
@@ -316,6 +355,7 @@ from trseeker.models.blast_model import read_blast_file
 ref_to_blast_obj = read_blast_file(file_name)
 ```
 
+<a name="_models_chr"/>
 ### Chromosome model
 
 ```python
@@ -341,8 +381,9 @@ Attributes:
 - chr_trs_3000_length
 - genome_gaps
 - chr_sum_gc
-	
-### WGS model
+
+<a name="_models_wgs"/>
+### WGS assembly model
 
 ```python
 from trseeker.models.wgs_model import WGSModel
@@ -379,6 +420,7 @@ Clear trf information (set to 0):
 wgs_obj.clear_trf()
 ```
 
+<a name="_models_genome"/>
 ### Genome model
 
 ```python
@@ -402,7 +444,8 @@ from trseeker.models.genome_model import GenomeModel
 - genome_gaps
 - genome_sum_gc
 
-### Ngram model
+<a name="_models_kmer"/>
+### Ngram/kmer model
 
 ```python
 	from trseeker.models.ngram_model import NgramModel
@@ -429,6 +472,7 @@ Attributes
 - trs (set)
 - families (dict)
 
+<a name="_models_kmers"/>
 ### Ngrams model
 
 ```python
@@ -446,6 +490,7 @@ Attributes
 - etf (float)
 - edf (int)
 
+<a name="_models_kmersTR"/>
 ### NgramToTRModel model
 
 ```python
@@ -472,8 +517,10 @@ Yield (ngram id, [(seq id, tf), ...]):
 sc_ngram_trid_reader(file_name)
 ```
 
+<a name="_io"/>
 ## IO functions
 
+<a name="_io_tab"/>
 ### Tab file
 
 ```python
@@ -523,6 +570,7 @@ for data in sc_read_simple_tab_file(file_name):
 		print "id = ", item[0]	
 ```
 
+<a name="_io_block"/>
 ### Block file
 
 ```python
@@ -535,6 +583,7 @@ for (head, body, start, next) in reader.read_online(file_name):
 
 Avaliable all functions from parent class AbstractFileIO from PyExp package.
 
+<a name="_io_fasta"/>
 ### Fasta file
 
 ```python
@@ -569,52 +618,7 @@ from trseeker.seqio.fasta_file import save_all_seq_with_exact_substring
 save_all_seq_with_exact_substring(fasta_file, substring, output_file)
 ```
 
-### FTP IO
-
-```python	
-from trseeker.seqio.frt_io import AbstractFtpIO
-
-reader = AbstractFtpIO(ftp_address=address)
-
-reader.connect()
-
-reader.cd(['/home', 'user', 'data'])
-
-reader.ls()
->>> ['readme.txt', 'data.fa']
-
-reader.get(file, output_file)
-
-reader.unzip(file_name)
-```
-
-### NCBI ftp
-
-```python
-from trseeker.seqio.ncbi_ftp import NCBIFtpIO
-
-reader = NCBIFtpIO()
-
-reader.download_wgs_fasta(wgs_list, file_suffix, output_folder)
-
-reader.download_all_wgs_in_fasta(output_folder)
-
-reader.download_all_wgs_in_gbff(output_folder)
-
-reader.download_trace_data(taxon, output_folder)
-```
-
-### Mongo db reader
-
-Not implemented yet.
-
-```python	
-from trseeker.seqio.mongodb_reader import MongoDBReader
-
-reader = MongoDBReader()
-db = reader.get_trdb_conn()
-```
-
+<a name="_io_gbff"/>
 ### GBFF file
 
 ```python
@@ -649,6 +653,57 @@ from trseeker.seqio.gbff_file import sc_parse_gbff_in_folder
 sc_parse_gbff_in_folder("/home/user/", "/home/user/fasta", "fa", "mouse")
 ```
 
+
+<a name="_io_ftp"/>
+### FTP IO
+
+```python	
+from trseeker.seqio.frt_io import AbstractFtpIO
+
+reader = AbstractFtpIO(ftp_address=address)
+
+reader.connect()
+
+reader.cd(['/home', 'user', 'data'])
+
+reader.ls()
+>>> ['readme.txt', 'data.fa']
+
+reader.get(file, output_file)
+
+reader.unzip(file_name)
+```
+
+<a name="_io_ncbi_ftp"/>
+### NCBI ftp
+
+```python
+from trseeker.seqio.ncbi_ftp import NCBIFtpIO
+
+reader = NCBIFtpIO()
+
+reader.download_wgs_fasta(wgs_list, file_suffix, output_folder)
+
+reader.download_all_wgs_in_fasta(output_folder)
+
+reader.download_all_wgs_in_gbff(output_folder)
+
+reader.download_trace_data(taxon, output_folder)
+```
+
+<a name="_io_mongo"/>
+### Mongo db reader
+
+Not implemented yet.
+
+```python	
+from trseeker.seqio.mongodb_reader import MongoDBReader
+
+reader = MongoDBReader()
+db = reader.get_trdb_conn()
+```
+
+<a name="_io_trf"/>
 ### TRF file
 
 #### Useful functions:
@@ -682,7 +737,8 @@ gc_dif <= settings["trf_settings"]["overlapping_gc_diff"]
 
 TODO: убрать пересечение, так как это видимо в том числе и ошибки ассмеблера и это будет мешать корректной классификации. Убрать в отдельную часть.
 
-### TR file
+<a name="_io_trs"/>
+### TRs file
 
 ```python
 from trseeker.seqio.tr_file import *
@@ -713,6 +769,7 @@ read_trid2ngrams(annotation_ngram_folder, trf_large_file)
 
 TODO: rewrite this with AbstractReaders
 
+<a name="_io_ngram"/>
 ### Ngram file
 
 TODO: rewrite this with AbstractReaders
@@ -734,6 +791,7 @@ save_ngram_pos_index(ngram_trids_file, id2trids, id2trid2tf)
 save_distance_data(dist_file, distances)
 ```
 
+<a name="_io_blast"/>
 ### Blast results file
 
 ```python	
@@ -789,7 +847,8 @@ While blast results parsing:
 - skipped all alignments with length less thatn min_align paramter
 - joined gapped if gap less than gap_size paramter
 
-### Sra file
+<a name="_io_sra"/>
+### SRA file
 
 ```python
 from trseeker.seqio.sra_file import FastqObj
@@ -807,8 +866,10 @@ for fastq_obj in fastq_reader(fastq_file):
 	print fastq_obj.seq
 ```
 
+<a name="_tools"/>
 ## Toolkit
 
+<a name="_tools_tupip"/>
 ### Tulip files
 
 Format and write network data to tulip format from distance_file with given cutoff (defaul=90).
