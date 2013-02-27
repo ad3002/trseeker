@@ -11,7 +11,7 @@ Trseeker settings loader.
 import yaml, os
 
 SETTINGS_FILENAME = "settings.yaml"
-NGRAM_LENGTH = 21
+NGRAM_LENGTH = 23
 NGRAM_N = 100000000
     
 def load_settings():

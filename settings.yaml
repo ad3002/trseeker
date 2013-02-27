@@ -5,7 +5,7 @@ trseeker:
 blast_settings:
     blast_location: 
     repbase_db_folder: /home/rebase_blast_db/repbase
-    blast_e: 0.000000000001
+    blast_e: 1e-20
     blast_b: 20000000
     blast_v: 20000000
 trf_settings:
@@ -26,5 +26,5 @@ trf_settings:
     overlapping_cutoff_proc: 30
     overlapping_gc_diff: 0.05
 ngrams_settings:
-    ngram_length: 21
+    ngram_length: 23
     ngram_m: 10000000
