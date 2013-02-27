@@ -925,9 +925,11 @@ Return complementary sequence:
 revcom = get_revcomp(sequence)
 ```
 Return normalized sequence with following rules:
+
 1. if T > A then return reverse complement
 2. if A == T and G > C  then return reverse complement
 3. else return sequence
+
 ```python
 sequence = fix_strand(sequence)
 ```
@@ -944,9 +946,11 @@ Return subsequence:
 get_subseq(seq, start, end)
 ```
 Clear sequence (ACTGN alphabet):
+
 1. lower case
 2. remove any gaps
 3. remove all letters except atgcn
+
 ```python
 sequence = clear_sequence(sequence)
 ```
