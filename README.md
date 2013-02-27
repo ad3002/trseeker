@@ -463,25 +463,26 @@ from trseeker.models.ngrams_model import NgramToTRModel
 Yield NgramModel:
 
 ```python
-sc_ngram_reader(file_name), 
+sc_ngram_reader(file_name)
 ```
 
 Yield (ngram id, [(seq id, tf), ...]):
 
 ```python
-- sc_ngram_trid_reader(file_name),
+sc_ngram_trid_reader(file_name)
 ```
 
 ## IO functions
 
 ### Tab file
 
+```python
+from trseeker.seqio.tab_file import TabDelimitedFileIO
 
-	from trseeker.seqio.tab_file import TabDelimitedFileIO
+reader = TabDelimitedFileIO(skip_first=False, format_func=None, delimiter='\t', skip_startswith='#')
 
-	reader = TabDelimitedFileIO(skip_first=False, format_func=None, delimiter='\t', skip_startswith='#')
-
-	reader.read_from_file(file_name)
+reader.read_from_file(file_name)
+```
 
 Avaliable all functions from parent class AbstractFileIO from PyExp package.
 
@@ -492,164 +493,179 @@ Useful functions:
 - sc_read_dictionary(dict_file, value_func=None)
 - sc_read_simple_tab_file(input_file)
 
-	
-	from trseeker.seqio.tab_file import sc_iter_tab_file
+```python	
+from trseeker.seqio.tab_file import sc_iter_tab_file
 
-	for wgs_obj in sc_iter_tab_file(file_name, WGSModel):
-		print wgs_obj.wgs_taxon
+for wgs_obj in sc_iter_tab_file(file_name, WGSModel):
+	print wgs_obj.wgs_taxon
+```
 
-	from trseeker.seqio.tab_file import sc_iter_simple_tab_file
+```python
+from trseeker.seqio.tab_file import sc_iter_simple_tab_file
 
-	for item in sc_iter_simple_tab_file(file_name):
-		print item[0]
+for item in sc_iter_simple_tab_file(file_name):
+	print item[0]
+```
 
-	from trseeker.seqio.tab_file import sc_read_dictionary
+```python
+from trseeker.seqio.tab_file import sc_read_dictionary
 
-	for data in sc_read_dictionary(file_name):
-		for key, value in data.items():
-			print key, value
+for data in sc_read_dictionary(file_name):
+	for key, value in data.items():
+		print key, value
+```
 
-	from trseeker.seqio.tab_file import sc_read_simple_tab_file
+```python
+from trseeker.seqio.tab_file import sc_read_simple_tab_file
 
-	for data in sc_read_simple_tab_file(file_name):
-		for item in data:
-			print "id = ", item[0]	
+for data in sc_read_simple_tab_file(file_name):
+	for item in data:
+		print "id = ", item[0]	
+```
 
+### Block file
 
+```python
+from trseeker.seqio.block_file import AbstractBlockFileIO
 
-Block file
-----------
-
-::
-	
-	from trseeker.seqio.block_file import AbstractBlockFileIO
-
-	reader = AbstractBlockFileIO(token, **args)
-	for (head, body, start, next) in reader.read_online(file_name):
-		pirnt head
+reader = AbstractBlockFileIO(token, **args)
+for (head, body, start, next) in reader.read_online(file_name):
+	pirnt head
+```
 
 Avaliable all functions from parent class AbstractFileIO from PyExp package.
 
-Fasta file
-----------
+### Fasta file
 
-	
-	from trseeker.seqio.fasta_file import FastaFileIO
+```python
+from trseeker.seqio.fasta_file import FastaFileIO
 
-	reader = FastaFileIO()
+reader = FastaFileIO()
+```
 
-Useful functions:
+#### Useful functions:
 
 - sc_iter_fasta(file_name)
 - sc_iter_fasta_simple(file_name)
 - save_all_seq_with_exact_substring(fasta_file, substring, output_file)
 
+```python
+from trseeker.seqio.fasta_file import sc_iter_fasta
 
-	from trseeker.seqio.fasta_file import sc_iter_fasta
+for seq_obj in sc_iter_fasta(file_name):
+	print seq_obj.sequence
+```
 
-	for seq_obj in sc_iter_fasta(file_name):
-		print seq_obj.sequence
+```python
+from trseeker.seqio.fasta_file import sc_iter_fasta_simple
 
-	from trseeker.seqio.fasta_file import sc_iter_fasta_simple
+for (gi, sequence) in sc_iter_fasta_simple(file_name):
+	print gi
+```
 
-	for (gi, sequence) in sc_iter_fasta_simple(file_name):
-		print gi
+```python
+from trseeker.seqio.fasta_file import save_all_seq_with_exact_substring
 
-	from trseeker.seqio.fasta_file import save_all_seq_with_exact_substring
+save_all_seq_with_exact_substring(fasta_file, substring, output_file)
+```
 
-	save_all_seq_with_exact_substring(fasta_file, substring, output_file)
+### FTP IO
 
-FTP IO
-------
+```python	
+from trseeker.seqio.frt_io import AbstractFtpIO
 
-	
-	from trseeker.seqio.frt_io import AbstractFtpIO
+reader = AbstractFtpIO(ftp_address=address)
 
-	reader = AbstractFtpIO(ftp_address=address)
+reader.connect()
 
-	reader.connect()
+reader.cd(['/home', 'user', 'data'])
 
-	reader.cd(['/home', 'user', 'data'])
+reader.ls()
+>>> ['readme.txt', 'data.fa']
 
-	reader.ls()
-	>>> ['readme.txt', 'data.fa']
+reader.get(file, output_file)
 
-	reader.get(file, output_file)
+reader.unzip(file_name)
+```
 
-	reader.unzip(file_name)
+### NCBI ftp
 
-NCBI ftp
---------
+```python
+from trseeker.seqio.ncbi_ftp import NCBIFtpIO
 
-	
-	from trseeker.seqio.ncbi_ftp import NCBIFtpIO
+reader = NCBIFtpIO()
 
-	reader = NCBIFtpIO()
+reader.download_wgs_fasta(wgs_list, file_suffix, output_folder)
 
-	reader.download_wgs_fasta(wgs_list, file_suffix, output_folder)
+reader.download_all_wgs_in_fasta(output_folder)
 
-	reader.download_all_wgs_in_fasta(output_folder)
+reader.download_all_wgs_in_gbff(output_folder)
 
-	reader.download_all_wgs_in_gbff(output_folder)
+reader.download_trace_data(taxon, output_folder)
+```
 
-	reader.download_trace_data(taxon, output_folder)
-
-
-Mongo db reader
----------------
+### Mongo db reader
 
 Not implemented yet.
 
-	
-	from trseeker.seqio.mongodb_reader import MongoDBReader
+```python	
+from trseeker.seqio.mongodb_reader import MongoDBReader
 
-	reader = MongoDBReader()
-	db = reader.get_trdb_conn()
+reader = MongoDBReader()
+db = reader.get_trdb_conn()
+```
 
-GBFF file
----------
+### GBFF file
 
+```python
+from trseeker.seqio.gbff_file import GbffFileIO
 
-	from trseeker.seqio.gbff_file import GbffFileIO
+reader = GbffFileIO()
+```
 
-	reader = GbffFileIO()
-
-Useful functions:
+#### Useful functions:
 
 - sc_iter_gbff(file_name)
 - sc_iter_gbff_simple(file_name)
 - sc_parse_gbff_in_folder(gbbf_folder, fasta_folder, fasta_postfix, mask)
 
-	
-	from trseeker.seqio.gbff_file import sc_iter_gbff
+```python
+from trseeker.seqio.gbff_file import sc_iter_gbff
 
-	for seq_obj in sc_iter_gbff(file_name):
-		print seq_obj.length
+for seq_obj in sc_iter_gbff(file_name):
+	print seq_obj.length
+```
 
-	from trseeker.seqio.gbff_file import sc_iter_gbff_simple
+```python
+from trseeker.seqio.gbff_file import sc_iter_gbff_simple
 
-	for (gi, sequence) in sc_iter_gbff_simple(file_name):
-		print gi
+for (gi, sequence) in sc_iter_gbff_simple(file_name):
+	print gi
+```
 
-	from trseeker.seqio.gbff_file import sc_parse_gbff_in_folder
+```python
+from trseeker.seqio.gbff_file import sc_parse_gbff_in_folder
 
-	sc_parse_gbff_in_folder("/home/user/", "/home/user/fasta", "fa", "mouse")
+sc_parse_gbff_in_folder("/home/user/", "/home/user/fasta", "fa", "mouse")
+```
 
-TRF file
---------
+### TRF file
 
-Useful functions:
+#### Useful functions:
 
 - sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project=None)
-	
-	from trseeker.seqio.trf_file import TRFFileIO
 
-	from trseeker.seqio.trf_file import sc_parse_raw_trf_folder
+```python
+from trseeker.seqio.trf_file import TRFFileIO
 
-	for trf_obj in TRFFileIO(file_name, filter=True):
-		print trf_obj.trf_id
+from trseeker.seqio.trf_file import sc_parse_raw_trf_folder
 
-	sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project="mouse_genome")
+for trf_obj in TRFFileIO(file_name, filter=True):
+	print trf_obj.trf_id
+
+```python
+sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project="mouse_genome")
+```
 
 При чтение данных TRF происходит их фильтрация по следующим параметрам:
 
