@@ -11,7 +11,7 @@ Framework состоит из следующих частей:
 В файле settings.py:
 
 	SETTINGS_FILENAME = "settings.yaml"
-	NGRAM_LENGTH = 21
+	NGRAM_LENGTH = 23
 	NGRAM_N = 100000000
 
 Настройки можно прочитать и записать:
@@ -31,9 +31,9 @@ Framework состоит из следующих частей:
 	blast_settings:
 	    blast_location: 
 	    repbase_db_folder: /home/rebase_blast_db/repbase
-	    blast_e: 0.000000000001
-	    blast_b: 1000000
-	    blast_v: 1000000
+	    blast_e: 1e-20
+	    blast_b: 20000000
+	    blast_v: 20000000
 	trf_settings:
 	    trf_location: /root/trf404.linux64
 	    trf_match: 2
@@ -52,7 +52,7 @@ Framework состоит из следующих частей:
 	    overlapping_cutoff_proc: 30
 	    overlapping_gc_diff: 0.05
 	ngrams_settings:
-	    ngram_length: 21
+	    ngram_length: 23
 	    ngram_m: 10000000
 
 ## Avaliable Models
@@ -672,10 +672,11 @@ Dataset updating functions:
 		"min_length": 3000,
 	}
 
-- update_with_self_blast_result(trs_dataset, annotation_self_folder, filters)
+- update_with_self_blast_result(trs_dataset, annotation_self_folder, _get_filters)
 	
 	# inside function
 	# result comma-delimited
+	# _get_filters(array_length) generate parameters by array_length
 	trs_dataset[i].trf_family_self = result
 
 - update_with_ref_blast_result(trs_dataset, annotation_self_folder, filters)
@@ -872,6 +873,16 @@ Return repeatness coefficient. From 0 (e.g. polyA) to 1 (unique sequence).
 Return expressivenesss coefficient.
 
 	kmern * 1. / 4^k
+
+Update tf and df data with k-mers from given sequence.
+Usage:
+	
+	from trseeker.tools.ngrams_tools import count_kmer_tfdf
+
+	k = 21
+	for sequence in sequences:
+		tf_dict, df_dict, local_tf, local_df = count_kmer_tfdf(sequence, tf_dict, df_dict, k)
+
 
 ### Edit distance functions
 
