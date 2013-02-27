@@ -37,6 +37,8 @@
     - [Various](#_tools_other)
     - [Kmers](#_tools_kmers)
     - [Edit distance](#_tools_ed)
+    - [Repbase](#_tools_repbase)
+    - [Trace](#_tools_trace)
 
 
 <a name="_toolkit_intro"/>
@@ -1033,91 +1035,117 @@ clear_fragments_redundancy(data, extend=False, same_case_func=None)
 from trseeker.tools.ngrams_tools import *
 ```
 
-- generate_ngrams(text, n=12)
-Yields all ngrams of length n from given text.
-
-- generate_window(text, n=12, step=None)
-Yields all ngrams of length n from given text. 
-
-- get_ngrams(text, m=5, n=12)
-Returns m most frequent (ngram of length n, tf) tuples for given text.
-
-- get_ngrams_freq(text, m=5, n=12)
-Returns m most frequent (ngram of length n, fraction of possible ngrams) tuples for given text.
-
-- get_ngrams_feature_set(text, m=5, n=12)
-Returns a feature set {'ngram':'ngram',...}  of m most frequent ngram of length n for given text.
-
-- get_ngram_freq_distance(ngrams_a, ngrams_b)
-Returns a distance between two ngram sets where distance is a sum(min(ngram_a, ngram_b) for each common ngram). Format for ngrams_a and ngrams_b is a dictionary {ngram:n, ...}
-
-- get_ngram_common_distance(ngrams_a, ngrams_b)
-Returns a distance between two ngram sets where distance is a len(). Format for ngrams_a and ngrams_b is a dictionary {ngram:n, ...}
-
-- get_repeatness_coefficent(length, k, kmern)
-Return repeatness coefficient. From 0 (e.g. polyA) to 1 (unique sequence).
-
-	kmern * (N-1) / (N**2)
-
-- get_expessiveness_coefficent(kmern, k)
+Yields all ngrams of length n from given text:
+```python
+generate_ngrams(text, n=12)
+```
+Yields all ngrams of length n from given text:
+```python
+generate_window(text, n=12, step=None)
+```
+Returns m most frequent (ngram of length n, tf) tuples for given text:
+```python
+get_ngrams(text, m=5, n=12)
+```
+Returns m most frequent (ngram of length n, fraction of possible ngrams) tuples for given text:
+```python
+get_ngrams_freq(text, m=5, n=12)
+```
+Returns a feature set {'ngram':'ngram',...}  of m most frequent ngram of length n for given text:
+```python
+get_ngrams_feature_set(text, m=5, n=12)
+```
+Returns a distance between two ngram sets where distance is a sum(min(ngram_a, ngram_b) for each common ngram). Format for ngrams_a and ngrams_b is a dictionary {ngram:n, ...}:
+```python
+get_ngram_freq_distance(ngrams_a, ngrams_b)
+```
+Returns a distance between two ngram sets where distance is a len(). Format for ngrams_a and ngrams_b is a dictionary {ngram:n, ...}:
+```python
+get_ngram_common_distance(ngrams_a, ngrams_b)
+```
+Return repeatness coefficient. From 0 (e.g. polyA) to 1 (unique sequence):
+```python
+get_repeatness_coefficent(length, k, kmern)
+# Inside this function:
+# kmern * (N-1) / (N**2)
+```
 Return expressivenesss coefficient.
+```python
+get_expessiveness_coefficent(kmern, k)
+# Inside this function:
+# kmern * 1. / 4^k
+```
+Update tf and df data with k-mers from given sequence:
+```python	
+from trseeker.tools.ngrams_tools import count_kmer_tfdf
 
-	kmern * 1. / 4^k
-
-Update tf and df data with k-mers from given sequence.
-Usage:
-	
-	from trseeker.tools.ngrams_tools import count_kmer_tfdf
-
-	k = 21
-	for sequence in sequences:
-		tf_dict, df_dict, local_tf, local_df = count_kmer_tfdf(sequence, tf_dict, df_dict, k)
-
+k = 23
+for sequence in sequences:
+	tf_dict, df_dict, local_tf, local_df = count_kmer_tfdf(sequence, tf_dict, df_dict, k)
+```
 <a name="_tools_ed"/>
 ### Edit distance functions
 
-	from trseeker.tools.edit_distance import *
+```python
+from trseeker.tools.edit_distance import *
+```
 
-- get_pos(L, d)
-Return list of element (*d*) positions in given list.
+Return list of element (*d*) positions in given list:
+```python
+get_pos(L, d)
+```
+Return edit distance between two given strings. Edit distance dynamic programming implementation. Length of second sequence does not change similarity value:
 
-- get_ed_similarity(s1, s2, monomer_mode=False, full_info=False, verbose=False)
-Return edit distance between two given strings. Edit distance dynamic programming implementation. Length of second sequence does not change similarity value.
-1) monomer mode: double short monomer sequence if len2/len1 < 2
-2) full_info: boolean, return full information
+1. monomer mode: double short monomer sequence if len2/len1 < 2
+2. full_info: boolean, return full information
+
 Return: percent of ED similarity, or if full_info (distance, number of d, positions of d, S matrix)
-
-- get_edit_distance_info(s1, s2, verbose=False, monomer_mode=False)
+```python
+get_ed_similarity(s1, s2, monomer_mode=False, full_info=False, verbose=False)
+```
 
 Return two sequences edit distance full information.    
-1) s1: sequence of tandem repeat monomer
-2) s2: sequence of tandem repeat monomer
-3) verbose: boolean
-4) monomer mode: double short monomer sequence if len2/len1 < 2.
+
+1. s1: sequence of tandem repeat monomer
+2. s2: sequence of tandem repeat monomer
+3. verbose: boolean
+4. monomer mode: double short monomer sequence if len2/len1 < 2.
+
 Return: ("max_sim Nmax_sim %sim pos_list", pos_list, all_result, length seq1, length seq2)
 
-- get_edit_distance(s1, s2)
+```python
+get_edit_distance_info(s1, s2, verbose=False, monomer_mode=False)
+```
 
-Return ED valie for two sequences.
+Return ED valie for two sequences:
+```python
+get_edit_distance(s1, s2)
+```
 
-- get_edit_distance_row(s1, s2)
+Get last row of ED matrix between two strings:
+```python
+get_edit_distance_row(s1, s2)
+```
 
-Get last row of ED matrix between two strings.
+Get Hamming distance: the number of corresponding symbols that differs in given strings:
+```python
+hamming_distance(s1, s2)
+```
 
-- hamming_distance(s1, s2)
-
-Get Hamming distance: the number of corresponding symbols that differs in given strings.
-    
+<a name="_tools_repbase"/>
 ### Working with Repbase files
 
-	from trseeker.tools.repbase_tools import join_repbase_files
+TODO: move to Readers
 
-	join_repbase_files(input_folder, output_file)
+```python
+from trseeker.tools.repbase_tools import join_repbase_files
+```
+Function join all Repbase fasta files in one huge fasta; reformat headers for compatibility with NCBI tools:
+```python
+join_repbase_files(input_folder, output_file)
+```
 
-- join_repbase_files(input_folder, output_file)
-
-Function join all Repbase fasta files in one huge fasta; reformat headers for compatibility with NCBI tools.
-
+<a name="_tools_trace"/>
 ### Working with Trace files
 
 	from trseeker.tools.trace_tools import unclip_trace_file
