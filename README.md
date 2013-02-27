@@ -671,7 +671,7 @@ sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project="mouse_genome")
 При чтение данных TRF происходит их фильтрация по следующим параметрам:
 
 1. Убираются все вложенные поля меньшей длины.
-2. Если поля overlapping, то если 
+2. Если поля overlapping, то сейчас ничего не делается, а раньше если 
 
 ```python
 overlap_proc_diff >= settings["trf_settings"]["overlapping_cutoff_proc"] and gc_dif <= settings["trf_settings"]["overlapping_gc_diff"]
@@ -679,7 +679,7 @@ overlap_proc_diff >= settings["trf_settings"]["overlapping_cutoff_proc"] and gc_
 поля объяединяются в одно поле. Иначе считаем, что это отдельные поля.
 3. Если поля совпадают, то выбирается то которое с большим trf_pmatch.
 
-TODO: убрать пересечение, так как это видимо в том числе и ошибки ассмеблера и это будет мешать корректной классификации.
+TODO: убрать пересечение, так как это видимо в том числе и ошибки ассмеблера и это будет мешать корректной классификации. Убрать в отдельную часть.
 
 ### TR file
 
@@ -692,71 +692,87 @@ Functions:
 - save_trs_dataset(trs_dataset, output_file)
 - get_trfid_obj_dict(trf_large_file)
 
-	trid2trfobj = get_trfid_obj_dict(trf_large_file)
+```python
+trid2trfobj = get_trfid_obj_dict(trf_large_file)
+```
 
 - get_all_trf_objs(trf_large_file)
 
-	trf_obj_list = get_all_trf_objs(trf_large_file)
+```python
+trf_obj_list = get_all_trf_objs(trf_large_file)
+```
 
 - read_trid2meta(file_name)
 
-Load trid to full index dictionary as string.
+Load trid to full index dictionary as string:
 
-- read_trid2ngrams(annotation_ngram_folder, trf_large_file)
+```python
+read_trid2ngrams(annotation_ngram_folder, trf_large_file)
+```
+
 TODO: rewrite this with AbstractReaders
-
 
 ### Ngram file
 
 TODO: rewrite this with AbstractReaders
 
+```python
+from trseeker.seqio.ngram_file import save_ngram_index
 
-	from trseeker.seqio.ngram_file import save_ngram_index
+save_ngram_index(ngram_index_file,
+		       hash2id,
+		       result_tf,
+                     	       result_df, 
+                     	       result_rtf, 
+                     	       result_rdf,
+	                      seen_rev, 
+	                      hash2rev)
 
-	save_ngram_index(ngram_index_file, 
-					 hash2id, 				 result_tf,
-                     result_df, result_rtf, result_rdf,
-                     seen_rev, hash2rev)
+save_ngram_pos_index(ngram_trids_file, id2trids, id2trid2tf)    
 
-	save_ngram_pos_index(ngram_trids_file, id2trids, id2trid2tf)    
+save_distance_data(dist_file, distances)
+```
 
-	save_distance_data(dist_file, distances)
+### Blast results file
 
-Blast results file
-------------------
-	
-	from trseeker.seqio.blast_file import get_blast_result
+```python	
+from trseeker.seqio.blast_file import get_blast_result
 
-	get_blast_result(blast_file, length, gap_size=1000, min_align=500, min_length=2400, format_function=None)
+get_blast_result(blast_file, length, gap_size=1000, min_align=500, min_length=2400, format_function=None)
+```
 
 Dataset updating functions:
 
-- update_with_repbase_blast_result(trs_dataset, annotation_self_folder, filters)
+```python
+update_with_repbase_blast_result(trs_dataset, annotation_self_folder, filters)
 
-	# inside function
-	# result is semicolon-delimited
-	trs_dataset[i].trf_repbase = result
+# inside function
+# result is semicolon-delimited
+trs_dataset[i].trf_repbase = result
 
-	# filters parameters example
-	filters = {
-		"blast_gap_size": 300,
-		"min_align": 1000,
-		"min_length": 3000,
-	}
+# filters parameters example
+filters = {
+	"blast_gap_size": 300,
+	"min_align": 1000,
+	"min_length": 3000,
+}
+```
 
-- update_with_self_blast_result(trs_dataset, annotation_self_folder, _get_filters)
+```python
+update_with_self_blast_result(trs_dataset, annotation_self_folder, _get_filters)
 	
-	# inside function
-	# result comma-delimited
-	# _get_filters(array_length) generate parameters by array_length
-	trs_dataset[i].trf_family_self = result
+# inside function
+# result comma-delimited
+# _get_filters(array_length) generate parameters by array_length
+trs_dataset[i].trf_family_self = result
 
-- update_with_ref_blast_result(trs_dataset, annotation_self_folder, filters)
+```python
+update_with_ref_blast_result(trs_dataset, annotation_self_folder, filters)
 
-	# inside function
-	# comma-delimited data
-	trs_dataset[i].trf_family_ref = result
-
+# inside function
+# comma-delimited data
+trs_dataset[i].trf_family_ref = result
+```
 
 TODO: refractor to more generic form with setattr(...)
 
@@ -771,22 +787,23 @@ While blast results parsing:
 - skipped all alignments with length less thatn min_align paramter
 - joined gapped if gap less than gap_size paramter
 
-
 ### Sra file
 
-	from trseeker.seqio.sra_file import FastqObj
+```python
+from trseeker.seqio.sra_file import FastqObj
 
-	fastq_obj = FastqObj(head, seq, srain, qual_str)
-
-	print fastq_obj.fastq
+fastq_obj = FastqObj(head, seq, srain, qual_str)
+print fastq_obj.fastq
+```
 
 Additional functions:
 
 - fastq_reader
 
-	for fastq_obj in fastq_reader(fastq_file):
-		print fastq_obj.seq
-
+```python
+for fastq_obj in fastq_reader(fastq_file):
+	print fastq_obj.seq
+```
 
 ## Toolkit
 
