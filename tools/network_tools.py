@@ -18,7 +18,10 @@ from trseeker.seqio.tr_file import read_trid2meta
 import os
 import array
 from collections import defaultdict
-import numpy
+try:
+    import numpy
+except Exception, e:
+    print "Numpy import error: %s" % e
 from PyExp.experiments.abstract_experiment import Timer
 
 try:
