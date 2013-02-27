@@ -15,6 +15,10 @@ from trseeker.seqio.tab_file import sc_iter_tab_file
 BUBBLE_CHART_TEMPLATE = "BubbleChart3D[{%s}]"
 LEGENDED_CHART_TEMPLATE = 'Legended[Style[Import["%(file)s"], RGBColor[%(color_r)s, %(color_g)s, %(color_b)s]], "%(title)s"]'
 
+COLORS_50 = {
+  "denim": ("#1560bd", (21,96,189)),
+}
+
 class Legend(object):
     ''' Class for description color legend.'''
     file = ""

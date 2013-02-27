@@ -1275,6 +1275,15 @@ from trseeker.tools.trs_dataset import *
 ```
 
 - COLORS dictionary
+- COLORS_50 dictionary
+
+```python
+COLORS_50 = {
+  "denim": ("#1560bd", (21,96,189)),
+}
+# TODO: finish it
+```
+
 - get_colors(family)
 - get_colors_rgb(family)
 - create_mathematice_dataset_by_family(trs_dataset, path_to_mathematica_folder, min_borders, max_borders)
