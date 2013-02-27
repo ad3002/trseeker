@@ -827,13 +827,13 @@ format_distances_to_tulip(distance_file, tulip_file_output, cutoff=90)
 
 ```python
 from trseeker.tools.trs_groups import *
-```python
+```
 
 Get next family index. Index limited to latin alphabet characters. Otherwise will return X1,X2 and so on
 
 ```python
 letter = get_index(i)
-```python
+```
 
 Get most frequent element of list.
 
