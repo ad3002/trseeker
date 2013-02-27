@@ -10,56 +10,64 @@ Framework состоит из следующих частей:
 
 В файле settings.py:
 
-	SETTINGS_FILENAME = "settings.yaml"
-	NGRAM_LENGTH = 23
-	NGRAM_N = 100000000
+```python
+SETTINGS_FILENAME = "settings.yaml"
+NGRAM_LENGTH = 23
+NGRAM_N = 100000000
+```
 
 Настройки можно прочитать и записать:
 
-	from trseeker.settings import load_settings
-	from trseeker.settings import save_settings
+```python
+from trseeker.settings import load_settings
+from trseeker.settings import save_settings
 
-	settings_dict = load_settings()
-	save_settings(settings_dict)
+settings_dict = load_settings()
+save_settings(settings_dict)
+```
 
 Настройки содержат следующие параметры:
-	
-	trseeker:
-	    os: linux64
-	    root_dir: /root/Dropbox/workspace/trseeker
-	    work_dir: /home
-	blast_settings:
-	    blast_location: 
-	    repbase_db_folder: /home/rebase_blast_db/repbase
-	    blast_e: 1e-20
-	    blast_b: 20000000
-	    blast_v: 20000000
-	trf_settings:
-	    trf_location: /root/trf404.linux64
-	    trf_match: 2
-	    trf_mismatch: 5
-	    trf_indel: 7
-	    trf_p: 80
-	    trf_q: 10
-	    trf_threshold: 50
-	    trf_length: 2000
-	    trf_param_postfix: 2.5.7.80.10.50.2000
-	    trf_masked_file: False
-	    trf_flanked_data: True
-	    trf_data_file: True
-	    trf_nohtml: True
-	    overlapping_cutoff: 10
-	    overlapping_cutoff_proc: 30
-	    overlapping_gc_diff: 0.05
-	ngrams_settings:
-	    ngram_length: 23
-	    ngram_m: 10000000
+
+```yaml	
+trseeker:
+    os: linux64
+    root_dir: /root/Dropbox/workspace/trseeker
+    work_dir: /home
+blast_settings:
+    blast_location: 
+    repbase_db_folder: /home/rebase_blast_db/repbase
+    blast_e: 1e-20
+    blast_b: 20000000
+    blast_v: 20000000
+trf_settings:
+    trf_location: /root/trf404.linux64
+    trf_match: 2
+    trf_mismatch: 5
+    trf_indel: 7
+    trf_p: 80
+    trf_q: 10
+    trf_threshold: 50
+    trf_length: 2000
+    trf_param_postfix: 2.5.7.80.10.50.2000
+    trf_masked_file: False
+    trf_flanked_data: True
+    trf_data_file: True
+    trf_nohtml: True
+    overlapping_cutoff: 10
+    overlapping_cutoff_proc: 30
+    overlapping_gc_diff: 0.05
+ngrams_settings:
+    ngram_length: 23
+    ngram_m: 10000000
+```
 
 ## Avaliable Models
 
 ### DNA Sequence
 
-	from trseeker.models.sequence_model import SequenceModel
+```python
+from trseeker.models.sequence_model import SequenceModel
+```
 
 Attribites:
 
@@ -114,8 +122,9 @@ self.seq_ref = title
 
 Chromosome name is **?** or setted with parse_chromosome_name(head).
 
-	
-	(self.seq_gi, self.seq_ref, self.seq_description) = parse_fasta_head(head)
+```python	
+(self.seq_gi, self.seq_ref, self.seq_description) = parse_fasta_head(head)
+```
 
 - set_gbff_sequence(self, head, sequence)
 
@@ -127,7 +136,9 @@ Sequence is cleared with clear_sequence(s) function. Lowercase and all non-DNA c
 
 ### TRF results
 
-	from trseeker.models.trf_model import TRModel
+```python
+from trseeker.models.trf_model import TRModel
+```
 
 Attributes:
 
@@ -172,60 +183,66 @@ Methods
 - set_project_data(project), set self.project to given project
 - set_raw_trf(head, body, line), head, body and line from TRF parser
 - get_index_repr()
-	
-	print trf_obj.get_index_repr()
-	'''
-	Tab delimted string with \n-symbol:
-	trf_id
-	trf_period
-	trf_array_length
-	trf_pvar
-	trf_gi
-	trf_l_ind
-	trf_r_ind
-	trf_chr
-	'''
+
+```python	
+print trf_obj.get_index_repr()
+'''
+Tab delimted string with \n-symbol:
+trf_id
+trf_period
+trf_array_length
+trf_pvar
+trf_gi
+trf_l_ind
+trf_r_ind
+trf_chr
+'''
+```
 
 - get_numerical_repr()
 
-	print trf_obj.get_numerical_repr()
-	>>> [trf_period]\t[trf_array_length]\t[trf_array_gc]\n
+```python
+print trf_obj.get_numerical_repr()
+>>> [trf_period]\t[trf_array_length]\t[trf_array_gc]\n
+```
 
 - get_fasta_repr(), where head is trf_obj.trf_id and sequence is trf_obj.trf_array
 - get_monomer_fasta_repr(), where head is trf_obj.trf_id and sequence is trf_obj.trf_consensus
 - get_family_repr()
 
-
-	print trf_obj.get_family_repr()
-	'''
-	Tab delimted string with \n-symbol:
-	trf_id
-	trf_period
-	trf_array_length
-	trf_array_gc
-	trf_pvar
-	trf_gi
-	trf_l_ind
-	trf_r_ind
-	trf_chr
-	trf_repbase
-	trf_superfamily
-	trf_family
-	trf_subfamily
-	'''
+```python
+print trf_obj.get_family_repr()
+'''
+Tab delimted string with \n-symbol:
+trf_id
+trf_period
+trf_array_length
+trf_array_gc
+trf_pvar
+trf_gi
+trf_l_ind
+trf_r_ind
+trf_chr
+trf_repbase
+trf_superfamily
+trf_family
+trf_subfamily
+'''
+```
 
 For network slice added one more index - gid (group id)
 
-::
+```python
+from trseeker.models.trf_model import NetworkSliceModel	
 
-	from trseeker.models.trf_model import NetworkSliceModel	
-
-	slice_obj = NetworkSliceModel()
+slice_obj = NetworkSliceModel()
+```
 
 ### Organism model
 
-
-	from trseeker.models.organism_model import OrganismModel		
+```python
+from trseeker.models.organism_model import OrganismModel		
+```
 
 Attributes:
 
@@ -238,8 +255,9 @@ Attributes:
 
 ### Dataset model
 
-
-	from trseeker.models.dataset_model import DatasetModel		
+```python
+from trseeker.models.dataset_model import DatasetModel		
+```
 
 Attributes:
 
@@ -256,7 +274,9 @@ Attributes:
 
 ### Blast Results Model
 
-	from trseeker.models.blast_model import BlastResultModel		
+```python
+from trseeker.models.blast_model import BlastResultModel		
+```
 
 Attributes:
 
@@ -290,13 +310,17 @@ Additional functions:
 
 - read_blast_file(blast_file, length), return subject_ref -> list of matches (BlastResultModel models).
 
-	from trseeker.models.blast_model import read_blast_file
+```python
+from trseeker.models.blast_model import read_blast_file
 
-	ref_to_blast_obj = read_blast_file(file_name)
+ref_to_blast_obj = read_blast_file(file_name)
+```
 
 ### Chromosome model
 
-	from trseeker.models.chromosome_model import ChromosomeModel
+```python
+from trseeker.models.chromosome_model import ChromosomeModel
+```
 
 Attributes:
 
@@ -320,7 +344,9 @@ Attributes:
 	
 ### WGS model
 
-	from trseeker.models.wgs_model import WGSModel
+```python
+from trseeker.models.wgs_model import WGSModel
+```
 
 Attributes:
 
@@ -347,11 +373,17 @@ Attributes:
 
 Methods:
 
-- wgs-obj.clear_trf(), clear trf information (set to 0)
+Clear trf information (set to 0):
+
+```python
+- wgs-obj.clear_trf()
+```
 
 ### Genome model
 
-	from trseeker.models.genome_model import GenomeModel
+```python
+from trseeker.models.genome_model import GenomeModel
+```
 
 - genome_taxon
 - genome_prefix
