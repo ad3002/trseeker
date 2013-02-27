@@ -75,8 +75,6 @@ class TRFFileIO(AbstractBlockFileIO):
         for head, body, start, next in self.read_online(trf_file):
             obj_set = []
             for line in self._gen_data_line(body):
-                if not line:
-                    continue
                 trf_obj = TRModel()
                 trf_obj.set_raw_trf(head, body, line)
                 obj_set.append(trf_obj)
@@ -110,17 +108,19 @@ class TRFFileIO(AbstractBlockFileIO):
                     trf_id += 1
         return trf_id
 
-
     def _gen_data_line(self, data):
-        try:
-            datas = re.compile('\n(\d.+?)\n', re.S).findall(data)
-            for line in datas:
-                yield line
-        except:
-            print "Failed parse data lines: %s" % (data)
-            yield None
-
+        for line in data.split("\n"):
+            line = line.strip()
+            if line.startswith("Sequence"):
+                continue
+            if line.startswith("Parameters"):
+                continue
+            if not line:
+                continue
+            yield line
+        
     def _filter_obj_set(self, obj_set):
+        # NB: I removed the overlaping part due to suspicious results.
         # Complex filter
         is_overlapping = False
         n = len(obj_set)
@@ -157,13 +157,16 @@ class TRFFileIO(AbstractBlockFileIO):
                 # a ------ 
                 # b    -----
                 if obj1.trf_r_ind > obj2.trf_l_ind and obj1.trf_r_ind < obj2.trf_r_ind:
-                    is_overlapping = True
+                    #TODO: move overlaping part in different place
+                    # is_overlapping = True
+                    # obj1.overlap = obj2.trf_id
+                    # obj2.overlap = obj1.trf_id
                     continue
                 # a ------ 
-                # b         -----
+                # b                -----
                 if obj1.trf_r_ind < obj2.trf_l_ind:
                     break
-                # a         ------ 
+                # a               ------ 
                 # b -----
                 if obj2.trf_r_ind < obj1.trf_l_ind:
                     break
@@ -182,10 +185,10 @@ class TRFFileIO(AbstractBlockFileIO):
                     if not obj2:
                         continue
                     # a ------ 
-                    # b         -----
+                    # b               -----
                     if obj1.trf_r_ind < obj2.trf_l_ind:
                         break
-                    # a         ------ 
+                    # a              ------ 
                     # b -----
                     if obj2.trf_r_ind < obj1.trf_l_ind:
                         break
@@ -203,6 +206,8 @@ class TRFFileIO(AbstractBlockFileIO):
                             is_overlapping = True
                             obj1 = self._join_overlapped(obj1, obj2)
                             obj2 = None
+                            print "overlap: ", overlap, "min_length:", min_length, "overlap_proc_diff:", overlap_proc_diff, "gc_dif:", gc_dif
+                            print "JOINED"
                         continue
                     # a ------ 
                     # b ------
@@ -215,11 +220,11 @@ class TRFFileIO(AbstractBlockFileIO):
                             obj_set[a] = None
                             continue
                     # a ------ ------  ------- 
-                    # b ---       ---    ---
+                    # b ---       ---     ---
                     if obj1.trf_l_ind <= obj2.trf_l_ind and obj1.trf_r_ind >= obj2.trf_r_ind:
                         obj_set[b] = None
                         continue
-                    # a ---       ---    ---
+                    # a ---       ---            ---
                     # b ------ ------  ------- 
                     if obj2.trf_l_ind <= obj1.trf_l_ind and obj2.trf_r_ind >= obj1.trf_r_ind:
                         obj_set[a] = None
