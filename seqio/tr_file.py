@@ -46,6 +46,13 @@ def get_all_trf_objs(trf_large_file):
         result.append(trf_obj)
     return result
 
+def get_trf_objs_dict(trf_large_file):
+    """ Return dict of trf_obj from given trf_large_file."""
+    result = {}
+    for trf_obj in sc_iter_tab_file(trf_large_file, TRModel):
+        result[trf_obj.trf_id] = trf_obj
+    return result
+
 def get_trfid_obj_dict(trf_large_file):
      """ Return dicionary trf_id to trf_obj from given trf_large_file."""
      trs_dataset = get_all_trf_objs(trf_large_file)

@@ -779,6 +779,12 @@ trid2trfobj = get_trfid_obj_dict(trf_large_file)
 trf_obj_list = get_all_trf_objs(trf_large_file)
 ```
 
+- get_trf_objs_dict(trf_large_file)
+
+```python
+trf_obj_dics = get_trf_objs_dict(trf_large_file)
+```
+
 - read_trid2meta(file_name)
 
 Load trid to full index dictionary as string:
@@ -838,11 +844,12 @@ filters = {
 ```
 
 ```python
-update_with_self_blast_result(trs_dataset, annotation_self_folder, _get_filters)
+update_with_self_blast_result(trs_dataset, annotation_self_folder, filters_obj)
 	
 # inside function
 # result comma-delimited
-# _get_filters(array_length) generate parameters by array_length
+# inside get_filters(array_length) generate parameters by array_length:
+# 	filters = filters_obj.get_filters(trf_obj.trf_array_length)
 trs_dataset[i].trf_family_self = result
 ```
 
@@ -870,11 +877,14 @@ While blast results parsing:
 <a name="_io_sra"/>
 ### SRA file
 
+TODO: move FastqObj to models
+
 ```python
 from trseeker.seqio.sra_file import FastqObj
 
 fastq_obj = FastqObj(head, seq, srain, qual_str)
 print fastq_obj.fastq
+print fastq_obj.sequence
 ```
 
 Additional functions:
@@ -998,7 +1008,7 @@ from trseeker.tools.seqfile import *
 
 - save_list(file_name, data)
 - save_dict(file_name, dictionary)
-- save_sorted_dict(file, d, by_value=True, reverse=True)
+- save_sorted_dict(file, d, by_value=True, reverse=True, min_value=None)
 - count_lines(file)
 - sort_file_by_int_field(file_name, field)
 
