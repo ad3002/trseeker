@@ -30,7 +30,13 @@
     - [Blast output](#_io_blast)
     - [Fastq file](#_io_sra)
 - [Toolkit](#_tools)
-    - [Tupip](#_tools_tuplip)
+    - [Tulip](#_tools_tulip)
+    - [TRs nomenclature](#_tools_trs_group)
+    - [Sequence](#_tools_sequence)
+    - [Various for files](#_tools_var)
+    - [Various](#_tools_other)
+    - [Kmers](#_tools_kmers)
+    - [Edit distance](#_tools_ed)
 
 
 <a name="_toolkit_intro"/>
@@ -869,7 +875,7 @@ for fastq_obj in fastq_reader(fastq_file):
 <a name="_tools"/>
 ## Toolkit
 
-<a name="_tools_tupip"/>
+<a name="_tools_tulip"/>
 ### Tulip files
 
 Format and write network data to tulip format from distance_file with given cutoff (defaul=90).
@@ -884,86 +890,71 @@ from trseeker.tools.tulip_tools import *
 format_distances_to_tulip(distance_file, tulip_file_output, cutoff=90)
 ```
 
-### TRs groups
+<a name="_tools_trs_nomen"/>
+### TRs nomenclature
 
+TODO: rename package
 ```python
 from trseeker.tools.trs_groups import *
 ```
-
-Get next family index. Index limited to latin alphabet characters. Otherwise will return X1,X2 and so on
-
+Get next family index. Index limited to latin alphabet characters. Otherwise will return X1,X2 and so on:
 ```python
 letter = get_index(i)
 ```
-
-Get most frequent element of list.
-
+Get most frequent element of list:
 ```python
 element = get_popular(s)
 ```
-
-Get unit and letter for family. Unit picked by most common pmatch value. A seen_units is a dictionary unit_size to frequence, it is needed for letter choosing.
-
+Get unit and letter for family. Unit picked by most common pmatch value. A seen_units is a dictionary unit_size to frequence, it is needed for letter choosing:
 ```python
 unit, letter, seen_units = get_family_name(ids, seen_units)	
 ```
-
-Join families with common members.
-
+Join families with common members:
 ```python
 join_families_with_common(families)
 ```
 
+<a name="_tools_sequence"/>
 ### Sequence tools
 
 ```python
 from trseeker.tools.sequence_tools import *
 ```
-
 Return complementary sequence:
-
 ```python
 revcom = get_revcomp(sequence)
 ```
-
 Return normalized sequence with following rules:
 1. if T > A then return reverse complement
 2. if A == T and G > C  then return reverse complement
 3. else return sequence
-
 ```python
 sequence = fix_strand(sequence)
 ```
-
 Count GC content:
 ```python
 gc = get_gc(sequence)
 ```
-
 Check for N|n in sequence. Return n(with N) or w(whole):
 ```python
 bool_value = check_gapped(sequence)
 ```
-
 Return subsequence:
 ```python
 get_subseq(seq, start, end)
 ```
-
-Clear sequence (ACTGN alphabet)
+Clear sequence (ACTGN alphabet):
 1. lower case
 2. remove any gaps
 3. remove all letters except atgcn
-
 ```python
 sequence = clear_sequence(sequence)
 ```
-
 Return list of sequences splited by pattern with added end. Pattern is regexp:
 ```python
-restriction(sequence, pattern, end="")
+restriction(sequence, pattern, end=None)
 ```
-Return number of fragments after restriction of sequence with given pattern. Pattern is regexp:
+Return number of fragments after restriction of sequence with given regexp pattern:
 ```python
 restriction_fragments_n(sequence, pattern)
 ```
@@ -980,9 +971,12 @@ Return consensus string for given list of strings:
 get_consensus(strs)
 ```
 
-### Various useful functions
+<a name="_tools_var"/>
+### Various useful functions for working with files
 
-	from trseeker.tools.seqfile import *
+```python
+from trseeker.tools.seqfile import *
+```
 
 - save_list(file_name, data)
 - save_dict(file_name, dictionary)
@@ -990,29 +984,50 @@ get_consensus(strs)
 - count_lines(file)
 - sort_file_by_int_field(file_name, field)
 
+<a name="_tools_other"/>
 ### Other useful functions (other_tools.py)
 
-	from trseeker.tools.other_tools import *
+```python
+from trseeker.tools.other_tools import *
+```
 
-- sort_dictionary_by_key(d, reverse=False)
-Sort dictionary by key. Retrun list of (k, v) pairs.
-- as_strings(alist)
-Cast list elements to string.
-- dict2list(adict)
-Return list from dictionary, return list of (key, value) pairs.
-- sort_dictionary_by_value(d, reverse=False)
-Sort dictionary by value. Retrun list of (v, k) pairs.
-- remove_duplicates_and_sort(data)
-Remove duplicates from list and sort it.
-- remove_duplicates(data)
-- remove_redundancy(alist)
-Remove redundancy or empty elements in given list.
-- clear_fragments_redundancy(data, extend=False, same_case_func=None)
-Remove nested fragments, ata format [start, end, ...].
+Sort dictionary by key. Retrun list of (k, v) pairs:
+```python
+sort_dictionary_by_key(d, reverse=False)
+```
+Cast list elements to string:
+```python
+as_strings(alist)
+```
+Return list from dictionary, return list of (key, value) pairs:
+```python
+dict2list(adict)
+```
+Sort dictionary by value. Retrun list of (v, k) pairs:
+```python
+sort_dictionary_by_value(d, reverse=False)
+```
+Remove duplicates from list and sort it:
+```python
+remove_duplicates_and_sort(data)
 
+remove_duplicates(data)
+```
+Remove redundancy or empty elements in given list:
+```python
+remove_redundancy(alist)
+```
+Remove nested fragments, ata format [start, end, ...]:
+```python
+clear_fragments_redundancy(data, extend=False, same_case_func=None)
+```
+
+<a name="_tools_kmers"/>
 ### Ngrams (kmers) tools
 
-	from trseeker.tools.ngrams_tools import *
+```python
+from trseeker.tools.ngrams_tools import *
+```
 
 - generate_ngrams(text, n=12)
 Yields all ngrams of length n from given text.
@@ -1054,7 +1069,7 @@ Usage:
 	for sequence in sequences:
 		tf_dict, df_dict, local_tf, local_df = count_kmer_tfdf(sequence, tf_dict, df_dict, k)
 
-
+<a name="_tools_ed"/>
 ### Edit distance functions
 
 	from trseeker.tools.edit_distance import *
