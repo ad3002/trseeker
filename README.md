@@ -376,7 +376,7 @@ Methods:
 Clear trf information (set to 0):
 
 ```python
-- wgs-obj.clear_trf()
+wgs_obj.clear_trf()
 ```
 
 ### Genome model
@@ -404,16 +404,20 @@ from trseeker.models.genome_model import GenomeModel
 
 ### Ngram model
 
+```python
 	from trseeker.models.ngram_model import NgramModel
+```
 
-	ngram_obj = NgramModel(seq_f, seq_r)
-	ngram_obj.add_tr(trf_obj, tf)
+```python
+ngram_obj = NgramModel(seq_f, seq_r)
+ngram_obj.add_tr(trf_obj, tf)
 
-	print ngram_obj
-	>>> '[fseq]\t[rseq]\t[tf]\t[df]\t[len taxons]\t[len fams]\n'
+print ngram_obj
+>>> '[fseq]\t[rseq]\t[tf]\t[df]\t[len taxons]\t[len fams]\n'
 
-	print ngram_obj.get_families()
-	>>> ???
+print ngram_obj.get_families()
+>>> ???
+```
 
 Attributes
 
@@ -427,8 +431,9 @@ Attributes
 
 ### Ngrams model
 
-
-	from trseeker.models.ngrams_model import NgramModel
+```python
+from trseeker.models.ngrams_model import NgramModel
+```
 
 Attributes
 
@@ -443,18 +448,29 @@ Attributes
 
 ### NgramToTRModel model
 
-	from trseeker.models.ngrams_model import NgramToTRModel
+```python
+from trseeker.models.ngrams_model import NgramToTRModel
+```
 
-Attributes
+#### Attributes
 
 - id (int)
 - trids (list int)
 - tfs (list int)
 
-Additional function
+#### Additional function
 
-- sc_ngram_reader(file_name), yield NgramModel
-- sc_ngram_trid_reader(file_name), yield (ngram id, [(seq id, tf), ...])
+Yield NgramModel:
+
+```python
+sc_ngram_reader(file_name), 
+```
+
+Yield (ngram id, [(seq id, tf), ...]):
+
+```python
+- sc_ngram_trid_reader(file_name),
+```
 
 ## IO functions
 
