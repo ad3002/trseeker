@@ -817,88 +817,107 @@ Format and write network data to tulip format from distance_file with given cuto
 - tulip_file_output: network in tulip format
 - cutoff: distance cutoff
 
+```python
+from trseeker.tools.tulip_tools import *
 
-	from trseeker.tools.tulip_tools import *
-
-	format_distances_to_tulip(distance_file, tulip_file_output, cutoff=90)
+format_distances_to_tulip(distance_file, tulip_file_output, cutoff=90)
+```
 
 ### TRs groups
 
-	from trseeker.tools.trs_groups import *
-
-- get_index(i)
+```python
+from trseeker.tools.trs_groups import *
+```python
 
 Get next family index. Index limited to latin alphabet characters. Otherwise will return X1,X2 and so on
 
-	letter = get_index(i)
-
-- get_popular(s)
+```python
+letter = get_index(i)
+```python
 
 Get most frequent element of list.
 
-	element = get_popular(s)
-
-- get_family_name(ids, seen_units)
+```python
+element = get_popular(s)
+```
 
 Get unit and letter for family. Unit picked by most common pmatch value. A seen_units is a dictionary unit_size to frequence, it is needed for letter choosing.
 
-	unit, letter, seen_units = get_family_name(ids, seen_units)	
+```python
+unit, letter, seen_units = get_family_name(ids, seen_units)	
+```
 
-- join_families_with_common(families)
 Join families with common members.
+
+```python
+join_families_with_common(families)
+```
 
 ### Sequence tools
 
-	from trseeker.tools.sequence_tools import *
+```python
+from trseeker.tools.sequence_tools import *
+```
 
-- get_revcomp(sequence)
 Return complementary sequence.
 
-	revcom = get_revcomp(sequence)
+```python
+revcom = get_revcomp(sequence)
+```
 
-- fix_strand(sequence)
 Return normalized sequence with following rules:
 1) if T > A then return reverse complement
 2) if A == T and G > C  then return reverse complement
 3) else return sequence
 
-	sequence = fix_strand(sequence)
+```python
+sequence = fix_strand(sequence)
+```
 
-- get_gc(sequence)
 Count GC content.
+```python
+gc = get_gc(sequence)
+```
 
-	gc = get_gc(sequence)
-
-- check_gapped(sequence)
 Check for N|n in sequence. Return n(with N) or w(whole).
+```python
+bool_value = check_gapped(sequence)
+```
 
-	bool_value = check_gapped(sequence)
-
-- get_subseq(seq, start, end)
 Return subsequence.
+```python
+get_subseq(seq, start, end)
+```
 
-- clear_sequence(sequence)
 Clear sequence (ACTGN alphabet)
 1) lower case
 2) remove any gaps
 3) remove all letters except atgcn
 
-	sequence = clear_sequence(sequence)
+```python
+sequence = clear_sequence(sequence)
+```
 
-- restriction(sequence, pattern, end="")
 Return list of sequences splited by pattern with added end. Pattern is regexp.
-
-- restriction_fragments_n(sequence, pattern)
+```python
+restriction(sequence, pattern, end="")
+```
 Return number of fragments after restriction of sequence with given pattern. Pattern is regexp.
-
-- check_cyclic_repeats(seq_a, seq_b)
+```python
+restriction_fragments_n(sequence, pattern)
+```
 Check tandem repeat synonims  between two sequence with same length.
-
-- random_mutation(seq, n, alphabet="actgn +")
+```python
+check_cyclic_repeats(seq_a, seq_b)
+```
 Return sequence with n mutations.
-
-- get_consensus(strs)
+```python
+random_mutation(seq, n, alphabet="actgn +")
+```
 Return consensus string for given list of strings.
+```python
+get_consensus(strs)
+```
 
 ### Various useful functions
 
