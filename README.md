@@ -859,62 +859,62 @@ join_families_with_common(families)
 from trseeker.tools.sequence_tools import *
 ```
 
-Return complementary sequence.
+Return complementary sequence:
 
 ```python
 revcom = get_revcomp(sequence)
 ```
 
 Return normalized sequence with following rules:
-1) if T > A then return reverse complement
-2) if A == T and G > C  then return reverse complement
-3) else return sequence
+1. if T > A then return reverse complement
+2. if A == T and G > C  then return reverse complement
+3. else return sequence
 
 ```python
 sequence = fix_strand(sequence)
 ```
 
-Count GC content.
+Count GC content:
 ```python
 gc = get_gc(sequence)
 ```
 
-Check for N|n in sequence. Return n(with N) or w(whole).
+Check for N|n in sequence. Return n(with N) or w(whole):
 ```python
 bool_value = check_gapped(sequence)
 ```
 
-Return subsequence.
+Return subsequence:
 ```python
 get_subseq(seq, start, end)
 ```
 
 Clear sequence (ACTGN alphabet)
-1) lower case
-2) remove any gaps
-3) remove all letters except atgcn
+1. lower case
+2. remove any gaps
+3. remove all letters except atgcn
 
 ```python
 sequence = clear_sequence(sequence)
 ```
 
-Return list of sequences splited by pattern with added end. Pattern is regexp.
+Return list of sequences splited by pattern with added end. Pattern is regexp:
 ```python
 restriction(sequence, pattern, end="")
 ```
-Return number of fragments after restriction of sequence with given pattern. Pattern is regexp.
+Return number of fragments after restriction of sequence with given pattern. Pattern is regexp:
 ```python
 restriction_fragments_n(sequence, pattern)
 ```
-Check tandem repeat synonims  between two sequence with same length.
+Check tandem repeat synonims  between two sequence with same length:
 ```python
 check_cyclic_repeats(seq_a, seq_b)
 ```
-Return sequence with n mutations.
+Return sequence with n mutations:
 ```python
 random_mutation(seq, n, alphabet="actgn +")
 ```
-Return consensus string for given list of strings.
+Return consensus string for given list of strings:
 ```python
 get_consensus(strs)
 ```
