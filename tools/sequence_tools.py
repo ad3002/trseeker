@@ -93,7 +93,7 @@ def clear_sequence(sequence):
     sequence = re.sub("\s+", "", sequence)
     return re.sub("[^actgn]", "", sequence)
 
-def restriction(sequence, pattern, end=""):
+def restriction(sequence, pattern, end=None):
     ''' Return list of sequences splited by pattern with added end.
     
     - patterm: reg_exp
@@ -103,6 +103,8 @@ def restriction(sequence, pattern, end=""):
         fragments[0] == sequence:
             return fragments
     n = len(fragments)
+    if not end:
+        end = ""
     for i in range(0,n):
         if i == 0:
             fragments[i] += end
