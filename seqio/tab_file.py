@@ -145,4 +145,3 @@ def sc_read_simple_tab_file(input_file):
         for data in csv.reader(fh, delimiter='\t', quoting=csv.QUOTE_NONE):
             result.append(data)
     return result
-
