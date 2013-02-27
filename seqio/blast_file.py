@@ -177,7 +177,7 @@ def update_with_repbase_blast_result(trs_dataset, annotation_self_folder, filter
 
     return trs_dataset
 
-def update_with_self_blast_result(trs_dataset, annotation_self_folder, filters):
+def update_with_self_blast_result(trs_dataset, annotation_self_folder, filters_obj):
     ''' Add vs_self blast result to trs_dataset.'''
     n = len(trs_dataset)
     for i, trf_obj in enumerate(trs_dataset):
@@ -190,6 +190,7 @@ def update_with_self_blast_result(trs_dataset, annotation_self_folder, filters):
             ref = int(data[1])
             trs_dataset[i].trf_family_self = ('ALPHA', ref)
             continue
+        filters = filters_obj.get_filters(trf_obj.trf_array_length)
         result = get_blast_result(blast_output_file,
                                   trf_obj.trf_array_length,
                                   gap_size=filters["blast_gap_size"],
