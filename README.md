@@ -39,6 +39,18 @@
     - [Edit distance](#_tools_ed)
     - [Repbase](#_tools_repbase)
     - [Trace](#_tools_trace)
+    - [Statistics](#_tools_stat)
+    - [Parsing](#_tools_parsers)
+    - [TRF](#_tools_trf)
+    - [TRs datasets](#_tools_trs)
+    - [SRA datasets](#_tools_sra)
+    - [Sequence patterns](#_tools_patterns)
+    - [Blast](#_tools_blast)
+    - [ESA](#_tools_sa)
+    - [NCBI genomes](#_tools_ncbi_genome)
+    - [Networks](#_tools_networks)
+    - [Networks](#_tools_ncbi_ann)
+
 
 
 <a name="_toolkit_intro"/>
@@ -1148,121 +1160,162 @@ join_repbase_files(input_folder, output_file)
 <a name="_tools_trace"/>
 ### Working with Trace files
 
-	from trseeker.tools.trace_tools import unclip_trace_file
-
-	unclip_trace_file(fasta_file, clip_file, uncliped_file)
-
-- unclip_trace_file(fasta_file, clip_file, uncliped_file)
+```python
+from trseeker.tools.trace_tools import unclip_trace_file
+```
 
 Unclip. Remove vector flanks from Trace data.
+```python
+unclip_trace_file(fasta_file, clip_file, uncliped_file)
+```
 
+<a name="_tools_stat"/>
 ### Function related to statistics
 
-	from trseeker.tools.statistics import *
+```python
+from trseeker.tools.statistics import *
+```
 
-- get_sigma(data)
+Calculate sigma, return sum(module(xi - mean):
+```python
+get_sigma(data)
+```
+Return dictionary containing simple statistics for given list. Dictionary keys: mean, variance, sigma, sample derivation:
+```python
+get_mean(data)
 
-Calculate sigma, return sum(module(xi - mean).
+get_sample_derivation(variance)
 
-- get_mean(data)
-- get_sample_derivation(variance)
-- t_test(sample_mean, dist_mean, variance, N)
-- get_element_frequences(data)
-- get_simple_statistics(data)
+t_test(sample_mean, dist_mean, variance, N)
 
-Return dictionary containing simple statistics for given list. Dictionary keys: mean, variance, sigma, sample derivation.
+get_element_frequences(data)
 
+get_simple_statistics(data)
+```
+
+<a name="_tools_parsers"/>
 ### Parsers
 
-	from trseeker.tools.parsers import *
+```python
+from trseeker.tools.parsers import *
 
-- parse_fasta_head(fa_head)
-- parse_chromosome_name(head)
-- trf_parse_line(line)
-- trf_parse_param(line)
-- trf_parse_head(line)
-- get_wgs_prefix_from_ref(ref)
-- get_wgs_prefix_from_head(head)
+parse_fasta_head(fa_head)
 
+parse_chromosome_name(head)
+
+trf_parse_line(line)
+
+trf_parse_param(line)
+
+trf_parse_head(line)
+
+get_wgs_prefix_from_ref(ref)
+
+get_wgs_prefix_from_head(head)
+```
+
+<a name="_tools_trf"/>
 ### Functions related to TRF
+```python
+from trseeker.tools.trf_tools import *
+```
 
-	from trseeker.tools.trf_tools import *
+```python
+trf_search(file_name)
+```
+```python
+trf_search_in_dir(folder, verbose=False, file_suffix=".fa", output_folder=None)
+```
 
-- trf_search(file_name)
-- trf_search_in_dir(folder, verbose=False, file_suffix=".fa", output_folder=None)
-- trf_filter_by_array_length(trf_file, output_file, cutoff)
+Create output TRF file with tandem repeats with length greater than from input file. Function returns number of tandem repeats in output file:
 
-Create output TRF file with tandem repeats with length greater than from input file. Function returns number of tandem repeats in output file.
+```python
+trf_filter_by_array_length(trf_file, output_file, cutoff)
+```
+Create output TRF file with tandem repeats with unit length greater than from input file. Function returns number of tandem repeats in output file:
 
-- trf_filter_by_monomer_length(trf_file, output_file, cutoff)
-
-Create output TRF file with tandem repeats with unit length greater than from input file. Function returns number of tandem repeats in output file.
-
-- trf_filter_exclude_by_gi_list(trf_file, output_file, gi_list_to_exclude)
-
+```python
+trf_filter_by_monomer_length(trf_file, output_file, cutoff)
+```
 Create output TRF file with tandem repeats with GI that don't match GI_LIST. List of GI, see TRF and FA specifications, GI is first value in TRF row.
 
-- trf_representation(trf_file, trf_output, representation)
-
+```python
+trf_filter_exclude_by_gi_list(trf_file, output_file, gi_list_to_exclude)
+```
 Write TRF file tab delimited representation.Representation: numerical|index|agc_apm|with_monomer|family
+```python
+trf_representation(trf_file, trf_output, representation)
+```
+Write statistics data: field, N:
+```python
+trf_write_field_n_data(trf_file, file_output, field, field_format="%s")
+```
+Write statistics data: field_a, field_b:
+```python
+trf_write_two_field_data(trf_file, file_output, field_a, field_b)
+```
+Function prints chr, all trs, 3000 trs, 10000 trs:
+```python
+count_trs_per_chrs(all_trf_file)
+```
+Function prints number of items with given fasta head fragment:
+```python
+count_trf_subset_by_head(trf_file, head_value)
+```
+Several fasta heads impossible to parse, so it is simpler to fix them postfactum:
+```python
+fix_chr_names(trf_file, temp_file_name=None, case=None)
+```
 
-- trf_write_field_n_data(trf_file, file_output, field, field_format="%s")
 
-Write statistics data: field, N.
-
-- trf_write_two_field_data(trf_file, file_output, field_a, field_b)
-
-Write statistics data: field_a, field_b.
-
-- count_trs_per_chrs(all_trf_file)
-
-Function prints chr, all trs, 3000 trs, 10000 trs
-
-- count_trf_subset_by_head(trf_file, head_value)
-
-Function prints number of items with given fasta head fragment
-
-- fix_chr_names(trf_file, temp_file_name=None, case=None)
-
-Some fasta heads impossible to parse, so it is simpler to fix them postfactum
-
+<a name="_tools_trs"/>
 ### Working with TRs datasets
-
-	from trseeker.tools.trs_dataset import *
+```python
+from trseeker.tools.trs_dataset import *
+```
 
 - COLORS dictionary
 - get_colors(family)
 - get_colors_rgb(family)
 - create_mathematice_dataset_by_family(trs_dataset, path_to_mathematica_folder, min_borders, max_borders)
 
+<a name="_tools_sra"/>
 ### Working with SRA data
-
-	from trseeker.tools.sra_tools import *
-
-- sra_fastaq_reader(file_name)
+```python
+from trseeker.tools.sra_tools import *
+```
 
 Iterate over fastaq data.
-
-- sra_fasta_reader(file_name)
-
+```python
+sra_fastaq_reader(file_name)
+```
 Iterate over fasta SRA data.
+
+```python
+sra_fasta_reader(file_name)
+```
 
 - read_fastaq_freq_to_memory(file_name)
 - fastaq_to_fasta(file_name, output_file)
 - write_fastaq_repeats(input_file, output_file, min_tf=1000)
 - seq_to_bin(seq)
 - bin_to_seq(bseq)
-- write_reduced_fasta(input_file, output_reduced)
 
 Read SRA fasta data without read repeats.
-
-- write_ngrams(input_file, output_ngram, NGRAM_N)
-
+```python
+write_reduced_fasta(input_file, output_reduced)
+```
 Write ngrams data from SRA fasta data.
+```python
+write_ngrams(input_file, output_ngram, NGRAM_N)
+```
 
+
+<a name="_tools_patterns"/>
 ### Working with sequence patterns
-
-	from trseeker.tools.sequence_patterns import *
+```python
+from trseeker.tools.sequence_patterns import *
+```
 
 Avaliable patterns:
 
@@ -1273,26 +1326,31 @@ Avaliable patterns:
 
 Functions:
 
-- re_translate(sequence)
+Translate sequence in DNA15 in reg exp:
+```python
+re_translate(sequence)
+```
 
-Translate sequence in DNA15 in reg exp.
+Return list of sequences where one letter changed to N:
+```python
+re_get_plus_minus(sequence)
+re_get_mutations(sequence)
+```
 
-- re_get_plus_minus(sequence)
-- re_get_mutations(sequence)
-
-Return list of sequences where one letter changed to N.
-
-- get_double_pattern(pattern_static, pattern_dynamic)
-
-Return list of patterns one not mutated and second mutated.
+Return list of patterns one not mutated and second mutated:
+```python
+get_double_pattern(pattern_static, pattern_dynamic)
+```
 
 - get_mutated_pattern_twice(pattern)
 - get_mutated_pattern_trice(pattern)
 - pattern_search(name, sequence, pattern_function, pattern_function_params)
 
+<a name="_tools_blast"/>
 ### Working with BLAST
-
-	from trseeker.tools.blast_tools import *
+```python
+from trseeker.tools.blast_tools import *
+```
 
 - blastn(database, query, output)
 - create_db(fasta_file, output, verbose=False, title=None)
@@ -1304,53 +1362,71 @@ Return list of patterns one not mutated and second mutated.
 - get_all_blast_obj_from_blast(blast_file, mode="ref")
 - blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file, skip_by_family=None, is_huge_alpha=False)
 
+<a name="_tools_sa"/>
 ### Working with suffix arrays
+```python
+from trseeker.tools.sa_tools import *
+```
 
-	from trseeker.tools.sa_tools import *
+Fasta to SA input. Text file of sequences delimeted by $ symbol:
 
-- fasta_to_sa_input(fasta_file, sa_input_file, index_file_name=None, file_name=None, start_id=None, increment=False)
+```python
+fasta_to_sa_input(fasta_file, sa_input_file, index_file_name=None, file_name=None, start_id=None, increment=False)
+```
 
-Fasta to SA input. Text file of sequences delimeted by $ symbol.
+SA input file to fasta file:
 
-- sa_input_to_fasta(input_file, output_file)
+```python
+sa_input_to_fasta(input_file, output_file)
+```
 
-SA input file to fasta file.
+Function precompiles doc2id and id2doc pickled dictionary:
 
-- pickle_dictionary_for_docid_trid(sa_doc_index, doc_to_trf_file, trf_to_doc_file)
+```python
+pickle_dictionary_for_docid_trid(sa_doc_index, doc_to_trf_file, trf_to_doc_file)
+```
 
-Function precompiles doc2id and id2doc pickled dictionary
+Function filters and writes sa data with given min tf and df:
 
-- filter_sa_dataset(sa_file, output_file, min_tf, min_df)
+```python
+filter_sa_dataset(sa_file, output_file, min_tf, min_df)
+```
 
-Function filters and writes sa data with given min tf and df.
+Yields corpus texts. Corpus is $ delimited text file:
 
-- iterate_sa_corpus(corpus)
+```python
+iterate_sa_corpus(corpus)
+```
 
- Yields corpus texts. Corpus is $ delimited text file.
-
+<a name="_tools_ncbi_genome"/>
 ### Working with NCBI genome information
+```python
+from trseeker.tools.ncbi_genomes import *
+```
 
-	from trseeker.tools.ncbi_genomes import *
+Scrap finished WGS genome projects wtih given SubGroup name:
+```python
+load_genome_projects(subgroup)
+```
+Scrap finished WGS genome projects wtih given SubGroup name:
+```python
+load_genome_projects_exclude(notsubgroups)
+```
+Print data for initiating PySatDNA projects:
+```python
+print_add_project_data(genome_projects, pid_type, pr_type)
+```
 
-- load_genome_projects(subgroup)
-
-Scrap finished WGS genome projects wtih given SubGroup name.
-
-- load_genome_projects_exclude(notsubgroups)
-
-Scrap finished WGS genome projects wtih given SubGroup name.
-
-- print_add_project_data(genome_projects, pid_type, pr_type)
-
-Print data for initiating PySatDNA projects.
-
+<a name="_tools_networks"/>
 ### Working with graph data
-
-	from trseeker.tools.network_tools import *
-
-- compute_network(network_file, output_file_pattern, trf_large_index_file, g_file, weights_file, weight_to_pairs_file)
+```python
+from trseeker.tools.network_tools import *
+```
 
 Compute network slices using graph_tool library or networkx.
+```python
+compute_network(network_file, output_file_pattern, trf_large_index_file, g_file, weights_file, weight_to_pairs_file)
+```
 
 - load_graph(ml_file)
 - analyse_network_graph_tool(G, output_file_pattern, trf_large_index_file)
@@ -1361,14 +1437,17 @@ Compute network slices using graph_tool library or networkx.
 - init_graph_networkx(network_data, start=0, precise=1, trf_large_index_file=None)
 - analyse_networkx(G, network_data, output_file_pattern, trf_large_index_file)
 
+<a name="_tools_ncbi_amm"/>
 ### Working with NCBI annotations
-
-	from trseeker.tools.ncbi_annotation_tools import *
-
-- get_ideogram_dict(idiogram_file, mode="NCBI")
+```python
+from trseeker.tools.ncbi_annotation_tools import *
+```
 
 Read ideogram file and return return dict chr -> list.
 
-- get_gene_list(file_gene_list, color='#000000', left_padding=30, gene_group_label='C57BL/6J')
+```python
+get_ideogram_dict(idiogram_file, mode="NCBI")
 
-Not implemented yet.
+get_gene_list(file_gene_list, color='#000000', left_padding=30, gene_group_label='C57BL/6J')
+# NB: Not implemented yet.
+``` 
