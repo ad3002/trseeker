@@ -674,7 +674,8 @@ sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project="mouse_genome")
 2. Если поля overlapping, то сейчас ничего не делается, а раньше если 
 
 ```python
-overlap_proc_diff >= settings["trf_settings"]["overlapping_cutoff_proc"] and gc_dif <= settings["trf_settings"]["overlapping_gc_diff"]
+overlap_proc_diff >= settings["trf_settings"]["overlapping_cutoff_proc"] 
+gc_dif <= settings["trf_settings"]["overlapping_gc_diff"]
 ``` 
 поля объяединяются в одно поле. Иначе считаем, что это отдельные поля.
 3. Если поля совпадают, то выбирается то которое с большим trf_pmatch.
@@ -750,7 +751,7 @@ update_with_repbase_blast_result(trs_dataset, annotation_self_folder, filters)
 # result is semicolon-delimited
 trs_dataset[i].trf_repbase = result
 
-# filters parameters example
+# filters example
 filters = {
 	"blast_gap_size": 300,
 	"min_align": 1000,
@@ -765,6 +766,7 @@ update_with_self_blast_result(trs_dataset, annotation_self_folder, _get_filters)
 # result comma-delimited
 # _get_filters(array_length) generate parameters by array_length
 trs_dataset[i].trf_family_self = result
+```
 
 ```python
 update_with_ref_blast_result(trs_dataset, annotation_self_folder, filters)
