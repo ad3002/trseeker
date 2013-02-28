@@ -196,7 +196,6 @@ def create_graphml(network_file, ml_file):
 # Networkx section
 #
 
-
 def load_networkx(network_file):
     ''' Load network data if it was pickled previously.'''
     
@@ -223,7 +222,6 @@ def load_networkx(network_file):
 
     print "#edges: ", k
     return (a_nodes, b_nodes, weights, k)
-
 
 def init_graph_networkx(network_data, start=0, precise=1, trf_large_index_file=None):
     ''' Init graph with data.'''
