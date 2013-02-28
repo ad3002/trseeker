@@ -31,6 +31,7 @@ import os
 import re
 
 from trseeker.settings import load_settings
+from trseeker.seqio.tr_file import get_all_trf_objs
 
 settings = load_settings()
 location = settings["blast_settings"]["blast_location"]
@@ -126,11 +127,22 @@ def alias_tool(dblist, output, title):
 def bl2seq(input1, input2, output):
     """ Blast two seq."""
 
-    # TODO: parameters
-    string = location + "bl2seq.exe -p blastn -i %s -j %s -o %s -F F -W 5 -D 1 -e 0.01" % (input1,
-                                          input2, output)
+    if OS == "win":
+        _location = settings["blast_settings"]["blast_location_WIN"]
+    else:
+        _location = settings["blast_settings"]["blast_location_NIX"]
 
+    # TODO: parameters
+    string = "perl %s -p blastn -i %s -j %s -o %s -F F -W 5 -D 1 -e %s" % (
+                                          _location,
+                                          input1,
+                                          input2, 
+                                          output, 
+                                          e)
+    print _location
+    print string[:100]
     os.system(string)
+    exit()
 
 def create_db_for_genome(file_pattern=None,
                          chromosome_list=None,
@@ -206,6 +218,28 @@ def get_all_blast_obj_from_blast(blast_file, mode="ref"):
         result[id].append(blast_obj)
     return result
         
+def bl2seq_search_for_trs(trf_large_file, annotation_bl2seq_folder, temp_file):
+    ''' Pairwise search of TRs with bl2seq.
+    '''
+    # read trf_objs
+    print "Read TRs..."
+    trf_objs = get_all_trf_objs(trf_large_file)
+    N = len(trf_objs)
+    for i in xrange(N):
+        for j in xrange(i, N):
+            print "Searching:", i, j, "from", N
+            output_file = "%s.%s.blast" % (trf_objs[i].trf_id, trf_objs[j].trf_id)
+            blast_output_file = os.path.join(annotation_bl2seq_folder, output_file)
+            input1 = trf_objs[i].trf_array
+            input2 = trf_objs[j].trf_array
+            input_file1 = temp_file + ".1.fasta"
+            input_file2 = temp_file + ".2.fasta"
+            with open(input_file1, "w") as fh:
+                fh.write(">%s\n%s" % (trf_objs[i].trf_id, input1))
+            with open(input_file2, "w") as fh:
+                fh.write(">%s\n%s" % (trf_objs[j].trf_id, input2))
+            bl2seq(input_file1, input_file2, blast_output_file)
+
 def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file, skip_by_family=None, is_huge_alpha=False):
     ''' Search TRs in given DB.
     '''
