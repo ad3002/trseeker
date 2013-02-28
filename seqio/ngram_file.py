@@ -31,7 +31,6 @@ def save_ngram_index(ngram_index_file, hash2id, result_tf,
                                  result_rdf[id])
                 fh.write(data)
 
-
 def save_ngram_pos_index(ngram_trids_file, id2trids, id2trid2tf):
     ''' Write ngrams position data. 
     Format: id, comma separated list of trids,
