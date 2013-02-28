@@ -13,7 +13,7 @@ from trseeker.models.blast_model import read_blast_file
 def _get_blast_result_intervals(blast_file, length):
     ''' Return gi->sorted list of blast objects. '''
 
-    # read data and Filter A: min_align
+    # read data
     gi_to_results = read_blast_file(blast_file, length)
 
     # create correct start/end positions
