@@ -90,7 +90,9 @@ trseeker:
     root_dir: /root/Dropbox/workspace/trseeker
     work_dir: /home
 blast_settings:
-    blast_location: 
+    blast_location:
+    blast_location_NIX: /home/ncbi-blast-2.2.26+/bin/legacy_blast.pl bl2seq
+    blast_location_WIN: c:\Program Files\NCBI\blast-2.2.26+\bin\legacy_blast.pl bl2seq.exe
     repbase_db_folder: /home/rebase_blast_db/repbase
     blast_e: 1e-20
     blast_b: 20000000
@@ -770,12 +772,16 @@ Functions:
 - get_trfid_obj_dict(trf_large_file)
 
 ```python
+from trseeker.seqio.tr_file import get_trfid_obj_dict
+
 trid2trfobj = get_trfid_obj_dict(trf_large_file)
 ```
 
 - get_all_trf_objs(trf_large_file)
 
 ```python
+from trseeker.seqio.tr_file import get_all_trf_objs
+
 trf_obj_list = get_all_trf_objs(trf_large_file)
 ```
 
@@ -825,6 +831,25 @@ from trseeker.seqio.blast_file import get_blast_result
 
 get_blast_result(blast_file, length, gap_size=1000, min_align=500, min_length=2400, format_function=None)
 ```
+
+Для фильтров используются following parameters:
+
+1. **cutoff** - TRs array length.
+2. **match** and **min_match** from **blast_match_proc** settings
+3. **min_align** is minimal length of alignment (array_length / .min_alig)
+4. **blast_gap_size** is size of the gap between two match regions (array_length * min_match)
+5. **min_length** is minimal total length (array_length * match)
+
+Этапы анализа:
+
+1. From blast output files extracted ref_gi to BlastResultModel dictionary.
+2. Removed all nested matches.
+3. Overlapping matches joined.
+4. Joined matches with length less than **min_align** are dropped.
+5. Matches with gap length less than **gap_size** are joined
+6. Joined gapped matches with length less than **min_align** are dropped.
+7. Results formatted with given format_function
+
 
 Dataset updating functions:
 
@@ -1380,6 +1405,7 @@ from trseeker.tools.blast_tools import *
 - get_all_gi_from_blast(blast_file, mode="gi")
 - get_all_blast_obj_from_blast(blast_file, mode="ref")
 - blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file, skip_by_family=None, is_huge_alpha=False)
+- bl2seq_search_for_trs(trf_large_file, annotation_bl2seq_folder, temp_file)
 
 <a name="_tools_sa"/>
 ### Working with suffix arrays
