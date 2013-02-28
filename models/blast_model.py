@@ -94,7 +94,8 @@ class BlastResultModel(AbstractModel):
 
 def read_blast_file(blast_file, length):
     ''' Read blast file. Return subject_ref -> list of matches (BlastResultModel models).'''
-
+    #TODO: move it to readers
+    
     gi_to_results = {}
 
     # remove # lines from blast file.
