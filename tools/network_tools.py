@@ -9,7 +9,7 @@ Functions for network construction.
 
 TODO: check it.
 '''
-
+from trseeker.seqio.tr_file import get_all_trf_objs
 from trseeker.seqio.tab_file import sc_iter_tab_file
 from trseeker.models.trf_model import TRModel
 import pickle
@@ -43,7 +43,7 @@ def compute_network(network_file, output_file_pattern,
     if GRAPHTOOL:
         ml_file = network_file + ".ml"
         with Timer("Create ml"):
-            create_graphml(network_file, ml_file)
+            create_graphml(network_file, ml_file, trf_large_index_file)
         with Timer("Load graph"):    
             G = load_graph(ml_file)
         with Timer("ANALYSE NETWORK"):
@@ -76,7 +76,6 @@ def analyse_network_graph_tool(G, output_file_pattern, trf_large_index_file):
     edges = []
     for i, e in enumerate(G.edges()):
          edges.append(e)
-
     print "Iterate over weights"
 
     last = -1
@@ -111,13 +110,17 @@ def analyse_network_graph_tool(G, output_file_pattern, trf_large_index_file):
                                                                          i,
                                                                          N)
 
-        if hist[0] == 1:
-            ended = True
+        ended = True
+        for hist_item in hist:
+            if hist_item > 1:
+                ended = False
+                break
         
         output_file = output_file_pattern % (int(w), N)
         write_classification_graph_tool(output_file, comp_data, trid2meta)
 
         if ended:
+            print "Ended since ended=True"
             break
 
         G.remove_edge(e)
@@ -149,7 +152,7 @@ def write_classification_neworkx(output_file, components, trid2meta):
             for trid in comp:
                 fw.write("%s\t%s" % (i, trid2meta[int(trid)]))
 
-def create_graphml(network_file, ml_file):
+def create_graphml(network_file, ml_file, trf_large_index_file):
     ''' Create graphml xml file from tab delimited network_file.
     '''
 
@@ -173,21 +176,16 @@ def create_graphml(network_file, ml_file):
     data = ""
     data += start
     seen = {}
-    k = 0
+    for k, trf_obj in enumerate(get_all_trf_objs(trf_large_index_file)):
+        data += node % (k, trf_obj.trf_id)
+        seen[trf_obj.trf_id] = k
     for i, line in enumerate(network_data):
         a, b, w = line.strip().split("\t")
+        a = int(a)
+        b = int(b)
         w = round(float(w), 4)
-        if not a in seen:
-            data += node % (k, a)
-            seen[a] = k
-            k += 1
-        if not b in seen:
-            data += node % (k, b)
-            seen[b] = k
-            k += 1
         data += edge % (i, seen[a], seen[b], w)
     data += end
-
     print "Save data..."
     with open(ml_file, "w") as fh:
         fh.write(data)
