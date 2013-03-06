@@ -73,6 +73,77 @@ class NgramToTRModel(AbstractModel):
 
     other_attributes = {"idtf":[]}
 
+class KmerSliceModel(AbstractModel):
+    '''
+    '''
+    dumpable_attributes = ["kmer",
+                             "local_tf",
+                             "df",
+                             ]
+    int_attributes = ["local_tf",
+                             "df",
+                        ]
+
+    def __init__(self, data):
+      super(KmerSliceModel, self).__init__()
+      a, b, c = data.split(":")
+      self.kmer = a
+      self.local_tf = int(b)
+      self.df = int(c)
+
+    def set_with_dict(self, dictionary):
+      raise NotImplemented 
+
+    def set_with_list(self, dictionary):
+      raise NotImplemented
+
+    def __str__(self):
+      return "%s:%s:%s" % (self.kmer, self.local_tf, self.df)
+
+
+class SliceTreeModel(AbstractModel):
+    ''' Model for kmers tree node.
+    '''
+
+    dumpable_attributes = [
+                           "deep",
+                           "size",
+                           "blast_fams",
+                           "maxdf",
+                           "nmaxdf",
+                           "pmaxdf",
+                           "gc_var",
+                           "units",
+                           "trs",
+                           "kmers",
+                           ]
+
+    int_attributes = [
+                           "deep",
+                           "size",
+                           "maxdf",
+                           "nmaxdf",
+                      ]
+
+    float_attributes = [
+                        "pmaxdf",
+                        "gc_var",
+    ]
+
+    list_attributes = ["blast_fams",
+                       "units",
+                       "trs",
+                       "kmers",
+                       ]
+
+    list_attributes_types = {"blast_fams":str,
+                             "units":int,
+                             "trs":int,
+                             "kmers":KmerSliceModel,
+                             }
+
+    
+
 def sc_ngram_reader(file_name):
     ''' Read file with ngrams data.'''
     for obj in sc_iter_tab_file(file_name, NgramModel):

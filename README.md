@@ -539,6 +539,37 @@ Yield (ngram id, [(seq id, tf), ...]):
 sc_ngram_trid_reader(file_name)
 ```
 
+### KmerSliceModel
+
+```python
+from trseeker.models.ngrams_model import KmerSliceModel
+```
+
+#### Attributes
+
+- kmer (str)
+- local_tf (int)
+- df (int)
+
+### SliceTreeModel
+
+```python
+from trseeker.models.ngrams_model import SliceTreeModel
+```
+
+#### Attributes
+
+- deep (int)
+- size (int)
+- blast_fams (list of str)
+- maxdf (int)
+- nmaxdf (int)
+- pmaxdf (float)
+- gc_var (float)
+- units (list of int)
+- trs (list of int)
+- kmers (list of SliceTreeModel)
+
 <a name="_io"/>
 ## IO functions
 
@@ -1215,11 +1246,11 @@ Calculate sigma, return sum(module(xi - mean):
 ```python
 get_sigma(data)
 ```
-Return dictionary containing simple statistics for given list. Dictionary keys: mean, variance, sigma, sample derivation:
+Return dictionary containing simple statistics for given list. Dictionary keys: mean, variance, sigma, sample deviation:
 ```python
 get_mean(data)
 
-get_sample_derivation(variance)
+get_standard_deviation(variance)
 
 t_test(sample_mean, dist_mean, variance, N)
 
