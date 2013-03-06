@@ -1162,6 +1162,13 @@ k = 23
 for sequence in sequences:
 	tf_dict, df_dict, local_tf, local_df = count_kmer_tfdf(sequence, tf_dict, df_dict, k)
 ```
+
+Compute max df, number and procent of sequence with given ngram. Return (maxdf, nmaxdf, pmaxdf, ngram_seqs)
+
+```python
+(maxdf, nmaxdf, pmaxdf, ngram_seqs) = get_df_stats_for_list(data, k, kmer2df):
+```
+
 <a name="_tools_ed"/>
 ### Edit distance functions
 
