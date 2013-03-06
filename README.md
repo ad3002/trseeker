@@ -93,6 +93,7 @@ blast_settings:
     blast_location:
     blast_location_NIX: /home/ncbi-blast-2.2.26+/bin/legacy_blast.pl bl2seq
     blast_location_WIN: c:\Program Files\NCBI\blast-2.2.26+\bin\legacy_blast.pl bl2seq.exe
+    jellyfish_location: jellyfish
     repbase_db_folder: /home/rebase_blast_db/repbase
     blast_e: 1e-20
     blast_b: 20000000
