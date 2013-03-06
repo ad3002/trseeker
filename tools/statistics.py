@@ -50,8 +50,8 @@ def get_mean(data):
     mean = float(sum_x) / len(data)
     return mean
 
-def get_sample_derivation(variance):
-    ''' Get sample derivation for variance.
+def get_standard_deviation(variance):
+    ''' Get sample deviation for variance.
     '''
     if variance<0:
         raise "Wrong variance value %s" % variance
@@ -88,15 +88,16 @@ def get_simple_statistics(data):
     >>>    'mean': get_mean(data),
     >>>    'variance': get_variance(data),
     >>>    'sigma': get_sigma(data),
-    >>>    'sample_derivation': get_sample_derivation(data),
+    >>>    'standard_deviation': get_standard_deviation(data),
     >>> }
     
     '''
-
+    variance = get_variance(data)
+    mean = get_mean(data)
     result = {
-        'mean': get_mean(data),
-        'variance': get_variance(data),
+        'mean': mean,
+        'variance': variance,
         'sigma': get_sigma(data),
-        'sample_derivation': get_sample_derivation(data),
+        'standard_deviation': get_standard_deviation(variance),
     }
     return result
