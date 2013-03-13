@@ -126,6 +126,15 @@ def count_kmer_tfdf(sequence, tf_dict, df_dict, k):
         local_df[ngram] += 1
     return tf_dict, df_dict, local_tf, local_df
 
+def get_kmer_tf_df_for_data(data, k):
+    '''
+    '''
+    df = defaultdict(int)
+    tf = defaultdict(int)
+    for sequence in data:
+        tf, df, local_tf, local_df = count_kmer_tfdf(sequence, tf, df, k)
+    return (tf, df)
+    
 def get_df_stats_for_list(data, k, kmer2df):
     ''' Compute max df, number and procent of sequence with given ngram.
     Return (maxdf, nmaxdf, pmaxdf)
