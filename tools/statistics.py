@@ -12,29 +12,18 @@ from collections import defaultdict
 
 def get_variance(data):
     '''Calculated variance for given list.
-
-    ( sum(X*X) - sum(X) * mean_x ) / (n-1)
     '''
-    n = 0
-    Sum = 0
-    Sum_sqr = 0
-
     if not data:
-        raise "Empty arrays for variance computation."
-    n = len(data)
-    if n == 1:
-        return 0
-    sum_x = sum(data)
-    sum_xx = sum([x*x for x in data])
-    mean = float(sum_x) / n
-    variance = (sum_xx - sum_x * mean) / (n - 1)
-    return variance
+        raise Exception("Empty arrays for variance computation.")
+    mean = get_mean(data)
+    N = float(len(data))
+    return sum([ (x-mean)**2 for x in data ])/N
 
 def get_sigma(data):
     ''' Calculate sigma, return sum(module(xi - mean).
     '''
     if not data:
-        raise "Empty arrays for variance computation."
+        raise Exception("Empty arrays for variance computation.")
     n = len(data)
     if n == 1:
         return 0
@@ -54,7 +43,7 @@ def get_standard_deviation(variance):
     ''' Get sample deviation for variance.
     '''
     if variance<0:
-        raise "Wrong variance value %s" % variance
+        raise Exception("Wrong variance value %s" % variance)
     return math.sqrt(variance)
 
 def t_test(sample_mean, dist_mean, variance, N):
@@ -66,9 +55,9 @@ def t_test(sample_mean, dist_mean, variance, N):
     - N: sample size
     '''
     if N<=0:
-        raise "Wrong N value %s" % N
+        raise Exception("Wrong N value %s" % N)
     if variance<=0:
-        raise "Wrong variance value %s" % variance
+        raise Exception("Wrong variance value %s" % variance)
     return (sample_mean-dist_mean)/float( math.sqrt( variance/N ) )
 
 def get_element_frequences(data):
