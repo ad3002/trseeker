@@ -58,7 +58,7 @@ def trf_search_in_dir(folder, verbose=False, file_suffix=".fa", output_folder=No
     """
     for file_name in sc_iter_filepath_folder(folder, mask=file_suffix):
 
-        # check existance in output folder
+        # check existence in output folder
         name = os.path.basename(file_name)
         if output_folder:
             if not os.path.isdir(output_folder):
