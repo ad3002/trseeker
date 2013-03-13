@@ -40,6 +40,7 @@ class AbstractFtpIO(object):
 
     def connect(self):
         """ Connect anonymously to server."""
+        print "Connect to", self.ftp_address
         self.ftp = ftplib.FTP(self.ftp_address)
         self.ftp.login()
 
