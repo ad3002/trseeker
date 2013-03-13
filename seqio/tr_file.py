@@ -68,3 +68,13 @@ def save_trs_dataset(trs_dataset, output_file):
             data = str(trf_obj)
             fh.write(data)
 
+def save_trs_as_fasta(trf_file, fasta_file):
+    ''' Save TRs dataset as one fasta file.
+    '''
+    trf_objs = []
+    for trf_obj in sc_iter_tab_file(trf_file, TRModel):
+        trf_objs.append(trf_obj)
+    with open(fasta_file, "w") as fh_fasta:
+        for trf_obj in trf_objs:
+            fh_fasta.write(trf_obj.get_fasta_repr())
+
