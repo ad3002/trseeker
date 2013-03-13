@@ -169,4 +169,3 @@ def write_ngrams(input_file, output_ngram, NGRAM_N):
     print "Done."
     print "ngrams, skipped: ", n, skipped
     return n, skipped
-
