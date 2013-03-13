@@ -10,7 +10,7 @@ Working with ngram indexes.
 
 def save_ngram_index(ngram_index_file, hash2id, result_tf,
                      result_df, result_rtf, result_rdf,
-                     seen_rev, hash2rev):
+                     seen_rev, hash2rev, ngram2kmerann):
     ''' Write ngram index. 
     
     Format: id, rev_id, hash, rev_hash, tf, df, etf, edf.
@@ -18,17 +18,23 @@ def save_ngram_index(ngram_index_file, hash2id, result_tf,
     etf and edf are tf and df taking into account reverse complement.'''
     
     with open(ngram_index_file, "w") as fh:
-        for hash, id in hash2id.items():
-            if not hash in seen_rev:
-                rev_id = hash2id[hash2rev[hash]]
-                data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (id,
+        for kmer, id in hash2id.items():
+            if not kmer in seen_rev:
+                rev_id = hash2id[hash2rev[kmer]]
+
+                kmer_ann = [str(x) for x in ngram2kmerann[kmer]]
+                kmer_ann = ",".join(kmer_ann)
+
+                data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (
+                                 id,
                                  rev_id,
-                                 hash,
-                                 hash2rev[hash],
+                                 kmer,
+                                 hash2rev[kmer],
                                  result_tf[id],
                                  result_df[id],
                                  result_rtf[id],
-                                 result_rdf[id])
+                                 result_rdf[id],
+                                 kmer_ann)
                 fh.write(data)
 
 def save_ngram_pos_index(ngram_trids_file, id2trids, id2trid2tf):
