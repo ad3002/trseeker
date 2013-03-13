@@ -803,6 +803,12 @@ Functions:
 - save_trs_dataset(trs_dataset, output_file)
 - get_trfid_obj_dict(trf_large_file)
 
+Save trf file as fasta file:
+
+```python
+save_trs_as_fasta(trf_file, fasta_file)
+```
+
 ```python
 from trseeker.seqio.tr_file import get_trfid_obj_dict
 
@@ -848,7 +854,8 @@ save_ngram_index(ngram_index_file,
                      	       result_rtf, 
                      	       result_rdf,
 	                      seen_rev, 
-	                      hash2rev)
+	                      hash2rev,
+                                    ngram2kmerann)
 
 save_ngram_pos_index(ngram_trids_file, id2trids, id2trid2tf)    
 
@@ -942,6 +949,7 @@ from trseeker.seqio.sra_file import FastqObj
 fastq_obj = FastqObj(head, seq, srain, qual_str)
 print fastq_obj.fastq
 print fastq_obj.sequence
+print fastq_obj.fasta
 ```
 
 Additional functions:
@@ -1167,6 +1175,12 @@ Compute max df, number and procent of sequence with given ngram. Return (maxdf, 
 
 ```python
 (maxdf, nmaxdf, pmaxdf, ngram_seqs) = get_df_stats_for_list(data, k, kmer2df):
+```
+
+Get tf and df frequencies for kmer list:
+
+```python
+get_kmer_tf_df_for_data(data, k)
 ```
 
 <a name="_tools_ed"/>
