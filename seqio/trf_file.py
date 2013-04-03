@@ -16,7 +16,7 @@ from trseeker.models.trf_model import TRModel
 from trseeker.seqio.block_file import AbstractBlockFileIO
 from trseeker.tools.sequence_tools import get_gc
 from trseeker.seqio.mongodb_reader import MongoDBReader
-from PyExp.readers.abstract_reader import sc_iter_filepath_folder
+from PyExp.readers.abstract_reader import sc_iter_filepath_folder, WizeOpener
 from trseeker.settings import load_settings
 
 settings = load_settings()
@@ -71,7 +71,8 @@ class TRFFileIO(AbstractBlockFileIO):
         super(TRFFileIO, self).__init__(token)
 
     def iter_parse(self, trf_file, filter=True):
-        """ Iterate over raw trf data and yield TRFObjs."""
+        """ Iterate over raw trf data and yield TRFObjs.
+        """
         for head, body, start, next in self.read_online(trf_file):
             obj_set = []
             for line in self._gen_data_line(body):
@@ -95,7 +96,8 @@ class TRFFileIO(AbstractBlockFileIO):
             mode = "w"
         else:
             mode = "a"
-        with open(output_path, mode) as fw:
+        
+        with WizeOpener(output_path, mode) as fw:
             for trf_obj_set in self.iter_parse(file_path):
                 for trf_obj in trf_obj_set:
                     trf_obj.trf_id = trf_id
