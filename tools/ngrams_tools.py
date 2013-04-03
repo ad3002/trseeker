@@ -8,10 +8,13 @@
 Functions related to ngram (k-mer).
 '''
 from collections import defaultdict
-from trseeker.tools.sequence_tools import fix_strand
+from trseeker.tools.sequence_tools import fix_strand, get_revcomp
+from trseeker.tools.edit_distance import hamming_distance
+from trseeker.seqio.tab_file import sc_iter_tab_file
+from trseeker.models.trf_model import TRModel
 
 def generate_ngrams(text, n=12):
-    ''' Yields all ngrams of length n from given text. 
+    ''' Yields all ngrams of length k from given text. 
     
     - n: ngram length
     '''
@@ -27,7 +30,6 @@ def generate_window(text, n=12, step=None):
         step = n / 2
     for i in xrange(0, len(text) - n + 1, step):
         yield i, text[i:i + n]
-
 
 def get_ngrams(text, m=5, n=12):
     ''' Returns m most frequent (ngram of length n, tf) tuples for given text.
@@ -126,13 +128,21 @@ def count_kmer_tfdf(sequence, tf_dict, df_dict, k):
         local_df[ngram] += 1
     return tf_dict, df_dict, local_tf, local_df
 
-def get_kmer_tf_df_for_data(data, k):
+def get_kmer_tf_df_for_data(data, k, docids=False):
     '''
     '''
     df = defaultdict(int)
     tf = defaultdict(int)
-    for sequence in data:
+    kmer2ids = defaultdict(list)
+    kmer2freq = defaultdict(list)
+    for i, sequence in enumerate(data):
         tf, df, local_tf, local_df = count_kmer_tfdf(sequence, tf, df, k)
+        if docids:
+            for key in local_tf:
+                kmer2ids[key].append(i)
+                kmer2freq[key].append(local_tf[key])
+    if docids:
+        return (tf, df, kmer2ids, kmer2freq)
     return (tf, df)
     
 def get_df_stats_for_list(data, k, kmer2df):
@@ -154,3 +164,92 @@ def get_df_stats_for_list(data, k, kmer2df):
     pmaxdf = round(float(maxdf)/n, 3)
     ngram_seqs = [":".join((k,str(f), str(d))) for k,f,d in ngram_seqs[:10]]
     return (maxdf, nmaxdf, pmaxdf, ngram_seqs)
+
+def process_list_to_kmer_index(data, k, docids=True, cutoff=None):
+    ''' Get list of string.
+    Return list of (kmer, revkmer, tf, df, docids)
+    '''
+    if docids:
+        (tf_dict, df_dict, doc_data, freq_data) = get_kmer_tf_df_for_data(data, k, docids=docids)
+    else:
+        (tf_dict, df_dict) = get_kmer_tf_df_for_data(data, k, docids=docids)
+    result = []
+    seen = set()
+    for key in df_dict:
+        if key in seen:
+            continue
+        revkey = get_revcomp(key)
+        if revkey in seen:
+            continue
+        if revkey in df_dict:
+            df = df_dict[key] + df_dict[revkey]
+            tf = tf_dict[key] + tf_dict[revkey]
+            if docids:
+                ids = doc_data[key] + doc_data[revkey]
+                freqs = freq_data[key] + freq_data[revkey]
+        else:
+            df = df_dict[key]
+            tf = tf_dict[key]
+            if docids:
+                ids = doc_data[key]
+                freqs = freq_data[key]
+        if docids:
+            result.append((key, revkey, tf, df, ids, freqs))
+        else:
+            result.append((key, revkey, tf, df, "", ""))
+        seen.add(key)
+        seen.add(revkey)
+    if cutoff:
+        result = [x for x in result if x[-3]>cutoff]
+    result.sort(key=lambda x: x[-3], reverse=True)
+    return result
+
+def compute_kmer_index_for_fasta_file(file_name, index_file, k=23):
+    """ 
+    """
+    data = []
+    print "Read arrays..."
+    for i, seq_obj in enumerate(sc_iter_fasta(file_name)):
+        data.append(seq_obj.sequence)
+    print "Readed %s arrays." % i
+    print "Compute k-mers..."
+    result = process_list_to_kmer_index(data, k, docids=False)
+    print "Save index..."
+    with open(index_file, "w") as fh:
+        for item in result:
+            s  = "%s\n" % "\t".join(map(str, item))
+            fh.write(s)
+    return result
+
+def compute_kmer_index_for_trf_file(file_name, index_file, k=23):
+    """ 
+    """
+    data = []
+    print "Read arrays..."
+    for i, trf_obj in enumerate(sc_iter_tab_file(file_name, TRModel)):
+        data.append(trf_obj.trf_array)
+    print "Readed %s arrays." % i
+    print "Compute k-mers..."
+    result = process_list_to_kmer_index(data, k, docids=False)
+    print "Save index..."
+    with open(index_file, "w") as fh:
+        for item in result:
+            s  = "%s\n" % "\t".join(map(str, item))
+            fh.write(s)
+    return result
+
+def get_sequence_kmer_coverage(sequence, kmers, k):
+    '''
+    '''
+    n = len(sequence)
+    match = 0.
+    mismatch = 0.
+    variability = set()
+    for i, kmer in generate_ngrams(sequence, n=k):
+        if kmer in kmers:
+            variability.add(kmer)
+            match += 1
+        else:
+            mismatch += 1
+    return match/(n-k+1), variability
+
