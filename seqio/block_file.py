@@ -53,24 +53,19 @@ class AbstractBlockFileIO(AbstractFileIO):
         """ Overrided. Set token velue."""
         super(AbstractBlockFileIO, self).__init__(**args)
         self.token = token
+        self.wise_opener = self.get_opener()
 
     def read_from_file(self, input_file):
         """ Overrided. Read data from given input_file."""
-        with open(input_file, "rb") as fh:
+        with self.wise_opener(input_file, "rb") as fh:
             for head, body, start, next in self.gen_block_sequences(self.token, fh):
                 self.data.append((head, body, start, next))
 
     def read_online(self, input_file):
         """ Overrided. Yield items from data online from input_file."""
-        if input_file.endswith(".gz"):
-            fh = gzip.open(input_file, 'rb')
+        with self.wise_opener(input_file, "rb") as fh:
             for head, body, start, next in self.gen_block_sequences(self.token, fh):
                 yield (head, body, start, next)
-            fh.close()
-        else:
-            with open(input_file, "rb") as fh:
-                for head, body, start, next in self.gen_block_sequences(self.token, fh):
-                    yield (head, body, start, next)
 
     def get_block_sequence(self, head_start, next_head, fh):
         """ Get a data block (head, seq, head_start, head_end).
@@ -158,4 +153,3 @@ class AbstractBlockFileIO(AbstractFileIO):
         for x, y in header_start_list:
             # yeild sequence by coordinates 
             yield self.get_block_sequence(x, y, fh)
-
