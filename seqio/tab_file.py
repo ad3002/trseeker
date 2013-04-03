@@ -138,6 +138,12 @@ def sc_read_dictionary(dict_file, value_func=None):
             result[data[0]] = data[1]
     return result
 
+def sc_write_model_to_tab_file(output_file, objs):
+    """ Write model obj to tab-delimited file."""
+    with open(output_file, "w") as fh:
+        for obj in objs:
+            fh.write(str(obj))
+
 def sc_read_simple_tab_file(input_file):
     """ Iter tab file, yield a list."""
     result = []
