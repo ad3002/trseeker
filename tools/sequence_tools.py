@@ -27,6 +27,15 @@ TODO: Not implemented:
 import re
 import random
 
+
+def get_shifts_variants(sequence):
+    '''
+    '''
+    shifts = set()
+    for i in xrange(len(sequence)):
+        shifts.add(sequence[i:]+sequence[:i])
+    return list(shifts)
+    
 def get_revcomp(sequence):
     '''Return complementary sequence.
 
