@@ -22,8 +22,11 @@ def save_ngram_index(ngram_index_file, hash2id, result_tf,
             if not kmer in seen_rev:
                 rev_id = hash2id[hash2rev[kmer]]
 
-                kmer_ann = [str(x) for x in ngram2kmerann[kmer]]
-                kmer_ann = ",".join(kmer_ann)
+                if type(ngram2kmerann) == dict:
+                    kmer_ann = [str(x) for x in ngram2kmerann[kmer]]
+                    kmer_ann = ",".join(kmer_ann)
+                else:
+                    kmer_ann = ""
 
                 data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (
                                  id,
