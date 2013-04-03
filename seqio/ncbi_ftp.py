@@ -12,6 +12,7 @@ Classes:
 """
 from trseeker.seqio.ftp_io import AbstractFtpIO
 import os
+import re
 
 class NCBIFtpIO(AbstractFtpIO):
     """ Class for working with data via FTP.
@@ -96,6 +97,32 @@ class NCBIFtpIO(AbstractFtpIO):
             self.unzip(output_file)
             print "Done %i from %s" % (i, n)
 
+    def download_chromosomes_in_fasta(self, ftp_address, name, output_folder):
+        """ Download all WGS files from NCBI in fasta format."""
+        paths = ftp_address.split("/")
+        if paths[-1].endswith("/"):
+            self.ftp_address, folders = paths[0], paths[1:]
+        else:
+            self.ftp_address, folders = paths[0], paths[1:-1]
+        self.connect()
+        self.cd(folders)
+        files = self.ls()
+        if name:
+            files = [ item for item in files if re.search(name, item)]
+        n = len(files)
+        for i, file in enumerate(files):
+            output_file = os.path.join(output_folder, file)
+            print "Start download: %s ..." % file,
+            print " to %s" % output_file
+
+            if os.path.isfile(output_file):
+                print "--> was downloaded early"
+                continue
+            self.get(file, output_file)
+            print "Unzip..."
+            self.unzip(output_file)
+            print "Done %i from %s" % (i, n)
+
     def download_all_wgs_in_gbff(self, output_folder):
         """ Download all WGS files from NCBI in genbank format."""
         file_suffix = "gbff"
@@ -130,3 +157,36 @@ class NCBIFtpIO(AbstractFtpIO):
             self.unzip(output_file)
             index.add(file.split(".")[-2])
         return index
+
+    def download_sra_from_ddbj(self, ftp_address, output_folder):
+        '''
+        '''
+        paths = ftp_address.split("/")
+        self.ftp_address, folders = paths[0], paths[1:]
+        self.connect()
+        self.cd(folders)
+        files = self.ls()
+        index = set()
+        for file in files:
+            output_file = os.path.join(output_folder, file)
+            print "Start download as is: %s ..." % file,
+            print " to %s" % output_file
+            self.get(file, output_file)
+            index.add(file.split(".")[-2])
+        return index
+
+    def download_with_aspera(self, local_path, remove_server, remote_path):
+        '''
+        '''
+        remove_server = "anonftp@ftp-private.ncbi.nlm.nih.gov"
+
+        params = {
+            "location": "/root/.aspera/connect/bin/ascp",
+            "putty_keys": "/root/.aspera/connect/etc/asperaweb_id_dsa.putty",
+            "remove_server": remove_server,
+            "remote_path": remote_path,
+            "local_path": local_path,
+        }
+        command = "%(location)s -QT -l640M -i %(putty_keys)s %(remove_server)s:%(remote_path)s %(local_path)s" % params
+        print command
+        os.system(command)
