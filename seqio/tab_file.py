@@ -11,7 +11,7 @@ Classes:
     
 """
 import csv
-from PyExp.readers.abstract_reader import AbstractFileIO
+from PyExp.readers.abstract_reader import AbstractFileIO, WizeOpener
 
 csv.field_size_limit(10000000)
 
