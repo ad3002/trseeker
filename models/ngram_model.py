@@ -40,13 +40,15 @@ class NgramModel(AbstractModel):
 
     '''
 
-    dumpable_attributes = ["seq_f", 
+    dumpable_attributes = [
+                           "seq_f", 
                            "seq_r", 
                            "tf", 
                            "df", 
                            "taxons", 
                            "trs", 
-                           "families"]
+                           "families"
+                           ]
 
     int_attributes = ["df"]
     float_attributes = ["tf"]
