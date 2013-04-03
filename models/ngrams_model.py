@@ -8,70 +8,32 @@
 from PyExp.models.abstract_model import AbstractModel
 from trseeker.seqio.tab_file import sc_iter_tab_file, sc_iter_simple_tab_file
 
-class NgramModel(AbstractModel):
-    ''' Ngram model.
-
-    Dumpable attributes:
-
-    - id (int)
-    - rev_id (int)
-    - ngram
-    - rev_ngram
-    - tf (int), ngram frequency
-    - df (int), document frequency
-    - edf (int), ngram frequency for both strands
-    - etf (int)
-    '''
-
-    dumpable_attributes = ["id",
-                           "rev_id",
-                           "ngram",
-                           "rev_ngram",
-                           "tf",
-                           "df",
-                           "etf",
-                           "edf",
-                           ]
-    int_attributes = ["id",
-                      "rev_id",                      
-                      "df",
-                      "edf",
-                      ]
-
-    float_attributes = ["tf","etf"]
-
-class NgramToTRModel(AbstractModel):
+class KmerIndexModel(AbstractModel):
     ''' Model for ngram to TR data.
 
-    Dumpable attributes:
-
-    - id (int)
-    - trids (list of int)
-    - tfs (list of int)
-
-    Other attributes:
-
-    - idtf (list)
-
     '''
     dumpable_attributes = ["id",
-                           "trids",
-                           "tfs",
+                           "kmer",
+                           "rkmer",
+                           "tf",
+                           "df",
+                           "docs",
+                           "freqs"
                            ]
     int_attributes = ["id",
+                      "tf",
+                      "df",
                       ]
 
     float_attributes = []
 
-    list_attributes = ["trids",
-                       "tfs",
+    list_attributes = ["docs",
+                       "freqs",
                        ]
 
-    list_attributes_types = {"trids":int,
-                             "tfs":int,
+    list_attributes_types = {"docs":int,
+                             "freqs":int,
                              }
-
-    other_attributes = {"idtf":[]}
 
 class KmerSliceModel(AbstractModel):
     '''
@@ -79,6 +41,14 @@ class KmerSliceModel(AbstractModel):
     dumpable_attributes = ["kmer",
                              "local_tf",
                              "df",
+                             "f_trs",
+                             "f_wgs",
+                             "f_mwgs",
+                             "f_trace",
+                             "f_sra",
+                             "f_ref1",
+                             "f_ref2",
+                             "f_caroli",
                              ]
     int_attributes = ["local_tf",
                              "df",
@@ -86,10 +56,14 @@ class KmerSliceModel(AbstractModel):
 
     def __init__(self, data):
       super(KmerSliceModel, self).__init__()
-      a, b, c = data.split(":")
-      self.kmer = a
-      self.local_tf = int(b)
-      self.df = int(c)
+      data = data.split(":")
+      if len(data) < len(self.dumpable_attributes):
+        for i in xrange(len(self.dumpable_attributes) - len(data)):
+          data.append("-1")
+      for i, attr in enumerate(self.dumpable_attributes):
+        setattr(self, attr, data[i])
+      self.local_tf = int(self.local_tf)
+      self.df = int(self.df)
 
     def set_with_dict(self, dictionary):
       raise NotImplemented 
@@ -98,7 +72,7 @@ class KmerSliceModel(AbstractModel):
       raise NotImplemented
 
     def __str__(self):
-      return "%s:%s:%s" % (self.kmer, self.local_tf, self.df)
+      return ":".join([str(getattr(self, x)) for x in self.dumpable_attributes])
 
 
 class SliceTreeModel(AbstractModel):
@@ -142,11 +116,9 @@ class SliceTreeModel(AbstractModel):
                              "kmers":KmerSliceModel,
                              }
 
-    
-
 def sc_ngram_reader(file_name):
     ''' Read file with ngrams data.'''
-    for obj in sc_iter_tab_file(file_name, NgramModel):
+    for obj in sc_iter_tab_file(file_name, KmerIndexModel):
         yield obj
 
 def sc_ngram_trid_reader(file_name):

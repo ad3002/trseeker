@@ -118,4 +118,3 @@ class NgramModel(AbstractModel):
             result.append(data)
         fresult = ";   ".join(result)
         return len(result), "%s\t%s\n" % (self.seq_f, fresult)
-
