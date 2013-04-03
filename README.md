@@ -15,7 +15,6 @@
     - [Genome](#_models_genome)
     - [Kmer](#_models_kmer)
     - [Kmers](#_models_kmers)
-    - [Kmers from TRs](#_models_kmersTR)
 - [Readers](#_io)
     - [Tab file](#_io_tab)
     - [Block file](#_io_block)
@@ -471,7 +470,7 @@ from trseeker.models.genome_model import GenomeModel
 ### Ngram/kmer model
 
 ```python
-	from trseeker.models.ngram_model import NgramModel
+from trseeker.models.ngram_model import NgramModel
 ```
 
 ```python
@@ -496,51 +495,23 @@ Attributes
 - families (dict)
 
 <a name="_models_kmers"/>
-### Ngrams model
+### Kmer index model
 
 ```python
-from trseeker.models.ngrams_model import NgramModel
+from trseeker.models.ngrams_model import KmerIndexModel
 ```
 
-Attributes
+Attributes:
 
 - id (int)
-- rev_id (int)
-- ngram
-- rev_ngram
-- tf (float)
+- kmer
+- rkmer
+- tf (int)
 - df (int)
-- etf (float)
-- edf (int)
+- docs (list of int)
+- freqs (list of int)
 
-<a name="_models_kmersTR"/>
-### NgramToTRModel model
-
-```python
-from trseeker.models.ngrams_model import NgramToTRModel
-```
-
-#### Attributes
-
-- id (int)
-- trids (list int)
-- tfs (list int)
-
-#### Additional function
-
-Yield NgramModel:
-
-```python
-sc_ngram_reader(file_name)
-```
-
-Yield (ngram id, [(seq id, tf), ...]):
-
-```python
-sc_ngram_trid_reader(file_name)
-```
-
-### KmerSliceModel
+### Kmer Slice model
 
 ```python
 from trseeker.models.ngrams_model import KmerSliceModel
@@ -548,9 +519,17 @@ from trseeker.models.ngrams_model import KmerSliceModel
 
 #### Attributes
 
-- kmer (str)
+- kmer
 - local_tf (int)
 - df (int)
+- f_trs
+- f_wgs
+- f_mwgs
+- f_trace
+- f_sra
+- f_ref1
+- f_ref2
+- f_caroli
 
 ### SliceTreeModel
 
@@ -570,6 +549,20 @@ from trseeker.models.ngrams_model import SliceTreeModel
 - units (list of int)
 - trs (list of int)
 - kmers (list of SliceTreeModel)
+
+#### Additional function
+
+Yield KmerIndexModel:
+
+```python
+sc_ngram_reader(file_name)
+```
+
+Yield (ngram id, [(seq id, tf), ...]):
+
+```python
+sc_ngram_trid_reader(file_name)
+```
 
 <a name="_io"/>
 ## IO functions
@@ -593,6 +586,7 @@ Useful functions:
 - sc_iter_simple_tab_file(input_file)
 - sc_read_dictionary(dict_file, value_func=None)
 - sc_read_simple_tab_file(input_file)
+- sc_write_model_to_tab_file(output_file, objs)
 
 ```python	
 from trseeker.seqio.tab_file import sc_iter_tab_file
@@ -742,7 +736,13 @@ reader.download_all_wgs_in_fasta(output_folder)
 
 reader.download_all_wgs_in_gbff(output_folder)
 
+reader.download_chromosomes_in_fasta(ftp_address, name, output_folder)
+
 reader.download_trace_data(taxon, output_folder)
+
+reader.download_sra_from_ddbj(ftp_address, output_folder)
+
+reader.download_with_aspera(local_path, remove_server, remote_path)
 ```
 
 <a name="_io_mongo"/>
@@ -1013,6 +1013,13 @@ Return complementary sequence:
 ```python
 revcom = get_revcomp(sequence)
 ```
+
+Get shift variants for TR monomer:
+
+```python
+sequences = get_revcomp(sequence)
+```
+
 Return normalized sequence with following rules:
 
 1. if T > A then return reverse complement
@@ -1180,7 +1187,31 @@ Compute max df, number and procent of sequence with given ngram. Return (maxdf, 
 Get tf and df frequencies for kmer list:
 
 ```python
-get_kmer_tf_df_for_data(data, k)
+get_kmer_tf_df_for_data(data, k, docids=False)
+```
+
+Get list of (kmer, revkmer, tf, df, docids) for given data:
+
+```python
+process_list_to_kmer_index(data, k, docids=True, cutoff=None)
+```
+
+Get list of (kmer, revkmer, tf, df, docids) for multifasta file:
+
+```python
+compute_kmer_index_for_fasta_file(file_name, index_file, k=23)
+```
+
+Get list of (kmer, revkmer, tf, df, docids) for TRs file:
+
+```python
+compute_kmer_index_for_trf_file(file_name, index_file, k=23)
+```
+
+Compute kmer coverage and set of kmers:
+
+```python
+(m, kmers) = get_sequence_kmer_coverage(sequence, kmers, k)
 ```
 
 <a name="_tools_ed"/>
@@ -1256,6 +1287,12 @@ Unclip. Remove vector flanks from Trace data.
 ```python
 unclip_trace_file(fasta_file, clip_file, uncliped_file)
 ```
+
+Read clip dictionary from clip_file_name gz archive:
+```python
+get_clip_data(clip_file_name)
+```
+
 
 <a name="_tools_stat"/>
 ### Function related to statistics
