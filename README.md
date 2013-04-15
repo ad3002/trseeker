@@ -49,6 +49,7 @@
     - [NCBI genomes](#_tools_ncbi_genome)
     - [Networks](#_tools_networks)
     - [Networks](#_tools_ncbi_ann)
+    - [Jellyfish](#_tools_jellyfish)
 
 
 
@@ -1578,7 +1579,7 @@ compute_network(network_file, output_file_pattern, trf_large_index_file, g_file,
 - init_graph_networkx(network_data, start=0, precise=1, trf_large_index_file=None)
 - analyse_networkx(G, network_data, output_file_pattern, trf_large_index_file)
 
-<a name="_tools_ncbi_amm"/>
+<a name="_tools_ncbi_ann"/>
 ### Working with NCBI annotations
 ```python
 from trseeker.tools.ncbi_annotation_tools import *
@@ -1592,3 +1593,29 @@ get_ideogram_dict(idiogram_file, mode="NCBI")
 get_gene_list(file_gene_list, color='#000000', left_padding=30, gene_group_label='C57BL/6J')
 # NB: Not implemented yet.
 ``` 
+
+<a name="_tools_jellyfish"/>
+### Jellyfish wrapper
+
+```python
+from trseeker.tools.jellyfish import *
+
+# jellyfish settings:
+location = settings["blast_settings"]["jellyfish_location"]
+```
+
+ Count kmers with Jellyfish
+
+```python
+count_kmers(input_fasta, ouput_prefix, k, mintf=None)
+
+merge_kmers(folder, ouput_prefix, ouput_file)
+
+stats_kmers(db_file, stats_file)
+
+histo_kmers(db_file, histo_file)
+
+dump_kmers(db_file, fasta_file)
+
+query_kmers(db_file, query_hashes, both_strands=True)
+```
