@@ -27,12 +27,12 @@ def get_popular(s):
     c.sort(reverse=True)
     return c[0][1]
 
-def get_family_name(ids, seen_units):
+def get_family_name(trf_objs, seen_units):
     ''' Get unit and letter for family.'''
     
     # read units to pmatch
     units = {}
-    for trf_obj in ids:
+    for trf_obj in trf_objs:
         units.setdefault(trf_obj.trf_period, [])
         units[trf_obj.trf_period].append(trf_obj.trf_pmatch)
 
