@@ -202,7 +202,7 @@ from trseeker.models.trf_model import TRModel
 Attributes:
 
 - project, project name
-- id (int)
+- id (float)
 - trf_id (int)
 - trf_l_ind (int)
 - trf_r_ind (int)
@@ -562,6 +562,12 @@ Yield (ngram id, [(seq id, tf), ...]):
 
 ```python
 sc_ngram_trid_reader(file_name)
+```
+
+Read kmer index data as list:
+
+```python
+read_kmer_index(ngram_index_file, micro_kmers, cutoff=1)
 ```
 
 <a name="_io"/>
