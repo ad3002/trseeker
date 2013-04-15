@@ -50,6 +50,7 @@
     - [Networks](#_tools_networks)
     - [Networks](#_tools_ncbi_ann)
     - [Jellyfish](#_tools_jellyfish)
+    - [Trees](#_tools_tree)
 
 
 
@@ -1619,3 +1620,113 @@ dump_kmers(db_file, fasta_file)
 
 query_kmers(db_file, query_hashes, both_strands=True)
 ```
+
+<a name="_tools_tree"/>
+### Tree data
+
+```python
+from trseeker.tools.tree_tools import *
+```
+
+#### NodeData class
+
+Stores tree-relevant data associated with nodes.
+
+```python
+node = NodeData(taxon=None, branchlength=1.0,
+                 support=None, comment=None, bootstrap=None,
+                 taxon_name=None, distance=None, elements=None)
+```
+
+#### Chain class
+
+Stores a list of nodes that are linked together.
+
+```python
+chain = Chain()
+
+# Return a list of all node ids
+ids = chain.all_ids()
+
+# Attaches node to another: (self, node, prev)
+chain.add(node, prev=None)
+
+# Deletes node from chain and relinks successors to predecessor: collapse(self, id).
+chain.collapse(id)
+
+# Kills a node from chain without caring to what it is connected
+chain.kill(id)
+
+# Disconnects node from his predecessor
+chain.unlink(id)
+
+# Connects son to parent
+chain.link(id)
+
+# Check if grandchild is a subnode of parent
+chain.is_parent_of(parent, grandchild)
+
+# Returns a list of all node_ids between two nodes (excluding start, including end)
+chain.trace(start, finish)
+```
+
+#### Node datastructure
+
+A single node
+
+```python
+# Represents a node with one predecessor and multiple successors
+node = Node(data=None)
+node.set_id(id)
+node.set_data(data)
+id = node.get_id()
+
+# Returns a list of the node's successors
+id = node.get_succ()
+# Returns the id of the node's predecessor
+id = node.get_prev()
+node.set_prev()
+
+# Adds a node id to the node's successors
+node.add_succ(id)
+# Removes a node id from the node's successors
+node.remove_succ(id)
+# Sets the node's successors
+node.set_succ(id)
+```
+
+#### Tree datastructure
+
+Represents a tree using a chain of nodes with on predecessor (=ancestor)
+    and multiple successors (=subclades)
+
+```python
+
+t = Tree(weight=1.0, rooted=False,
+                 name="", data=NodeData, max_support=1.0)
+
+t.is_leaf(node)
+t.is_subtree(node)
+t.is_terminal(node)
+t.is_internal(node)
+t.is_preterminal(node)
+
+l = t.get_node_to_one_d(tree)
+t.is_identical(tree)
+
+node = t.node(id)
+
+nodes = t.get_terminals()
+n = t.count_terminals(node=None)
+node = t.common_ancestor(node1, node2)
+d = t.distance(nod1, node2)
+
+dist_dict = t.get_distance_for_all_from_node(id)
+
+bl = t.sum_branchlength(root=None, node=None)
+
+```
+
+
+
+
