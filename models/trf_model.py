@@ -144,7 +144,6 @@ class TRModel(AbstractModel):
                            ]
 
     int_attributes = [
-                           "id",
                            "trf_id",
                            "trf_l_ind",
                            "trf_r_ind",
@@ -157,6 +156,7 @@ class TRModel(AbstractModel):
 
     float_attributes = [
                            "trf_n_copy",
+                            "id",
                            "trf_entropy",
                            "trf_pmatch",
                            "trf_pvar",
