@@ -44,7 +44,10 @@ def trf_search(file_name):
     if  settings["trseeker"]["os"] == "win":
         string = settings["trf_settings"]["trf_location"] + "trf400.dos.exe %s %s" % (file_name, params)
     else:
-        string = settings["trf_settings"]["trf_location"] +" %s %s" % (file_name, params)
+        if settings["trseeker"]["os"] == "WIN":
+            string = settings["trf_settings"]["trf_location_WIN"] +" %s %s" % (file_name, params)
+        else:
+            string = settings["trf_settings"]["trf_location"] +" %s %s" % (file_name, params)
     print string
     os.system(string)
 
