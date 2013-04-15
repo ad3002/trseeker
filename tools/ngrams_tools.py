@@ -46,7 +46,7 @@ def get_ngrams(text, m=5, n=12):
     ngrams.sort(reverse=True, key=lambda x: x[1])
     return ngrams[:m]
 
-def get_ngrams_freq(text, m=5, n=12):
+def get_ngrams_freq(text, m=500000, n=12):
     ''' Returns m most frequent (ngram of length n, fraction of possible ngrams) tuples for given text.
     
     - m: number of returned ngrams
@@ -135,12 +135,19 @@ def get_kmer_tf_df_for_data(data, k, docids=False):
     tf = defaultdict(int)
     kmer2ids = defaultdict(list)
     kmer2freq = defaultdict(list)
+    verbose = False
+    N = len(data)
+    if N>100:
+        verbose = True
     for i, sequence in enumerate(data):
+        if verbose:
+            print "Process td/df: ", i, N, "\r", 
         tf, df, local_tf, local_df = count_kmer_tfdf(sequence, tf, df, k)
         if docids:
             for key in local_tf:
                 kmer2ids[key].append(i)
                 kmer2freq[key].append(local_tf[key])
+    print
     if docids:
         return (tf, df, kmer2ids, kmer2freq)
     return (tf, df)
