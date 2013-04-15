@@ -131,3 +131,19 @@ def sc_ngram_trid_reader(file_name):
         for i in xrange(0, len(sids)):
             result.append((int(sids[i]), float(tfs[i])))
         yield int(nid), result
+
+def read_kmer_index(ngram_index_file, micro_kmers, cutoff=1):
+    ''' Read kmer index data as list
+    '''
+    data = []
+    for index_obj in sc_iter_tab_file(ngram_index_file, KmerIndexModel):
+        print index_obj.df, "\r",
+        if micro_kmers:
+            if index_obj.kmer in micro_kmers:
+                if index_obj.tf < micro_kmers[index_obj.kmer].tf:
+                    continue
+        if index_obj.df == cutoff:
+            break
+        data.append(index_obj)
+    print 
+    return data
