@@ -246,7 +246,7 @@ def compute_kmer_index_for_trf_file(file_name, index_file, k=23):
     return result
 
 def get_sequence_kmer_coverage(sequence, kmers, k):
-    '''
+    ''' 
     '''
     n = len(sequence)
     match = 0.
