@@ -1710,6 +1710,7 @@ t.is_subtree(node)
 t.is_terminal(node)
 t.is_internal(node)
 t.is_preterminal(node)
+t.has_support(node=None)
 
 l = t.get_node_to_one_d(tree)
 t.is_identical(tree)
@@ -1725,6 +1726,40 @@ dist_dict = t.get_distance_for_all_from_node(id)
 
 bl = t.sum_branchlength(root=None, node=None)
 
+ids = t.split(parent_id=None, n=2, branchlength=1.0)
+
+# Bootstrap tree with given cutoff value. Nodes with suppert below cutoff will be collapsed
+t.bootstrap(value)
+
+# Prunes a terminal taxon from the tree
+t.prune(taxon)
+
+# Return a list of all otus downwards from a node
+t.get_taxa(node_id=None)
+
+ids = t.search_taxon(taxon)
+
+t.to_string(support_as_branchlengths=False, branchlengths_only=False, plain=True, plain_newick=False, ladderize=None)
+
+t.make_info_string(data, terminal=False)
+
+t.ladderize_nodes(nodes, ladderize=None)
+
+t.newickize(node, ladderize=None)
+```
+
+Functions:
+
+Get list of (slice_id, file_path):
+
+```python
+slice_files = get_slice_files(folder)
+```
+
+read_tree_slices(slice_files):
+
+```python
+slice_files = read_tree_slices(slice_files)
 ```
 
 
