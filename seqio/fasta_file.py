@@ -76,3 +76,14 @@ def save_all_seq_with_exact_substring(fasta_file, substring, output_file):
         for seq_obj in sc_iter_fasta(fasta_file):
             if substring in seq_obj.seq_sequence:
                 fh.write(seq_obj.fasta)
+
+def sort_fasta_file_by_length(file_name):
+    ''' Sort by length and save fasta file
+    '''
+    objs = []
+    for i, seq_obj in enumerate(sc_iter_fasta(fasta_file)):
+        objs.append(seq_obj)
+    objs.sort(key=lambda x: x.length)
+    with open(fasta_file, "w") as fh:
+        for obj in objs:
+            fh.write(obj.fasta)
