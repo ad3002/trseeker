@@ -9,7 +9,7 @@ Functions related to Repbase datasets.
 '''
 import os
 from trseeker.tools.sequence_tools import clear_sequence
-from PyExp.readers.abstract_reader import sc_iter_filepath_folder
+from PyExp import sc_iter_filepath_folder
 from trseeker.seqio.fasta_file import sc_iter_fasta
 
 def _join_repbase_fastas(fasta_file, fasta_output, index_file_name=None, file_name=None, start_id=None, increment=False, repbase_names_fix=False):
