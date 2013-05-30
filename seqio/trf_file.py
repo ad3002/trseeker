@@ -16,7 +16,7 @@ from trseeker.models.trf_model import TRModel
 from trseeker.seqio.block_file import AbstractBlockFileIO
 from trseeker.tools.sequence_tools import get_gc
 from trseeker.seqio.mongodb_reader import MongoDBReader
-from PyExp.readers.abstract_reader import sc_iter_filepath_folder, WizeOpener
+from PyExp import sc_iter_filepath_folder, WizeOpener
 from trseeker.settings import load_settings
 
 settings = load_settings()
