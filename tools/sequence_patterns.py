@@ -45,7 +45,7 @@ __dna = {'A':'[AN]',
 
 PATTERNS = {'MARS1' : 'AATAAYAA',
             'MARS2' : 'AWWRTAANNWWGNNNC',
-            'CENPB' : 'TTCGNNNNANNCGGG', # TTCG.{4}A.{2}CGGG
+            'CENPB' : 'TTCGNNNNANNCGGG', # TTCG.{4}A.{2}CGGG   # CCCG.{2}T.{4}CGAA
             'PRDB9' : 'CCNCCNTNNCCNC',
             }
 
