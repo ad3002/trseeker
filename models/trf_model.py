@@ -5,7 +5,7 @@
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com 
 
-from PyExp.models.abstract_model import AbstractModel
+from PyExp import AbstractModel
 from trseeker.tools.parsers import trf_parse_param, trf_parse_head, \
     parse_fasta_head, parse_chromosome_name, trf_parse_line
 from trseeker.tools.sequence_tools import clear_sequence, get_gc
@@ -72,6 +72,9 @@ class TRModel(AbstractModel):
     - "project",
     - "id" (int),
     - "trf_id" (int),
+    - "trf_type",
+    - "trf_family",
+    - "trf_family_prob",
     - "trf_l_ind" (int),
     - "trf_r_ind" (int),
     - "trf_period" (int),
@@ -91,7 +94,6 @@ class TRModel(AbstractModel):
     - "trf_superfamily",
     - "trf_superfamily_ref",
     - "trf_superfamily_self",
-    - "trf_family",
     - "trf_subfamily",
     - "trf_subsubfamily",
     - "trf_family_network",
@@ -109,6 +111,9 @@ class TRModel(AbstractModel):
     dumpable_attributes = ["project",
                            "id",
                            "trf_id",
+                           "trf_type",
+                           "trf_family",
+                           "trf_family_prob",
                            "trf_l_ind",
                            "trf_r_ind",
                            "trf_period",
@@ -129,7 +134,6 @@ class TRModel(AbstractModel):
                            "trf_superfamily",
                            "trf_superfamily_ref",
                            "trf_superfamily_self",
-                           "trf_family",
                            "trf_subfamily",
                            "trf_subsubfamily",
                            "trf_family_network",
@@ -145,6 +149,7 @@ class TRModel(AbstractModel):
 
     int_attributes = [
                            "trf_id",
+                           "id",
                            "trf_l_ind",
                            "trf_r_ind",
                            "trf_period",
@@ -156,7 +161,7 @@ class TRModel(AbstractModel):
 
     float_attributes = [
                            "trf_n_copy",
-                            "id",
+                           "trf_family_prob",
                            "trf_entropy",
                            "trf_pmatch",
                            "trf_pvar",
@@ -238,9 +243,12 @@ class TRModel(AbstractModel):
                                    self.trf_array_length,
                                    self.trf_array_gc)
 
-    def get_fasta_repr(self):
+    def get_fasta_repr(self, add_project=False):
         ''' Get array fasta representation, head - trf_id.'''
-        return ">%s\n%s\n" % (self.trf_id, self.trf_array)
+        if add_project:
+          return ">%s_%s\n%s\n" % (self.trf_id, self.project, self.trf_array)
+        else:
+          return ">%s\n%s\n" % (self.trf_id, self.trf_array)
 
     def get_monomer_fasta_repr(self):
         ''' Get monomer fasta representation, head - trf_id.'''
