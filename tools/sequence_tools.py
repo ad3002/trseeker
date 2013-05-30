@@ -26,7 +26,8 @@ TODO: Not implemented:
 """
 import re
 import random
-
+from trseeker.tools.other_tools import sort_dictionary_by_value
+from collections import defaultdict
 
 def get_shifts_variants(sequence):
     '''
@@ -179,4 +180,58 @@ def get_consensus(strs):
         for s in strs:
             result[s[i]][i] += 1
     return result
+
+def remove_consensus_redundancy(trf_objs):
+    ''' Take a minimal sequence from lexicographically sorted rotations of sequence and its reverse complement
+        Example: ACT, underlined - reverse complement seqeunces
+        ACT, AGT, CTA, GTA, TAC, TAG
+        Find all possible multimers, e.g. replace GTAGTAGTA consensus sequence with ACT
+        Return:
+        1) list of sorted TRs
+        2) list of (df, consensus) pairs
+    '''
+    # sort by length
+    consensuses = [x.trf_consensus for x in trf_objs]
+    consensuses = list(set(consensuses))
+    consensuses.sort(key=lambda x: len(x))
+    length2consensuses = defaultdict(list)
+    result_rules = {}
+    for i, monomer in enumerate(consensuses):
+        n = len(monomer)
+        length2consensuses[n].append(i)
+    for i, monomer in enumerate(consensuses):
+        if monomer in result_rules:
+            continue
+        base = len(monomer)
+        n = base
+        # maximal consensus length from TRF is 2000 bp
+        variants = set(get_shifts_variants(monomer) + get_shifts_variants(get_revcomp(monomer)))
+        lex_consensus = min(variants)        
+        while n <= 2000:
+            for k in length2consensuses[n]:
+                monomer_b = consensuses[k]
+                if monomer_b in result_rules:
+                    continue
+                s = n/base
+                v = set()
+                for p in xrange(s):
+                    v.add(monomer_b[p*base:(p+1)*base])            
+                if len(v) > 1:
+                    continue
+                item = v.pop()
+                if item in variants:
+                    if consensuses[k] != lex_consensus:
+                        print i, base, consensuses[k], "->", lex_consensus, "\r",
+                    result_rules[consensuses[k]] = lex_consensus
+                    
+            n += base
+
+    variants2df = defaultdict(int)
+    for trf_obj in trf_objs:
+        variants2df[result_rules[trf_obj.trf_consensus]] += 1
+        trf_obj.trf_consensus = result_rules[trf_obj.trf_consensus]
         
+    print
+    print "Sort families by df..."
+    variants2df = sort_dictionary_by_value(variants2df, reverse=True)
+    return trf_objs, variants2df
