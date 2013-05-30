@@ -16,7 +16,7 @@ Command example: **wgs.AADD.1.gbff.fa 2 5 7 80 10 50 2000 -m -f -d -h**
 """
 
 import os, shutil
-from PyExp.readers.abstract_reader import sc_iter_filepath_folder
+from PyExp import sc_iter_filepath_folder
 from trseeker.settings import load_settings
 
 settings = load_settings()
