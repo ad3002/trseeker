@@ -5,7 +5,7 @@
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com 
 
-from PyExp.models.abstract_model import AbstractModel
+from PyExp import AbstractModel
 from trseeker.tools.sequence_tools import get_revcomp, get_gc, check_gapped
 from trseeker.tools.sequence_tools import clear_sequence
 from trseeker.tools.parsers import parse_fasta_head, parse_chromosome_name

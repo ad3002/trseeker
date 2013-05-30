@@ -5,7 +5,7 @@
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com 
 
-from PyExp.models.abstract_model import AbstractModel
+from PyExp import AbstractModel
 
 class WGSModel(AbstractModel):
     '''Model for reading WGS meta data.
