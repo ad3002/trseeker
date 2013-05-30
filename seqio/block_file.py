@@ -12,7 +12,7 @@ Classes:
     
 """
 import gzip
-from PyExp.readers.abstract_reader import AbstractFileIO
+from PyExp import AbstractFileIO
 
 class AbstractBlockFileIO(AbstractFileIO):
     """ Working with file with data organized in block, where each block starts with same token.
