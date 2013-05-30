@@ -22,7 +22,7 @@ import re
 from trseeker.seqio.block_file import AbstractBlockFileIO
 from trseeker.models.sequence_model import SequenceModel
 from trseeker.tools.sequence_tools import clear_sequence
-from PyExp.readers.abstract_reader import sc_iter_filename_folder
+from PyExp import sc_iter_filename_folder
 
 class GbffFileIO(AbstractBlockFileIO):
     """ Working with multi fasta files, where each block starts with '>' token.
