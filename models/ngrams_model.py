@@ -5,7 +5,7 @@
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com 
 
-from PyExp.models.abstract_model import AbstractModel
+from PyExp import AbstractModel
 from trseeker.seqio.tab_file import sc_iter_tab_file, sc_iter_simple_tab_file
 
 class KmerIndexModel(AbstractModel):
