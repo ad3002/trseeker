@@ -68,7 +68,7 @@ def save_trs_dataset(trs_dataset, output_file):
             data = str(trf_obj)
             fh.write(data)
 
-def save_trs_as_fasta(trf_file, fasta_file):
+def save_trs_as_fasta(trf_file, fasta_file, add_project=False):
     ''' Save TRs dataset as one fasta file.
     '''
     trf_objs = []
@@ -76,5 +76,5 @@ def save_trs_as_fasta(trf_file, fasta_file):
         trf_objs.append(trf_obj)
     with open(fasta_file, "w") as fh_fasta:
         for trf_obj in trf_objs:
-            fh_fasta.write(trf_obj.get_fasta_repr())
+            fh_fasta.write(trf_obj.get_fasta_repr(add_project=add_project))
 
