@@ -206,6 +206,9 @@ Attributes:
 - project, project name
 - id (float)
 - trf_id (int)
+- trf_type,
+- trf_family,
+- trf_family_prob (float),
 - trf_l_ind (int)
 - trf_r_ind (int)
 - trf_period (int)
@@ -653,6 +656,7 @@ reader = FastaFileIO()
 - sc_iter_fasta(file_name)
 - sc_iter_fasta_simple(file_name)
 - save_all_seq_with_exact_substring(fasta_file, substring, output_file)
+- sort_fasta_file_by_length(file_name)
 
 ```python
 from trseeker.seqio.fasta_file import sc_iter_fasta
@@ -672,6 +676,12 @@ for (gi, sequence) in sc_iter_fasta_simple(file_name):
 from trseeker.seqio.fasta_file import save_all_seq_with_exact_substring
 
 save_all_seq_with_exact_substring(fasta_file, substring, output_file)
+```
+
+Sort by length and save fasta file:
+
+```python
+sort_fasta_file_by_length(file_name)
 ```
 
 <a name="_io_gbff"/>
@@ -814,7 +824,7 @@ Functions:
 Save trf file as fasta file:
 
 ```python
-save_trs_as_fasta(trf_file, fasta_file)
+save_trs_as_fasta(trf_file, fasta_file, add_project=False)
 ```
 
 ```python
@@ -1077,6 +1087,21 @@ random_mutation(seq, n, alphabet="actgn +")
 Return consensus string for given list of strings:
 ```python
 get_consensus(strs)
+```
+
+Take a minimal sequence from lexicographically sorted rotations of sequence and its reverse complement.
+Example: ACT, underlined - reverse complement seqeunces
+ACT, AGT, CTA, GTA, TAC, TAG.
+
+Find all possible multimers, e.g. replace GTAGTAGTA consensus sequence with ACT.
+
+Return:
+
+- list of sorted TRs
+- list of (df, consensus) pairs
+
+```python
+remove_consensus_redundancy(trf_objs)
 ```
 
 <a name="_tools_var"/>
@@ -1619,6 +1644,10 @@ histo_kmers(db_file, histo_file)
 dump_kmers(db_file, fasta_file)
 
 query_kmers(db_file, query_hashes, both_strands=True)
+
+get_kmer_db_and_fasta(folder, input_file, kmers_file, k=23, mintf=None)
+
+query_and_write_coverage_histogram(db_file, query_sequence, output_file, k=23)
 ```
 
 <a name="_tools_tree"/>
