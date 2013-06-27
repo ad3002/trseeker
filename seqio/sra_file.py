@@ -13,7 +13,7 @@ class FastqObj(object):
 
 	def __init__(self, head, seq, strain, qual):
 		self.head = head
-		self.seq = seq
+		self.seq = seq.lower()
 		self.qual = qual
 		self.strain = strain
 		self.id = head.strip().split()[0].replace("@","")
@@ -34,8 +34,8 @@ class FastqObj(object):
 	@property
 	def fasta(self):
 		return ">%s\n%s\n" % (
-					self.head,
-					self.seq,
+					self.head.strip(),
+					self.seq.strip(),
 					)
 
 def fastq_reader(fastq_file):
