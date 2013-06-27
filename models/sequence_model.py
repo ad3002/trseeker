@@ -70,6 +70,17 @@ class SequenceModel(AbstractModel):
         return "%s\n%s\n" % (self.seq_head.strip(), self.seq_sequence.strip())
 
     @property
+    def header(self):
+      return self.seq_head[1:].strip()
+
+    @property
+    def contige_coverage(self):
+      if "_cov_" in self.header:
+        return float(self.header.split("_")[0])
+      return None
+
+
+    @property
     def sa_input(self):
         """ Return a sequence left flanked by $."""
         return "%s$" % self.sequence
