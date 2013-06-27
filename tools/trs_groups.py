@@ -67,4 +67,8 @@ def join_families_with_common(families):
             if families[i].intersection(families[j]):
                 families[i] = families[i].union(families[j])
                 families[j] = None
-    return [x for x in families if x]
+    families = [x for x in families if x]
+    for i in xrange(len(families)):
+        families[i] = list(families[i])
+    families.sort(key=lambda x: len(x), reverse=True)
+    return families
