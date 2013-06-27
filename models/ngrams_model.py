@@ -12,7 +12,7 @@ class KmerIndexModel(AbstractModel):
     ''' Model for ngram to TR data.
 
     '''
-    dumpable_attributes = ["id",
+    dumpable_attributes = [
                            "kmer",
                            "rkmer",
                            "tf",
@@ -20,7 +20,7 @@ class KmerIndexModel(AbstractModel):
                            "docs",
                            "freqs"
                            ]
-    int_attributes = ["id",
+    int_attributes = [
                       "tf",
                       "df",
                       ]
@@ -32,7 +32,7 @@ class KmerIndexModel(AbstractModel):
                        ]
 
     list_attributes_types = {"docs":int,
-                             "freqs":int,
+                             "freqs":float,
                              }
 
 class KmerSliceModel(AbstractModel):
@@ -140,7 +140,7 @@ def read_kmer_index(ngram_index_file, micro_kmers, cutoff=1):
         print index_obj.df, "\r",
         if micro_kmers:
             if index_obj.kmer in micro_kmers:
-                if index_obj.tf < micro_kmers[index_obj.kmer].tf:
+                if index_obj.tf < micro_kmers[index_obj.kmer]:
                     continue
         if index_obj.df == cutoff:
             break
