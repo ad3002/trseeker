@@ -105,7 +105,7 @@ def dump_kmers(db_file, kmers_file):
     os.system(command)
     sort_file_by_int_field(kmers_file, 1)
 
-def query_kmers(db_file, query_hashes, both_strands=True):
+def query_kmers(db_file, query_hashes, both_strands=True, verbose=True):
     '''Query jellyfish database.
     '''
     params = {
@@ -117,7 +117,8 @@ def query_kmers(db_file, query_hashes, both_strands=True):
     if both_strands:
         params["both_strands"] = "-C"
     command = "%(location)s query %(both_strands)s %(db_file)s" % params
-    
+    if verbose:
+        print command
     final_result = {}
     n = len(query_hashes)
     for k in xrange(0,n,100):
@@ -162,3 +163,14 @@ def query_and_write_coverage_histogram(db_file, query_sequence, output_file, k=2
                 p = 0
             fh.write("%s\t%s\n" % (i, "*"*p))
    
+def sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf):
+    '''
+    '''
+    ouput_prefix = os.path.join(
+            jellyfish_data_folder,
+            "data_"
+        )
+    count_kmers(fasta_file, ouput_prefix, k, mintf=mintf)
+    merge_kmers(jellyfish_data_folder, ouput_prefix, jf_db)
+    dump_kmers(jf_db, jf_dat)
+    sort_file_by_int_field(jf_dat, 1)
