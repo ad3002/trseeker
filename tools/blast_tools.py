@@ -42,7 +42,7 @@ e = settings["blast_settings"]["blast_e"]
 v = settings["blast_settings"]["blast_v"]
 OS = settings["trseeker"]["os"]
 
-def blastn(database, query, output):
+def blastn(database, query, output, e_value=None):
     """ Blastn. 
 
     Input format parametr:
@@ -61,13 +61,15 @@ def blastn(database, query, output):
 
     format = '"7 qseqid qgi qacc sseqid means sgi sacc qstart qend sstart send evalue bitscore score length pident nident mismatch positive gapopen gaps ppos frames qframe sframe"'
 
+    if not e_value:
+        e_value = e
 
     string = '%s%s -query %s -task blastn -db %s -out %s -evalue %s -word_size 10 -outfmt %s -dust no -soft_masking "false" -max_target_seqs %s -num_descriptions %s -num_threads 8 -num_alignments %s' % (location,
                           progr_name,
                           query,
                           database,
                           output,
-                          e,
+                          e_value,
                           format,
                           b,
                           v,
@@ -250,10 +252,13 @@ def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file,
     if is_huge_alpha:
         alpha_sets = {}
     for i, u in enumerate(sc_iter_tab_file(trf_large_file, TRModel)):
+        print "%s/%s" % (i, n)
         
         if skip_by_family:
-            if u.trf_family in filter_by_family:
+            if u.trf_family in skip_by_family:
                 continue
+        if u.trf_family == "ALPHA":
+            continue
         
         blast_output_file = os.path.join(annotation_self_folder, "%s.blast" % u.trf_id)
         if os.path.isfile(blast_output_file):
@@ -273,7 +278,7 @@ def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file,
         if seen:
             continue
 
-        print "%s/%s" % (i, n)
+        
         if os.path.isfile(blast_output_file) and os.stat(blast_output_file).st_size != 0:
             trids = _get_trids_from_blast_file(blast_output_file)
             alpha_sets[u.trf_id] = trids
