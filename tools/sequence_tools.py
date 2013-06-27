@@ -44,8 +44,7 @@ def get_revcomp(sequence):
     'CGAT'
 
     '''
-    __complementary = dict(zip('ATCGNatcgn[]', 'TAGCNtagcn]['))
-    c = __complementary
+    c = dict(zip('ATCGNatcgn[]', 'TAGCNtagcn]['))
     return ''.join(c.get(nucleotide, '') for nucleotide in reversed(sequence))
 
 def fix_strand(sequence):
@@ -77,6 +76,12 @@ def get_gc(sequence):
     gc = float(count_c + count_g) / float(length)
     return float(gc)
     
+def get_int_gc(sequence):
+    ''' Get GC content from 0 to 100.
+    '''
+    gc = get_gc(sequence)
+    return int(100*round(gc, 2))
+
 def check_gapped(sequence):
     """ Check for N in sequence. Return n(with N) or w(whole).
     """
@@ -194,44 +199,56 @@ def remove_consensus_redundancy(trf_objs):
     consensuses = [x.trf_consensus for x in trf_objs]
     consensuses = list(set(consensuses))
     consensuses.sort(key=lambda x: len(x))
-    length2consensuses = defaultdict(list)
-    result_rules = {}
+    length2consensuses = {}
+    print "Group monomers by length and GC"
     for i, monomer in enumerate(consensuses):
         n = len(monomer)
-        length2consensuses[n].append(i)
+        length2consensuses.setdefault(n, {})
+        gc = get_int_gc(monomer)
+        length2consensuses[n].setdefault(gc, [])
+        length2consensuses[n][gc].append(i)
+    print "Iterate over consensuses"
+    N = len(consensuses)
+    result_rules = {}
     for i, monomer in enumerate(consensuses):
+        print i, N, "\r",
         if monomer in result_rules:
             continue
+        gc = get_int_gc(monomer)
         base = len(monomer)
         n = base
         # maximal consensus length from TRF is 2000 bp
         variants = set(get_shifts_variants(monomer) + get_shifts_variants(get_revcomp(monomer)))
         lex_consensus = min(variants)        
-        while n <= 2000:
-            for k in length2consensuses[n]:
-                monomer_b = consensuses[k]
-                if monomer_b in result_rules:
-                    continue
-                s = n/base
-                v = set()
-                for p in xrange(s):
-                    v.add(monomer_b[p*base:(p+1)*base])            
-                if len(v) > 1:
-                    continue
-                item = v.pop()
-                if item in variants:
-                    if consensuses[k] != lex_consensus:
-                        print i, base, consensuses[k], "->", lex_consensus, "\r",
-                    result_rules[consensuses[k]] = lex_consensus
-                    
+        while n <= 2020:
+            if n in length2consensuses and gc in  length2consensuses[n]: 
+                for k in length2consensuses[n][gc]:
+                    monomer_b = consensuses[k]
+                    if monomer_b in result_rules:
+                        continue
+                    s = n/base
+                    v = set()
+                    for p in xrange(s):
+                        v.add(monomer_b[p*base:(p+1)*base])            
+                    if len(v) > 1:
+                        continue
+                    item = v.pop()
+                    if item in variants:
+                        # if consensuses[k] != lex_consensus:
+                            # print
+                            # print i, base, consensuses[k], "->", lex_consensus
+                        result_rules[consensuses[k]] = lex_consensus
+                        
             n += base
-
+    print
+    print "Fix momomers"
     variants2df = defaultdict(int)
     for trf_obj in trf_objs:
-        variants2df[result_rules[trf_obj.trf_consensus]] += 1
+        if trf_obj.trf_consensus in result_rules:
+            variants2df[result_rules[trf_obj.trf_consensus]] += 1
+        else:
+            print "Error key with length", len(trf_obj.trf_consensus), trf_obj.trf_consensus
         trf_obj.trf_consensus = result_rules[trf_obj.trf_consensus]
-        
-    print
     print "Sort families by df..."
     variants2df = sort_dictionary_by_value(variants2df, reverse=True)
     return trf_objs, variants2df
