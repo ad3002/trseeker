@@ -12,6 +12,8 @@ from trseeker.tools.sequence_tools import fix_strand, get_revcomp
 from trseeker.tools.edit_distance import hamming_distance
 from trseeker.seqio.tab_file import sc_iter_tab_file
 from trseeker.models.trf_model import TRModel
+from collections import Counter
+import math
 
 def generate_ngrams(text, n=12):
     ''' Yields all ngrams of length k from given text. 
@@ -31,20 +33,26 @@ def generate_window(text, n=12, step=None):
     for i in xrange(0, len(text) - n + 1, step):
         yield i, text[i:i + n]
 
-def get_ngrams(text, m=5, n=12):
+def get_ngrams(text, m=None, n=23, k=None, skip_n=False):
     ''' Returns m most frequent (ngram of length n, tf) tuples for given text.
     
     - m: number of returned ngrams
     - n: ngram length
     '''
-
+    if k:
+        n = k
     ngrams = {}
     for pos, ngram in generate_ngrams(text, n=n):
+        if skip_n and 'n' in ngram:
+            continue
         ngrams.setdefault(ngram, 0)
         ngrams[ngram] += 1
     ngrams = [(key, value) for key, value in ngrams.items()]
     ngrams.sort(reverse=True, key=lambda x: x[1])
-    return ngrams[:m]
+    if m:
+        return ngrams[:m]
+    else:
+        return ngrams
 
 def get_ngrams_freq(text, m=500000, n=12):
     ''' Returns m most frequent (ngram of length n, fraction of possible ngrams) tuples for given text.
@@ -59,7 +67,7 @@ def get_ngrams_freq(text, m=500000, n=12):
     text_length = float(len(text) - n + 1)
     ngrams = [(key, value, value / text_length) for key, value in ngrams.items()]
     ngrams.sort(reverse=True, key=lambda x: x[1])
-    return ngrams[:m]
+    return ngrams
 
 def get_ngrams_feature_set(text, m=5, n=12):
     ''' Returns a feature set {'ngram':'ngram',...}  of m most frequent ngram of length n for given text.
@@ -153,7 +161,7 @@ def get_kmer_tf_df_for_data(data, k, docids=False):
     return (tf, df)
     
 def get_df_stats_for_list(data, k, kmer2df):
-    ''' Compute max df, number and procent of sequence with given ngram.
+    ''' Compute max df, number and percentage of sequence with given ngram.
     Return (maxdf, nmaxdf, pmaxdf)
     '''
     df = defaultdict(int)
@@ -165,11 +173,11 @@ def get_df_stats_for_list(data, k, kmer2df):
     result = [(v,k) for (k,v) in df.items()]
     result.sort()
     maxdf = result[-1][0]
-    ngram_seqs = [(k, tf[k], kmer2df[k]) for v,k in result if v == maxdf]
+    ngram_seqs = [(k, tf[k]) for v,k in result if v == maxdf]
     ngram_seqs.sort(key=lambda x: x[1], reverse=True)
     nmaxdf = len(ngram_seqs)
     pmaxdf = round(float(maxdf)/n, 3)
-    ngram_seqs = [":".join((k,str(f), str(d))) for k,f,d in ngram_seqs[:10]]
+    ngram_seqs = [":".join((k,str(f))) for k,f in ngram_seqs[:10]]
     return (maxdf, nmaxdf, pmaxdf, ngram_seqs)
 
 def process_list_to_kmer_index(data, k, docids=True, cutoff=None):
@@ -259,4 +267,3 @@ def get_sequence_kmer_coverage(sequence, kmers, k):
         else:
             mismatch += 1
     return match/(n-k+1), variability
-
