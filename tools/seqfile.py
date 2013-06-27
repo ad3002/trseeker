@@ -23,13 +23,15 @@ def save_dict(file, d):
     with open(file, "ab") as fw:
         [ fw.write("%s\t%s\n" % (x, d[x])) for x in d.keys() ]
 
-def save_sorted_dict(file, d, by_value=True, reverse=True, min_value=None):
+def save_sorted_dict(d, file, by_value=True, reverse=True, min_value=None, key_type=None):
     ''' A function saves dictionatu *d* in *file*.
     '''
     if min_value is None:
         d = [(k, v) for k, v in d.items()]
     else:
         d = [(k, v) for k, v in d.items() if v>min_value]
+    if key_type:
+        d = [(key_type(k), v) for (k, v) in d]
     if by_value:
         d.sort(key=lambda x: x[1], reverse=reverse)
     else:
