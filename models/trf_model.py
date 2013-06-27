@@ -243,6 +243,10 @@ class TRModel(AbstractModel):
                                    self.trf_array_length,
                                    self.trf_array_gc)
 
+    @property
+    def fasta(self):
+      return self.get_fasta_repr()
+
     def get_fasta_repr(self, add_project=False):
         ''' Get array fasta representation, head - trf_id.'''
         if add_project:
@@ -277,3 +281,73 @@ class NetworkSliceModel(TRModel):
       self.dumpable_attributes = ["gid"] + self.dumpable_attributes
       self.int_attributes = ["gid"] + self.int_attributes
       super(TRModel, self).__init__()
+
+class TRsClassificationModel(AbstractModel):
+  ''' Model for keeping classification data.
+  '''
+  dumpable_attributes = ["project",
+                           "id",
+                           "trf_id",
+                           "trf_period",
+                           "trf_array_length",
+                           "trf_array_gc",
+                           "trf_type",
+                           "trf_family",
+                           "trf_subfamily",
+                           "trf_family_prob",
+                           "class_ssr",
+                           "class_sl",
+                           "class_good",
+                           "class_micro",
+                           "class_100bp",
+                           "class_perfect",
+                           "class_x4",
+                           "class_entropy",
+                           "class_gc",
+                           "trf_consensus",
+                ]
+  int_attributes = [
+                         "trf_id",
+                         "id",
+                         "trf_period",
+                         "trf_array_length",
+                     ]
+
+  float_attributes = [
+                         "trf_family_prob",
+                      ]
+
+  def set_with_trs(self, trf_obj):
+    '''Set data with trf_obj.
+    '''
+    for attr in self.dumpable_attributes:
+      if hasattr(trf_obj, attr):
+        setattr(self, attr, getattr(trf_obj, attr))
+
+  @property
+  def network_head(self):
+    '''Return TRs representation for network slices.
+    '''
+    dumpable_attributes = [
+                           "trf_id",
+                           "trf_period",
+                           "trf_array_length",
+                           "trf_array_gc",
+                           "trf_type",
+                           "trf_family",
+                           "trf_subfamily",
+                           "trf_family_prob",
+                           "class_ssr",
+                           "class_sl",
+                           "class_good",
+                           "class_micro",
+                           "class_100bp",
+                           "class_perfect",
+                           "class_x4",
+                           "class_entropy",
+                           "class_gc",
+                ]
+    return self.get_as_string(dumpable_attributes)
+
+
+
