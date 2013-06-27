@@ -43,7 +43,7 @@ class NCBIFtpIO(AbstractFtpIO):
         ftp_address = "ftp.ncbi.nlm.nih.gov"
         super(NCBIFtpIO, self).__init__(ftp_address)
 
-    def download_wgs_fasta(self, wgs_list, file_suffix, output_folder):
+    def download_wgs_fasta(self, wgs_list, file_suffix, output_folder, unzip=False):
         """ Download and unzip (gz) wgs file from wgsfor given wgs_list projects and file suffix.
             
         Parameters:
@@ -71,9 +71,10 @@ class NCBIFtpIO(AbstractFtpIO):
             print "Start download: %s ..." % file_name,
             print " to %s" % output_file
             self.get(file_name, output_file)
-            print "Unzip..."
-            self.unzip(output_file)
-            os.unlink(output_file)
+            if unzip:
+                print "Unzip..."
+                self.unzip(output_file)
+                os.unlink(output_file)
 
     def download_all_wgs_in_fasta(self, output_folder):
         """ Download all WGS files from NCBI in fasta format."""
