@@ -11,7 +11,8 @@ TODO: check it.
 import os
 from trseeker.seqio.tab_file import TabDelimitedFileIO, sc_iter_tab_file, \
     sc_iter_simple_tab_file
-from trseeker.models.trf_model import TRModel
+from trseeker.models.trf_model import TRModel, TRsClassificationModel
+from collections import defaultdict
 
 def read_trid2ngrams(annotation_ngram_folder, trf_large_file):
     """ Read trid -> [(ngram, tf), (rev_ngram, tf), ...] data."""
@@ -46,6 +47,13 @@ def get_all_trf_objs(trf_large_file):
         result.append(trf_obj)
     return result
 
+def get_all_class_objs(trf_class_file):
+    """ Return list of class_obj from given trf_class_file."""
+    result = []
+    for trf_obj in sc_iter_tab_file(trf_class_file, TRsClassificationModel):
+        result.append(trf_obj)
+    return result
+
 def get_trf_objs_dict(trf_large_file):
     """ Return dict of trf_obj from given trf_large_file."""
     result = {}
@@ -63,12 +71,28 @@ def get_trfid_obj_dict(trf_large_file):
 
 def save_trs_dataset(trs_dataset, output_file):
     """ Save trs dataset to file."""
+    if isinstance(trs_dataset, dict):
+        trs_dataset = trs_dataset.items()
+        trs_dataset.sort()
+        trs_dataset = [x[1] for x in trs_dataset]
     with open(output_file, "w") as fh:
         for trf_obj in trs_dataset:
             data = str(trf_obj)
             fh.write(data)
 
-def save_trs_as_fasta(trf_file, fasta_file, add_project=False):
+def save_trs_class_dataset(tr_class_dataset, output_file):
+    ''' Save TRs classification objects to file.
+    '''
+    if isinstance(tr_class_dataset, dict):
+        tr_class_dataset = tr_class_dataset.items()
+        tr_class_dataset.sort()
+        tr_class_dataset = [x[1] for x in tr_class_dataset]
+    with open(output_file, "w") as fh:
+        for class_obj in tr_class_dataset:
+            data = str(class_obj)
+            fh.write(data)
+
+def save_trs_as_fasta(trf_file, fasta_file, add_project=False, skip_alpha=False):
     ''' Save TRs dataset as one fasta file.
     '''
     trf_objs = []
@@ -76,5 +100,20 @@ def save_trs_as_fasta(trf_file, fasta_file, add_project=False):
         trf_objs.append(trf_obj)
     with open(fasta_file, "w") as fh_fasta:
         for trf_obj in trf_objs:
+            if skip_alpha:
+                if trf_obj.trf_family == "ALPHA":
+                    continue
             fh_fasta.write(trf_obj.get_fasta_repr(add_project=add_project))
+
+def get_classification_dict(fam_kmer_index_file):
+    '''
+    '''
+    kmer2fam = defaultdict(list)
+    with open(fam_kmer_index_file) as fh:
+        for line in fh:
+            fam, k, rk, tf, df = line.strip().split("\t")
+            df = float(df)
+            kmer2fam[k].append((fam, df))
+            kmer2fam[rk].append((fam, df))
+    return kmer2fam
 
