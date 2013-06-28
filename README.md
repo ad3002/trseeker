@@ -148,7 +148,9 @@ Properties
 
 - length (self.seq_length)
 - sequence (self.seq_sequence)
-- fasta 
+- fasta
+- header
+- contige_coverage if **_cov_** key in name
 
 ```python
 print seq_obj.fasta
@@ -271,6 +273,7 @@ print trf_obj.get_numerical_repr()
 ```
 
 - get_fasta_repr(), where head is trf_obj.trf_id and sequence is trf_obj.trf_array
+- or **fasta** property
 - get_monomer_fasta_repr(), where head is trf_obj.trf_id and sequence is trf_obj.trf_consensus
 - get_family_repr()
 
@@ -301,6 +304,43 @@ from trseeker.models.trf_model import NetworkSliceModel
 
 slice_obj = NetworkSliceModel()
 ```
+
+#### TRsClassificationModel(AbstractModel):
+
+Model for keeping classification data.
+
+Attributes:
+
+- project
+- id (int)
+- trf_id (int)
+- trf_period (int)
+- trf_array_length (int)
+- trf_array_gc
+- trf_type
+- trf_family
+- trf_subfamily
+- trf_family_prob (float)
+- class_ssr
+- class_sl
+- class_good
+- class_micro
+- class_100bp
+- class_perfect
+- class_x4
+- class_entropy
+- class_gc
+- trf_consensus
+
+```python
+
+class_obj = TRsClassificationModel()
+class_obj.set_with_trs(trf_obj)
+
+print class_obj.network_head()
+
+```
+
 <a name="_models_organism"/>
 ### Organism model
 
@@ -508,13 +548,12 @@ from trseeker.models.ngrams_model import KmerIndexModel
 
 Attributes:
 
-- id (int)
 - kmer
 - rkmer
 - tf (int)
 - df (int)
 - docs (list of int)
-- freqs (list of int)
+- freqs (list of float)
 
 ### Kmer Slice model
 
@@ -570,6 +609,12 @@ sc_ngram_trid_reader(file_name)
 ```
 
 Read kmer index data as list:
+
+Parameters:
+
+- index file
+- microsatellite kmer dictionary, kmer->index
+
 
 ```python
 read_kmer_index(ngram_index_file, micro_kmers, cutoff=1)
@@ -748,7 +793,7 @@ from trseeker.seqio.ncbi_ftp import NCBIFtpIO
 
 reader = NCBIFtpIO()
 
-reader.download_wgs_fasta(wgs_list, file_suffix, output_folder)
+reader.download_wgs_fasta(wgs_list, file_suffix, output_folder, unzip=False)
 
 reader.download_all_wgs_in_fasta(output_folder)
 
@@ -819,12 +864,15 @@ from trseeker.seqio.tr_file import *
 Functions:
 
 - save_trs_dataset(trs_dataset, output_file)
+- save_trs_class_dataset(tr_class_data, output_file)
 - get_trfid_obj_dict(trf_large_file)
+- get_classification_dict(fam_kmer_index_file)
 
 Save trf file as fasta file:
 
 ```python
-save_trs_as_fasta(trf_file, fasta_file, add_project=False)
+# don't save trf_obj if trf_family is ALPHA
+save_trs_as_fasta(trf_file, fasta_file, add_project=False, skip_alpha=False)
 ```
 
 ```python
@@ -834,11 +882,14 @@ trid2trfobj = get_trfid_obj_dict(trf_large_file)
 ```
 
 - get_all_trf_objs(trf_large_file)
+- get_all_class_objs(trf_class_file)
 
 ```python
 from trseeker.seqio.tr_file import get_all_trf_objs
+from trseeker.seqio.tr_file import get_all_class_objs
 
 trf_obj_list = get_all_trf_objs(trf_large_file)
+class_obj_list = get_all_class_objs(trf_class_file)
 ```
 
 - get_trf_objs_dict(trf_large_file)
@@ -1016,7 +1067,7 @@ Get unit and letter for family. Unit picked by most common pmatch value. A seen_
 ```python
 unit, letter, seen_units = get_family_name(ids, seen_units)	
 ```
-Join families with common members:
+Join families with common members, sort by family size:
 ```python
 join_families_with_common(families)
 ```
@@ -1098,7 +1149,7 @@ Find all possible multimers, e.g. replace GTAGTAGTA consensus sequence with ACT.
 Return:
 
 - list of sorted TRs
-- list of (df, consensus) pairs
+- list of (df, consensus) pairs sorted by array number
 
 ```python
 remove_consensus_redundancy(trf_objs)
@@ -1113,7 +1164,7 @@ from trseeker.tools.seqfile import *
 
 - save_list(file_name, data)
 - save_dict(file_name, dictionary)
-- save_sorted_dict(file, d, by_value=True, reverse=True, min_value=None)
+- save_sorted_dict(d, file, by_value=True, reverse=True, min_value=None, key_type=None)
 - count_lines(file)
 - sort_file_by_int_field(file_name, field)
 
@@ -1172,7 +1223,7 @@ generate_window(text, n=12, step=None)
 ```
 Returns m most frequent (ngram of length n, tf) tuples for given text:
 ```python
-get_ngrams(text, m=5, n=12)
+get_ngrams(text, m=None, n=23, k=None, skip_n=False)
 ```
 Returns m most frequent (ngram of length n, fraction of possible ngrams) tuples for given text:
 ```python
@@ -1519,7 +1570,7 @@ get_double_pattern(pattern_static, pattern_dynamic)
 from trseeker.tools.blast_tools import *
 ```
 
-- blastn(database, query, output)
+- blastn(database, query, output, e_value=None)
 - create_db(fasta_file, output, verbose=False, title=None)
 - alias_tool(dblist, output, title)
 - bl2seq(input1, input2, output)
@@ -1643,11 +1694,19 @@ histo_kmers(db_file, histo_file)
 
 dump_kmers(db_file, fasta_file)
 
-query_kmers(db_file, query_hashes, both_strands=True)
+query_kmers(db_file, query_hashes, both_strands=True, verbose=True)
 
 get_kmer_db_and_fasta(folder, input_file, kmers_file, k=23, mintf=None)
 
 query_and_write_coverage_histogram(db_file, query_sequence, output_file, k=23)
+```
+
+Shortcut:
+
+```python
+from trseeker.tools.jellyfish import sc_compute_kmer_data
+
+sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf)
 ```
 
 <a name="_tools_tree"/>
