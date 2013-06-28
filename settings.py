@@ -9,6 +9,7 @@ Trseeker settings loader.
 '''
 
 import yaml, os
+import platform 
 
 SETTINGS_FILENAME = "settings.yaml"
 NGRAM_LENGTH = 23
@@ -21,6 +22,13 @@ def load_settings():
                                  SETTINGS_FILENAME)
     with open(settings_file) as fh:
         settings = yaml.load(fh)
+    myos = platform.system()
+    if myos == "Windows":
+        settings["trseeker"]["os"]  = "WIN"
+    elif myos == "Darwin":
+        settings["trseeker"]["os"]  = "OSX"
+    else: 
+        settings["trseeker"]["os"]  = "NIX"
     return settings
 
 def save_settings(settings):
