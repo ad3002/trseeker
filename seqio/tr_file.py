@@ -53,6 +53,13 @@ def get_all_class_objs(trf_class_file):
     for trf_obj in sc_iter_tab_file(trf_class_file, TRsClassificationModel):
         result.append(trf_obj)
     return result
+    
+def get_class_objs_dict(trf_class_file):
+    """ Return list of class_obj from given trf_class_file."""
+    result = {}
+    for trf_obj in sc_iter_tab_file(trf_class_file, TRsClassificationModel):
+        result[trf_obj.trf_id] = trf_obj
+    return result
 
 def get_trf_objs_dict(trf_large_file):
     """ Return dict of trf_obj from given trf_large_file."""
