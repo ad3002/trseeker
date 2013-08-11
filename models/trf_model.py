@@ -243,10 +243,6 @@ class TRModel(AbstractModel):
                                    self.trf_array_length,
                                    self.trf_array_gc)
 
-    @property
-    def fasta(self):
-      return self.get_fasta_repr()
-
     def get_fasta_repr(self, add_project=False):
         ''' Get array fasta representation, head - trf_id.'''
         if add_project:
@@ -274,6 +270,51 @@ class TRModel(AbstractModel):
                                                      self.trf_family,
                                                      self.trf_subfamily)
 
+    @property
+    def fasta(self):
+      return self.get_fasta_repr()
+
+    
+    def get_gff3_string(self, 
+                                          chromosome=True, 
+                                          trs_type="complex_tandem_repeat", 
+                                          probability=1000,
+                                          tool="PySatDNA",
+                                          properties={
+                                              "id":"trf_id",
+                                              "family": "trf_family",
+                                          }):
+      '''Return TR in gff format.
+      '''
+      if chromosome:
+        seqid = self.trf_chr
+      else:
+        seqid = self.trf_gi
+      if self.trf_l_ind < self.trf_r_ind:
+        strand = "+"
+        self.trf_l_ind, self.trf_r_ind = self.trf_r_ind, self.trf_l_ind
+      else:
+        strand = "-"
+      features = []
+      for name, attr in properties.items():
+        features.append("%s=%s" % (
+                  name,
+                  getattr(self, attr)
+                )
+          )
+      features = ";".join(features)
+      d = (seqid, 
+           tool, 
+           trs_type, 
+           self.trf_l_ind, 
+           self.trf_r_ind, 
+           probability, 
+           strand, 
+           ".", 
+            features,
+          )
+      return "\t".join(map(str, d))
+
 class NetworkSliceModel(TRModel):
     """ Class for network slice data.
     """
@@ -295,6 +336,32 @@ class TRsClassificationModel(AbstractModel):
                            "trf_family",
                            "trf_subfamily",
                            "trf_family_prob",
+                           "trf_family_kmer",
+                           "trf_subfamily_kmer",
+                           "trf_family_self",
+                           "class_ssr",
+                           "class_tssr",
+                           "class_sl",
+                           "class_good",
+                           "class_micro",
+                           "class_100bp",
+                           "class_perfect",
+                           "class_x4",
+                           "class_entropy",
+                           "class_gc",
+                           "trf_consensus",
+                ]
+
+  alt_dumpable_attributes = ["project",
+                           "id",
+                           "trf_id",
+                           "trf_period",
+                           "trf_array_length",
+                           "trf_array_gc",
+                           "trf_type",
+                           "trf_family",
+                           "trf_subfamily",
+                           "trf_family_prob",
                            "class_ssr",
                            "class_sl",
                            "class_good",
@@ -306,6 +373,7 @@ class TRsClassificationModel(AbstractModel):
                            "class_gc",
                            "trf_consensus",
                 ]
+
   int_attributes = [
                          "trf_id",
                          "id",
@@ -348,6 +416,8 @@ class TRsClassificationModel(AbstractModel):
                            "class_gc",
                 ]
     return self.get_as_string(dumpable_attributes)
+
+
 
 
 
