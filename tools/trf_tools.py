@@ -18,6 +18,7 @@ Command example: **wgs.AADD.1.gbff.fa 2 5 7 80 10 50 2000 -m -f -d -h**
 import os, shutil
 from PyExp import sc_iter_filepath_folder
 from trseeker.settings import load_settings
+import gzip
 
 settings = load_settings()
 
@@ -51,7 +52,7 @@ def trf_search(file_name):
     print string
     os.system(string)
 
-def trf_search_in_dir(folder, verbose=False, file_suffix=".fa", output_folder=None):
+def trf_search_in_dir(folder, verbose=True, file_suffix=".fa", output_folder=None):
     """ TRF search in each file in the given folder.
     
     - folder with fasta files
@@ -61,6 +62,16 @@ def trf_search_in_dir(folder, verbose=False, file_suffix=".fa", output_folder=No
     """
     for file_name in sc_iter_filepath_folder(folder, mask=file_suffix):
 
+        temp_file_name = None
+        if file_name.endswith(".gz"):
+            fh = gzip.open(file_name, "r")
+            temp_file_name = file_name[:-3]
+            print "Unzip file:", file_name, "to", temp_file_name
+            data = fh.read()
+            with open(temp_file_name, "w") as fw:
+                fw.write(data)
+            file_name = temp_file_name
+        
         # check existence in output folder
         name = os.path.basename(file_name)
         if output_folder:
@@ -68,21 +79,27 @@ def trf_search_in_dir(folder, verbose=False, file_suffix=".fa", output_folder=No
                 os.makedirs(output_folder)
             result_name = "%s.%s.%s" % (name, settings["trf_settings"]["trf_param_postfix"], "dat")
             dist_file = os.path.join(output_folder, result_name)
-
-
             result_file = os.path.abspath(result_name)
             if os.path.isfile(result_file):
-                continue
+                os.unlink(result_file)
             if os.path.isfile(dist_file):
+                print "Found result file:", dist_file
                 continue
-
         
         if verbose:
             print "Start trf search in %s" % file_name
         
         trf_search(file_name)
+
+        if temp_file_name:
+            print "Remove file:", temp_file_name
+            os.unlink(temp_file_name)
+ 
+
         if output_folder:
             dist_file = os.path.join(output_folder, result_name)
+            if not os.path.isfile(result_file):
+                raise Exception("TRF search for file %s is failed" % result_file)
             print "Copy: ", result_file, dist_file
             shutil.copyfile(result_file, dist_file)
             os.unlink(result_file)
