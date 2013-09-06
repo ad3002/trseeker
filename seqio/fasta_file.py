@@ -60,6 +60,11 @@ def sc_iter_fasta(file_name):
         seq_obj.set_ncbi_sequence(head, sequence)
         yield seq_obj
 
+def fasta_reader(file_name):
+    """ Synonym for  sc_iter_fasta.
+    """
+    return  sc_iter_fasta(file_name)
+
 def sc_iter_fasta_simple(file_name):
     """ Iter over fasta file."""
 
