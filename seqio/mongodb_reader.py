@@ -10,9 +10,16 @@ Classes:
 - MongoDBReader(object)
         
 """
-import pymongo
-from pymongo import Connection
-from bson.code import Code
+try:
+    import pymongo
+    from pymongo import Connection
+except:
+    print "WARNING: Install pymongo"
+try:
+    from bson.code import Code
+except:
+    print "WARNING: Install bson"
+
 
 class MongoDBReader(object):
 	''' Wrapper for mongodb.'''
