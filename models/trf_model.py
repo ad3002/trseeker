@@ -112,7 +112,7 @@ class TRModel(AbstractModel):
                            "id",
                            "trf_id",
                            "trf_type",
-                           "trf_family",
+                           "trf_family", # set for alpha in cf_premask_alpha
                            "trf_family_prob",
                            "trf_l_ind",
                            "trf_r_ind",
@@ -280,9 +280,10 @@ class TRModel(AbstractModel):
                                           trs_type="complex_tandem_repeat", 
                                           probability=1000,
                                           tool="PySatDNA",
+                                          prefix=None,
                                           properties={
                                               "id":"trf_id",
-                                              "family": "trf_family",
+                                              "family": "trf_family_self",
                                           }):
       '''Return TR in gff format.
       '''
@@ -292,9 +293,9 @@ class TRModel(AbstractModel):
         seqid = self.trf_gi
       if self.trf_l_ind < self.trf_r_ind:
         strand = "+"
-        self.trf_l_ind, self.trf_r_ind = self.trf_r_ind, self.trf_l_ind
       else:
         strand = "-"
+        self.trf_l_ind, self.trf_r_ind = self.trf_r_ind, self.trf_l_ind
       features = []
       for name, attr in properties.items():
         features.append("%s=%s" % (
@@ -303,6 +304,8 @@ class TRModel(AbstractModel):
                 )
           )
       features = ";".join(features)
+      if prefix:
+        seqid = prefix + seqid
       d = (seqid, 
            tool, 
            trs_type, 
@@ -332,6 +335,7 @@ class TRsClassificationModel(AbstractModel):
                            "trf_period",
                            "trf_array_length",
                            "trf_array_gc",
+
                            "trf_type",
                            "trf_family",
                            "trf_subfamily",
@@ -339,17 +343,18 @@ class TRsClassificationModel(AbstractModel):
                            "trf_family_kmer",
                            "trf_subfamily_kmer",
                            "trf_family_self",
-                           "class_ssr",
-                           "class_tssr",
-                           "class_sl",
-                           "class_good",
-                           "class_micro",
-                           "class_100bp",
-                           "class_perfect",
-                           "class_x4",
-                           "class_entropy",
-                           "class_gc",
-                           "trf_consensus",
+
+                           "class_ssr", # from cf_find_ssr
+                           "class_tssr", # cf_find_ssr
+                           "class_sl", # cf_find_ssr, a number of loci
+                           "class_good", # cf_trs_classififcaiton_by_type
+                           "class_micro", # cf_trs_classififcaiton_by_type
+                           "class_100bp", # cf_trs_classififcaiton_by_type
+                           "class_perfect", # cf_trs_classififcaiton_by_type
+                           "class_x4", # cf_trs_classififcaiton_by_type
+                           "class_entropy", # cf_trs_classififcaiton_by_type
+                           "class_gc", # cf_trs_classififcaiton_by_type
+                           "trf_consensus", 
                 ]
 
   alt_dumpable_attributes = ["project",
@@ -405,7 +410,11 @@ class TRsClassificationModel(AbstractModel):
                            "trf_family",
                            "trf_subfamily",
                            "trf_family_prob",
+                           "trf_family_kmer",
+                           "trf_subfamily_kmer",
+                           "trf_family_self",
                            "class_ssr",
+                           "class_tssr",
                            "class_sl",
                            "class_good",
                            "class_micro",
@@ -414,6 +423,7 @@ class TRsClassificationModel(AbstractModel):
                            "class_x4",
                            "class_entropy",
                            "class_gc",
+                           "trf_consensus",
                 ]
     return self.get_as_string(dumpable_attributes)
 
