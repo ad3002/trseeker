@@ -14,6 +14,7 @@ from trseeker.seqio.tab_file import sc_iter_tab_file
 from trseeker.models.trf_model import TRModel
 from collections import Counter
 import math
+from trseeker.tools.complexity import get_zlib_complexity
 
 def generate_ngrams(text, n=12):
     ''' Yields all ngrams of length k from given text. 
@@ -54,19 +55,22 @@ def get_ngrams(text, m=None, n=23, k=None, skip_n=False):
     else:
         return ngrams
 
-def get_ngrams_freq(text, m=500000, n=12):
+def get_ngrams_freq(text, m=None, n=23, k=None):
     ''' Returns m most frequent (ngram of length n, fraction of possible ngrams) tuples for given text.
     
     - m: number of returned ngrams
     - n: ngram length
     '''
-
+    if k:
+        n = k
     ngrams = defaultdict(int)
     for pos, ngram in generate_ngrams(text, n=n):
         ngrams[ngram] += 1
     text_length = float(len(text) - n + 1)
     ngrams = [(key, value, value / text_length) for key, value in ngrams.items()]
     ngrams.sort(reverse=True, key=lambda x: x[1])
+    if m:
+        return ngrams[:m]
     return ngrams
 
 def get_ngrams_feature_set(text, m=5, n=12):
@@ -125,7 +129,8 @@ def count_kmer_tfdf(sequence, tf_dict, df_dict, k):
     seen = set()
     local_tf = defaultdict(int)
     local_df = defaultdict(int)
-    for (ngram, tf, nf) in get_ngrams_freq(sequence, m=100000, n=k):
+    sequence = sequence.lower()
+    for (ngram, tf, nf) in get_ngrams_freq(sequence, n=k):
         if 'n' in ngram:
             continue
         seen.add(ngram)
@@ -190,7 +195,11 @@ def process_list_to_kmer_index(data, k, docids=True, cutoff=None):
         (tf_dict, df_dict) = get_kmer_tf_df_for_data(data, k, docids=docids)
     result = []
     seen = set()
+    skipped = 0
+    added = 0
+    print "Join data..."
     for key in df_dict:
+        print skipped, added, "\r",
         if key in seen:
             continue
         revkey = get_revcomp(key)
@@ -208,14 +217,20 @@ def process_list_to_kmer_index(data, k, docids=True, cutoff=None):
             if docids:
                 ids = doc_data[key]
                 freqs = freq_data[key]
+        # skip by df
+        if cutoff and df <= cutoff:
+            skipped += 1
+            continue
+        added += 1
+        if revkey < key:
+            key, revkey = revkey, key
         if docids:
             result.append((key, revkey, tf, df, ids, freqs))
         else:
             result.append((key, revkey, tf, df, "", ""))
         seen.add(key)
         seen.add(revkey)
-    if cutoff:
-        result = [x for x in result if x[-3]>cutoff]
+    print
     result.sort(key=lambda x: x[-3], reverse=True)
     return result
 
@@ -236,7 +251,7 @@ def compute_kmer_index_for_fasta_file(file_name, index_file, k=23):
             fh.write(s)
     return result
 
-def compute_kmer_index_for_trf_file(file_name, index_file, k=23):
+def compute_kmer_index_for_trf_file(file_name, index_file, k=23, max_complexity=None, min_complexity=None):
     """ 
     """
     data = []
@@ -249,6 +264,12 @@ def compute_kmer_index_for_trf_file(file_name, index_file, k=23):
     print "Save index..."
     with open(index_file, "w") as fh:
         for item in result:
+            if max_complexity:
+                if get_zlib_complexity(item[0]) > max_complexity:
+                    continue
+            if min_complexity:
+                if get_zlib_complexity(item[0]) < min_complexity:
+                    continue
             s  = "%s\n" % "\t".join(map(str, item))
             fh.write(s)
     return result
