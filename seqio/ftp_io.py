@@ -70,4 +70,18 @@ class AbstractFtpIO(object):
         fh.close()
         fw.close()
 
+def download_with_aspera_from_ncbi(source, destination):
+    '''
+    anonftp@ftp-private.ncbi.nlm.nih.gov:%(source)s
+    where source for example /1Gb
+    '''
+    data = {
+        'source': source,
+        'dest': destination,
+
+    }
+    command = "~/.aspera/connect/bin/ascp -i -d ~/.aspera/connect/etc/asperaweb_id_dsa.putty -Q -l1000m anonftp@ftp-private.ncbi.nlm.nih.gov:%(source)s %(dest)s" % data
+    print command
+    os.system(command)
+
 
