@@ -10,7 +10,7 @@ Working with BLAST tab-delimited output files.
 import os
 from trseeker.models.blast_model import read_blast_file
 
-def _get_blast_result_intervals(blast_file, length):
+def _get_blast_result_intervals(blast_file, length, min_score):
     ''' Return gi->sorted list of blast objects. '''
 
     # read data
@@ -19,10 +19,15 @@ def _get_blast_result_intervals(blast_file, length):
     # create correct start/end positions
     for gi in gi_to_results:
         for i, blast_obj in enumerate(gi_to_results[gi]):
+            # skip by score value
+            if blast_obj.score < min_score:
+                gi_to_results[gi][i] = None
+                continue
             if blast_obj.query_start > blast_obj.query_end:
                 temp = blast_obj.query_start
                 gi_to_results[gi][i].query_start = blast_obj.query_end
                 gi_to_results[gi][i].query_end = temp
+        gi_to_results[gi] = [x for x in gi_to_results[gi] if x]
 
     # sort data
     for gi in gi_to_results:
@@ -150,10 +155,10 @@ def format_function_self(blast_dataset):
     ''' Join keys with ,.'''
     return ",".join(blast_dataset.keys())
 
-def get_blast_result(blast_file, length, gap_size=1000, min_align=500, min_length=2400, format_function=None):
+def get_blast_result(blast_file, length, gap_size=1000, min_align=500, min_length=2400, format_function=None, min_score=90):
     """ Get blast result."""
 
-    blast_dataset = _get_blast_result_intervals(blast_file, length)
+    blast_dataset = _get_blast_result_intervals(blast_file, length, min_score)
     blast_dataset = _remove_nested_join_overlap(blast_dataset)
     blast_dataset = _join_gapped(blast_dataset, gap_size, min_align)
     blast_dataset = _filter_blast_dataset(blast_dataset, min_length)
@@ -196,7 +201,9 @@ def update_with_self_blast_result(trs_dataset, annotation_self_folder, filters_o
                                   gap_size=filters["blast_gap_size"],
                                   min_align=filters["min_align"],
                                   min_length=filters["min_length"],
-                                  format_function=format_function_self)
+                                  format_function=format_function_self,
+                                  min_score=filters["min_blast_score"]
+                                  )
         trs_dataset[i].trf_family_self = result
     print
     return trs_dataset
