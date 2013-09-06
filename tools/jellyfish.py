@@ -6,6 +6,7 @@ from trseeker.settings import load_settings
 from PyExp import sc_iter_filepath_folder
 import subprocess
 from trseeker.tools.seqfile import sort_file_by_int_field
+from trseeker.tools.ngrams_tools import process_list_to_kmer_index
 
 settings = load_settings()
 location = settings["blast_settings"]["jellyfish_location"]
@@ -26,10 +27,10 @@ def count_kmers(input_file, ouput_prefix, k, mintf=None):
         "location": location,
         "input_fasta": input_file,
         "k": k,
-        "hash_size": 30000000,
-        "hash_bits": 3,
-        "threads": 8,
-        "both_strands": "--both-strands",
+        "hash_size": settings["jellyfish_settings"]["hash_size"],
+        "hash_bits": settings["jellyfish_settings"]["hash_bits"],
+        "threads": settings["jellyfish_settings"]["threads"],
+        "both_strands": settings["jellyfish_settings"]["both_strands"],
         "ouput_prefix": ouput_prefix,
         "mintf": "",
     }
@@ -153,7 +154,7 @@ def query_and_write_coverage_histogram(db_file, query_sequence, output_file, k=2
     data =  query_kmers(db_file, query_hashes, both_strands=True)
     with open(output_file, "w") as fh:
         p = 0
-        for i in xrange(0, len(DD)-18):
+        for i in xrange(0, len(query_sequence)-18):
             kmer = query_sequence[i:i+17]
             if kmer in data:
                 if int(data[kmer]) > 0:
@@ -173,4 +174,5 @@ def sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mi
     count_kmers(fasta_file, ouput_prefix, k, mintf=mintf)
     merge_kmers(jellyfish_data_folder, ouput_prefix, jf_db)
     dump_kmers(jf_db, jf_dat)
+    print "Sort data..."
     sort_file_by_int_field(jf_dat, 1)
