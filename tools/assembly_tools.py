@@ -10,14 +10,18 @@ Functions related to assembler statistics
 
 def get_N50(lengths):
     '''
-    Get (N50 contig length, N50) statistics for list of contigs lengths
+    Get (N50 contig length, N50, shortest contig, longest contig) statistics for list of contigs lengths
     '''
+    if not lengths:
+        return (0, 0, 0, 0)
     lengths.sort(reverse=True)
     total = sum(lengths)
     n50 = 0
     l50 = 0
+    shortest_seq = min(lengths)
+    longest_seq = max(lengths)
     for x in lengths:
         l50 += 1
         n50 += x
         if n50 >= total/2:
-            return x, l50
+            return (x, l50, shortest_seq, longest_seq)
