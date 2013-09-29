@@ -10,7 +10,7 @@ Classes:
 - NCBIFtpIO(AbstractFtpIO)
     
 """
-from trseeker.seqio.ftp_io import AbstractFtpIO
+from trseeker.seqio.ftp_io import AbstractFtpIO, download_with_aspera_from_ncbi
 import os
 import re
 
@@ -76,7 +76,7 @@ class NCBIFtpIO(AbstractFtpIO):
                 self.unzip(output_file)
                 os.unlink(output_file)
 
-    def download_all_wgs_in_fasta(self, output_folder):
+    def download_all_wgs_in_fasta(self, output_folder, aspera=False, get_size=False, unzip=False):
         """ Download all WGS files from NCBI in fasta format."""
         file_suffix = "fsa_nt"
         path = ["genbank", "wgs"]
@@ -85,18 +85,25 @@ class NCBIFtpIO(AbstractFtpIO):
         files = self.ls()
         files = [ item for item in files if file_suffix in item ]
         n = len(files)
+        total_size = 0
         for i, file in enumerate(files):
+            if get_size:
+                total_size += self.size(file)
+            print i, total_size / 8589934592, "\r"
             output_file = os.path.join(output_folder, file)
             print "Start download: %s ..." % file,
             print " to %s" % output_file
-
             if os.path.isfile(output_file):
                 print "--> was downloaded early"
                 continue
-            self.get(file, output_file)
-            print "Unzip..."
-            self.unzip(output_file)
-            print "Done %i from %s" % (i, n)
+            if aspera:
+                download_with_aspera_from_ncbi("/genbank/wgs/"+file, output_file)
+            else:
+                self.get(file, output_file)
+            if unzip:
+                print "Unzip..."
+                self.unzip(output_file)
+                print "Done %i from %s" % (i, n)
 
     def download_chromosomes_in_fasta(self, ftp_address, name, output_folder):
         """ Download all WGS files from NCBI in fasta format."""
