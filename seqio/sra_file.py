@@ -7,24 +7,50 @@
 '''
 SRA files.
 TODO: implement this.
+TODO: separate model from reader
 '''
+
+from trseeker.tools.sequence_tools import get_revcomp, get_gc
+from trseeker.tools.sequence_tools import clear_sequence
+from Bio import pairwise2
 
 class FastqObj(object):
 
-    def __init__(self, head, seq, strain, qual):
-        self.head = head
-        self.seq = seq.lower()
-        self.qual = qual
-        self.strain = strain
+    def __init__(self, head, seq, strain, qual, phred33=False):
+        self.head = head.strip()
+        self.seq = seq.lower().strip()
+        self.qual = qual.strip()
+        self.strain = strain.strip()
         self.id = head.strip().split()[0].replace("@","")
+        # trimmeing input
+        self.trimmed_seq = self.seq.strip()
+        self.trimmed_qual = qual.strip()
+        if phred33:
+            self.qv = [ord(x)-33 for x in qual.strip()]
+        # trimming results
+        self.adaptor_positions = []
+        self.adapter_contamination = None
+        self.qual_junk = None
+        self.status = True
+        self.parts = []
+        
 
     @property
     def fastq(self):
-        return "%s%s%s%s" % (
+        return "%s\n%s\n%s\n%s\n" % (
                     self.head,
                     self.seq,
                     self.strain,
                     self.qual,
+            )
+
+    @property
+    def trimmed_fastq(self):
+        return "%s%s\n%s%s\n" % (
+                    self.head,
+                    self.trimmed_seq,
+                    self.strain,
+                    self.trimmed_qual,
             )
 
     @property
@@ -38,7 +64,36 @@ class FastqObj(object):
                     self.seq.strip(),
                     )
 
-def fastq_reader(fastq_file):
+    @property
+    def gc(self):
+        return get_gc(self.seq)
+
+    def trim(self):
+        '''
+        '''
+        raise NotImplemented
+                    
+    def trim_by_quality_cutoff(self, cutoff=30):
+        '''
+        '''
+        for i, q in enumerate(self.qv):
+            if q < cutoff:
+                self.trimmed_seq = self.trimmed_seq[:i]
+                self.trimmed_qual = self.trimmed_qual[:i]
+                self.qual_junk = self.trimmed_seq[i:]
+                break
+
+    def trim_exact_adaptor(self, adaptor, verbose=False):
+        '''
+        '''
+        raise NotImplemented
+       
+    def trim_inexact_adaptor(self, adaptor, verbose=False, num_errors=2):
+        '''
+        '''
+        raise NotImplemented
+
+def fastq_reader(fastq_file, phred33=False):
     with open(fastq_file) as fh:
         while True:
             try:
@@ -46,7 +101,7 @@ def fastq_reader(fastq_file):
                 seq = fh.readline()
                 strain = fh.readline()
                 qual = fh.readline()
-                fastq_obj = FastqObj(head, seq, strain, qual)
+                fastq_obj = FastqObj(head, seq, strain, qual, phred33=phred33)
                 yield fastq_obj
             except:
                 break
