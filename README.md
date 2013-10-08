@@ -29,6 +29,8 @@
     - [Blast output](#_io_blast)
     - [Fastq file](#_io_sra)
 - [Toolkit](#_tools)
+    - [Annotation tools](#_annotation)
+    - [Assembly tools](#_assembly_tools)
     - [Tulip](#_tools_tulip)
     - [TRs nomenclature](#_tools_trs_group)
     - [Sequence](#_tools_sequence)
@@ -276,6 +278,7 @@ print trf_obj.get_numerical_repr()
 - or **fasta** property
 - get_monomer_fasta_repr(), where head is trf_obj.trf_id and sequence is trf_obj.trf_consensus
 - get_family_repr()
+- get_gff3_string(self, chromosome=True, trs_type="complex_tandem_repeat", probability=1000, tool="PySatDNA", prefix=None, properties={"id":"trf_id", "family": "trf_family_self"})
 
 ```python
 print trf_obj.get_family_repr()
@@ -321,7 +324,11 @@ Attributes:
 - trf_family
 - trf_subfamily
 - trf_family_prob (float)
+- trf_family_kmer
+- trf_subfamily_kmer
+- trf_family_self
 - class_ssr
+- class_tssr
 - class_sl
 - class_good
 - class_micro
@@ -511,6 +518,35 @@ from trseeker.models.genome_model import GenomeModel
 - genome_gaps
 - genome_sum_gc
 
+### RepeatMasker track data
+
+```python
+from trseeker.models.genome_model import RepeatMaskerAnnotation
+```
+
+Container for RepeatMasker track. For example from http://hgdownload.cse.ucsc.edu/goldenPath/felCat5/database/rmsk.txt.gz
+
+```
+Table fields:
+      `bin` smallint(5) unsigned NOT NULL,
+      `swScore` int(10) unsigned NOT NULL,
+      `milliDiv` int(10) unsigned NOT NULL,
+      `milliDel` int(10) unsigned NOT NULL,
+      `milliIns` int(10) unsigned NOT NULL,
+      `genoName` varchar(255) NOT NULL,
+      `genoStart` int(10) unsigned NOT NULL,
+      `genoEnd` int(10) unsigned NOT NULL,
+      `genoLeft` int(11) NOT NULL,
+      `strand` char(1) NOT NULL,
+      `repName` varchar(255) NOT NULL,
+      `repClass` varchar(255) NOT NULL,
+      `repFamily` varchar(255) NOT NULL,
+      `repStart` int(11) NOT NULL,
+      `repEnd` int(11) NOT NULL,
+      `repLeft` int(11) NOT NULL,
+      `id` char(1) NOT NULL,
+```
+
 <a name="_models_kmer"/>
 ### Ngram/kmer model
 
@@ -699,6 +735,7 @@ reader = FastaFileIO()
 #### Useful functions:
 
 - sc_iter_fasta(file_name)
+- fasta_reader(file_name), same as sc_iter_fasta
 - sc_iter_fasta_simple(file_name)
 - save_all_seq_with_exact_substring(fasta_file, substring, output_file)
 - sort_fasta_file_by_length(file_name)
@@ -780,9 +817,17 @@ reader.cd(['/home', 'user', 'data'])
 reader.ls()
 >>> ['readme.txt', 'data.fa']
 
+file_size = reader.size(file_name)
+
 reader.get(file, output_file)
 
 reader.unzip(file_name)
+```
+
+Download from NCBI ftp with aspera:
+
+```python
+download_with_aspera_from_ncbi(source, destination)
 ```
 
 <a name="_io_ncbi_ftp"/>
@@ -795,7 +840,7 @@ reader = NCBIFtpIO()
 
 reader.download_wgs_fasta(wgs_list, file_suffix, output_folder, unzip=False)
 
-reader.download_all_wgs_in_fasta(output_folder)
+reader.download_all_wgs_in_fasta(output_folder, aspera=False, get_size=False, unzip=False)
 
 reader.download_all_wgs_in_gbff(output_folder)
 
@@ -883,6 +928,7 @@ trid2trfobj = get_trfid_obj_dict(trf_large_file)
 
 - get_all_trf_objs(trf_large_file)
 - get_all_class_objs(trf_class_file)
+- get_class_objs_dict(trf_class_file)
 
 ```python
 from trseeker.seqio.tr_file import get_all_trf_objs
@@ -937,7 +983,7 @@ save_distance_data(dist_file, distances)
 ```python	
 from trseeker.seqio.blast_file import get_blast_result
 
-get_blast_result(blast_file, length, gap_size=1000, min_align=500, min_length=2400, format_function=None)
+get_blast_result(blast_file, length, gap_size=1000, min_align=500, min_length=2400, format_function=None, min_score=90)
 ```
 
 Для фильтров используются following parameters:
@@ -1015,23 +1061,81 @@ TODO: move FastqObj to models
 ```python
 from trseeker.seqio.sra_file import FastqObj
 
-fastq_obj = FastqObj(head, seq, srain, qual_str)
+fastq_obj = FastqObj(head, seq, strain, qual_str, phred33=False)
 print fastq_obj.fastq
 print fastq_obj.sequence
 print fastq_obj.fasta
+print fastq_obj.trimmed_fastq
+print fastq_obj.gc
 ```
+
+Properties:
+
+- head
+- seq
+- qual
+- strain
+- id
+- trimmed_seq
+- trimmed_qual
+- qv: list of Q - phredX
+- adaptor_positions: positions of adapter
+- adapter_contamination
+- qual_junk
+- status
+- parts
+
+Methods related to trimming:
+
+- trim(), NotImplemented
+- trim_by_quality_cutoff(cutoff=30)
+- trim_exact_adaptor(adaptor, verbose=False), NotImplemented
+- trim_inexact_adaptor(adaptor, verbose=False, num_errors=2), NotImplemented
 
 Additional functions:
 
 - fastq_reader
 
 ```python
-for fastq_obj in fastq_reader(fastq_file):
+for fastq_obj in fastq_reader(fastq_file, phred33=False):
 	print fastq_obj.seq
 ```
 
+
 <a name="_tools"/>
 ## Toolkit
+
+<a name="_annotation"/>
+### Assembly annotation
+
+Compute intersection between two datasets.
+Dataset format: list of tuples (chrName, startPos, endPos, feature_id).
+
+```python
+from trseeker.tools.annotation import *
+
+compute_intersection_intervals(data_a, data_b)
+```
+
+Usage example:
+
+```python
+data_b = open("cat_good_trf.gff3").readlines()
+data_b = [x.strip().split("\t") for x in data_b]
+data_b = [(x[0], int(x[3]), int(x[4]), x[-1]) for x in data_b]
+
+for x in compute_intersection_intervals(data_a, data_b):
+    print x
+```
+
+<a name="_assembly_tools"/>
+### Assembly tools
+
+```python
+from trseeker.tools.assembly_tools import *
+
+N50_contig_length, N50, shortest_seq, longest_seq = get_N50(lengths)
+```
 
 <a name="_tools_tulip"/>
 ### Tulip files
@@ -1206,6 +1310,9 @@ Remove nested fragments, ata format [start, end, ...]:
 clear_fragments_redundancy(data, extend=False, same_case_func=None)
 ```
 
+
+
+
 <a name="_tools_kmers"/>
 ### Ngrams (kmers) tools
 
@@ -1227,7 +1334,7 @@ get_ngrams(text, m=None, n=23, k=None, skip_n=False)
 ```
 Returns m most frequent (ngram of length n, fraction of possible ngrams) tuples for given text:
 ```python
-get_ngrams_freq(text, m=5, n=12)
+get_ngrams_freq(text, m=None, n=23, k=None)
 ```
 Returns a feature set {'ngram':'ngram',...}  of m most frequent ngram of length n for given text:
 ```python
@@ -1253,7 +1360,7 @@ get_expessiveness_coefficent(kmern, k)
 # Inside this function:
 # kmern * 1. / 4^k
 ```
-Update tf and df data with k-mers from given sequence:
+Update tf and df data with k-mers from given sequence (it will be lowered):
 ```python	
 from trseeker.tools.ngrams_tools import count_kmer_tfdf
 
@@ -1286,10 +1393,10 @@ Get list of (kmer, revkmer, tf, df, docids) for multifasta file:
 compute_kmer_index_for_fasta_file(file_name, index_file, k=23)
 ```
 
-Get list of (kmer, revkmer, tf, df, docids) for TRs file:
+Get list of (kmer, revkmer, tf, df, docids) for TRs file, filter ny sequence complexity defined by get_zlib_complexity function:
 
 ```python
-compute_kmer_index_for_trf_file(file_name, index_file, k=23)
+compute_kmer_index_for_trf_file(file_name, index_file, k=23, max_complexity=None, min_complexity=None)
 ```
 
 Compute kmer coverage and set of kmers:
@@ -1433,7 +1540,7 @@ from trseeker.tools.trf_tools import *
 trf_search(file_name)
 ```
 ```python
-trf_search_in_dir(folder, verbose=False, file_suffix=".fa", output_folder=None)
+trf_search_in_dir(folder, verbose=True, file_suffix=".fa", output_folder=None)
 ```
 
 Create output TRF file with tandem repeats with length greater than from input file. Function returns number of tandem repeats in output file:
@@ -1699,6 +1806,7 @@ query_kmers(db_file, query_hashes, both_strands=True, verbose=True)
 get_kmer_db_and_fasta(folder, input_file, kmers_file, k=23, mintf=None)
 
 query_and_write_coverage_histogram(db_file, query_sequence, output_file, k=23)
+# Save coverage histogram into output_file for given query_sequence.
 ```
 
 Shortcut:
