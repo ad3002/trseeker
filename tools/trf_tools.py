@@ -19,6 +19,7 @@ import os, shutil
 from PyExp import sc_iter_filepath_folder
 from trseeker.settings import load_settings
 import gzip
+from multiprocessing import Pool
 
 settings = load_settings()
 
@@ -48,7 +49,10 @@ def trf_search(file_name):
         if settings["trseeker"]["os"] == "WIN":
             string = settings["trf_settings"]["trf_location_WIN"] +" %s %s" % (file_name, params)
         else:
-            string = settings["trf_settings"]["trf_location"] +" %s %s" % (file_name, params)
+            if os.path.isfile(settings["trf_settings"]["trf_location"]):
+                string = settings["trf_settings"]["trf_location"] +" %s %s" % (file_name, params)
+            else:
+                string = settings["trf_settings"]["trf_location_mac"] +" %s %s" % (file_name, params)
     print string
     os.system(string)
 
@@ -103,6 +107,76 @@ def trf_search_in_dir(folder, verbose=True, file_suffix=".fa", output_folder=Non
             print "Copy: ", result_file, dist_file
             shutil.copyfile(result_file, dist_file)
             os.unlink(result_file)
+
+
+def trf_worker(args):
+    ''' Worker for paralling.
+    '''
+    folder, verbose, file_suffix, output_folder, threads, file_name = args
+    temp_file_name = None
+    if file_name.endswith(".gz"):
+        fh = gzip.open(file_name, "r")
+        temp_file_name = file_name[:-3]
+        print "Unzip file:", file_name, "to", temp_file_name
+        data = fh.read()
+        with open(temp_file_name, "w") as fw:
+            fw.write(data)
+        file_name = temp_file_name
+    
+    # check existence in output folder
+    name = os.path.basename(file_name)
+    if output_folder:
+        if not os.path.isdir(output_folder):
+            os.makedirs(output_folder)
+        result_name = "%s.%s.%s" % (name, settings["trf_settings"]["trf_param_postfix"], "dat")
+        dist_file = os.path.join(output_folder, result_name)
+        result_file = os.path.abspath(result_name)
+        if os.path.isfile(result_file):
+            os.unlink(result_file)
+        if os.path.isfile(dist_file):
+            print "Found result file:", dist_file
+            return
+    
+    if verbose:
+        print "Start trf search in %s" % file_name
+    
+    trf_search(file_name)
+
+    if temp_file_name:
+        print "Remove file:", temp_file_name
+        os.unlink(temp_file_name)
+
+    if output_folder:
+        dist_file = os.path.join(output_folder, result_name)
+        if not os.path.isfile(result_file):
+            raise Exception("TRF search for file %s is failed" % result_file)
+        print "Copy: ", result_file, dist_file
+        shutil.copyfile(result_file, dist_file)
+        os.unlink(result_file)
+
+def trf_search_in_dir_parallel(folder, verbose=True, file_suffix=".fa", output_folder=None, threads=1):
+    """ TRF search in each file in the given folder.
+    
+    - folder with fasta files
+    - verbose
+    - file_suffix, function takes only files with suffix, default *.fa*
+        
+    """
+    p = Pool(processes=threads)
+    map_data = []
+
+
+
+    for file_name in sc_iter_filepath_folder(folder, mask=file_suffix):
+        if file_name.endswith("fsa_nt"):
+            os.unlink(file_name)
+            continue
+
+        
+        args = folder, verbose, file_suffix, output_folder, threads, file_name
+        map_data.append(args)
+    p.map(trf_worker, map_data)
+        
 
 def _filter_by_bottom_array_length(obj, cutoff):
     if obj.trf_array_length > cutoff:
