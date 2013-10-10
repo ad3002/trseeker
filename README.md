@@ -1543,6 +1543,13 @@ trf_search(file_name)
 trf_search_in_dir(folder, verbose=True, file_suffix=".fa", output_folder=None)
 ```
 
+Parallel TRF seeach:
+
+```python
+trf_worker(args)
+trf_search_in_dir_parallel(folder, verbose=True, file_suffix=".fa", output_folder=None, threads=1)
+```
+
 Create output TRF file with tandem repeats with length greater than from input file. Function returns number of tandem repeats in output file:
 
 ```python
@@ -1751,17 +1758,18 @@ from trseeker.tools.network_tools import *
 
 Compute network slices using graph_tool library or networkx.
 ```python
-compute_network(network_file, output_file_pattern, trf_large_index_file, g_file, weights_file, weight_to_pairs_file)
+compute_network(network_file, output_file_pattern, id2nodename)
 ```
 
+- create_graph_on_fly(network_file)
 - load_graph(ml_file)
 - analyse_network_graph_tool(G, output_file_pattern, trf_large_index_file)
-- write_classification_graph_tool(output_file, components, trid2meta)
+- write_classification_graph_tool(output_file, components, id2nodename)
 - write_classification_neworkx(output_file, components, trid2meta)
-- create_graphml(network_file, ml_file)
+- create_graphml(network_file, ml_file, id2nodename)
 - load_networkx(network_file)
-- init_graph_networkx(network_data, start=0, precise=1, trf_large_index_file=None)
-- analyse_networkx(G, network_data, output_file_pattern, trf_large_index_file)
+- init_graph_networkx(network_data, start=0, precise=1, id2nodename=None)
+- analyse_networkx(G, network_data, output_file_pattern, id2nodename)
 
 <a name="_tools_ncbi_ann"/>
 ### Working with NCBI annotations
@@ -1799,7 +1807,7 @@ stats_kmers(db_file, stats_file)
 
 histo_kmers(db_file, histo_file)
 
-dump_kmers(db_file, fasta_file)
+dump_kmers(db_file, fasta_file, dumpmintf)
 
 query_kmers(db_file, query_hashes, both_strands=True, verbose=True)
 
@@ -1814,7 +1822,7 @@ Shortcut:
 ```python
 from trseeker.tools.jellyfish import sc_compute_kmer_data
 
-sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf)
+sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf, dumpmintf)
 ```
 
 <a name="_tools_tree"/>
