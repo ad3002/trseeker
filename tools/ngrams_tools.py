@@ -154,7 +154,7 @@ def get_kmer_tf_df_for_data(data, k, docids=False):
         verbose = True
     for i, sequence in enumerate(data):
         if verbose:
-            print "Process td/df: ", i, N, "\r", 
+            print "Process tf/df: ", i, N, "\r", 
         tf, df, local_tf, local_df = count_kmer_tfdf(sequence, tf, df, k)
         if docids:
             for key in local_tf:
