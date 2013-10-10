@@ -22,40 +22,40 @@ try:
     import numpy
 except Exception, e:
     print "Numpy import error: %s" % e
-from PyExp.experiments.abstract_experiment import Timer
+from PyExp import Timer
 
 try:
     import graph_tool
     from graph_tool import topology
+    from graph_tool.all import *
     GRAPHTOOL = True
 except:
     print "WARNING: install graph_tool"
     import networkx
     GRAPHTOOL = False
 
-def compute_network(network_file, output_file_pattern,
-                    trf_large_index_file,
-                    g_file, weights_file,
-                    weight_to_pairs_file):
+def compute_network(network_file, output_file_pattern, id2nodename):
     ''' Compute network slices using graph_tool library or networkx.
     '''
 
     if GRAPHTOOL:
+        print "Using graph_tool"
         ml_file = network_file + ".ml"
         with Timer("Create ml"):
-            create_graphml(network_file, ml_file, trf_large_index_file)
+            create_graphml(network_file, ml_file, id2nodename)
         with Timer("Load graph"):    
             G = load_graph(ml_file)
         with Timer("ANALYSE NETWORK"):
-             analyse_network_graph_tool(G, output_file_pattern, trf_large_index_file)
+             analyse_network_graph_tool(G, output_file_pattern, id2nodename)
     else:
+        print "Using networkx"
         with Timer("LOAD NETWORK"):
             network_data = load_networkx(network_file)
         with Timer("INIT NETWORK"):
             G = init_graph_networkx(network_data, start=0, precise=5, 
-                trf_large_index_file=trf_large_index_file)
+                id2nodename=id2nodename)
         with Timer("ANALYSE NETWORK"):
-            analyse_networkx(G, network_data, output_file_pattern, trf_large_index_file)
+            analyse_networkx(G, network_data, output_file_pattern, id2nodename)
 
 def load_graph(ml_file):
     ''' Load graph for graph_tools
@@ -64,52 +64,75 @@ def load_graph(ml_file):
     G = graph_tool.load_graph(ml_file, file_format="xml")
     return G
 
-def analyse_network_graph_tool(G, output_file_pattern, trf_large_index_file):
+def create_graph_on_fly(network_file):
+    '''
+    '''
+    g = Graph()
+    v_trid = g.new_vertex_property("int")
+    print "Load and save data..."
+    id2vid = {}
+    weight2edges = defaultdict(list)
+    with open(network_file, "r") as fh:
+        for i, line in enumerate(fh):
+            if not line:
+                continue
+            a,b,w = line.strip().split("\t")
+            a = int(a)
+            b = int(b)
+            w = round(float(w), 4)
+            if not a in id2vid:
+                v = g.add_vertex()
+                v_trid[v] = a
+                id2vid[a] = v
+            if not b in id2vid:
+                v = g.add_vertex()
+                v_trid[v] = b
+                id2vid[b] = v
+            e = g.add_edge(id2vid[a], id2vid[b])
+            weight2edges[w].append(e)
+    return g, v_trid, weight2edges
+
+def analyse_network_graph_tool(G, output_file_pattern, id2nodename):
     ''' Analys graph, created by graphtool.'''
     
-    print "Read meta trid"
-    if trf_large_index_file:
-        trid2meta = read_trid2meta(trf_large_index_file)
-
     print "Get edges..."
-    pm = G.edge_properties["weight"]
-    edges = []
+    edge2weigth = G.edge_properties["weight"]
+    weigth2edges = defaultdict(list)
     for i, e in enumerate(G.edges()):
-         edges.append(e)
-    print "Iterate over weights"
-
+         weigth2edges[edge2weigth[e]].append(e)
+    edge2weigth = None
+    weights = weigth2edges.keys()
+    weights.sort()
+    
     last = -1
     last_component = -1
     ended = False
 
-    np = G.vertex_properties["trid"]
+    node2trf_id = G.vertex_properties["trid"]
 
-    while edges:
+    print "Edges:", i
 
-        e = edges.pop()
-        w = pm[e]
-        if w == last:
-            G.remove_edge(e)
-            last = w
-            continue
+    print "Iterate over weights"
+    for w in weights:
+        for e in weigth2edges[w]:
+            G.remove_edge(e) 
         components, hist = topology.label_components(G)
-        
         N = len(hist)
         if N == last_component:
-            G.remove_edge(e)
-            last = w
             continue
         last_component = N
 
-        comp_data = defaultdict(list)
-        for i, c in enumerate(components.a):
-            comp_data[c].append(int(np[G.vertex(i)]))
+        # generate data comp_id->trf_ids sorted by size
+        comp_data = [[] for i in xrange(N)]
+        for node_id, comp_id in enumerate(components.a):
+            comp_data[comp_id].append(int(node2trf_id[G.vertex(node_id)]))
+        comp_data.sort(key=lambda x: len(x), reverse=True)
 
-        print "Distance: %s | Edges: %s | Nodes: %s | Components: %s" % (w,
+        print "Distance: %s | Edges: %s | Components: %s | Largest: %s" % (w,
                                                                          G.num_edges(),
-                                                                         i,
-                                                                         N)
-
+                                                                         N,
+                                                                         max(hist)
+                                                                         )
         ended = True
         for hist_item in hist:
             if hist_item > 1:
@@ -117,27 +140,22 @@ def analyse_network_graph_tool(G, output_file_pattern, trf_large_index_file):
                 break
         
         output_file = output_file_pattern % (int(w), N)
-        write_classification_graph_tool(output_file, comp_data, trid2meta)
+        write_classification_graph_tool(output_file, comp_data, id2nodename)
 
         if ended:
             print "Ended since ended=True"
             break
 
-        G.remove_edge(e)
-        last = w
-
-def write_classification_graph_tool(output_file, components, trid2meta):
+def write_classification_graph_tool(output_file, components, id2nodename):
     ''' Save slice data to file.
     
     - components is a default dictionary: slice_id -> [trid list]
     - trid2meta is a dictionary: trid -> descripion string
     '''
-    if os.path.isfile(output_file):
-        os.unlink(output_file)
     with open(output_file, "w") as fw:
-        for i, comp in components.items():
-            for trid in comp:
-                fw.write("%s\t%s" % (i, trid2meta[int(trid)]))
+        for i, comp in enumerate(components):
+            for trf_id in comp:
+                fw.write("%s\t%s" % (i, id2nodename[int(trf_id)]))
 
 def write_classification_neworkx(output_file, components, trid2meta):
     ''' Save slice data to file.
@@ -150,9 +168,9 @@ def write_classification_neworkx(output_file, components, trid2meta):
     with open(output_file, "w") as fw:
         for i, comp in enumerate(components):
             for trid in comp:
-                fw.write("%s\t%s" % (i, trid2meta[int(trid)]))
+                fw.write("%s\t%s\n" % (i, trid2meta[int(trid)].strip()))
 
-def create_graphml(network_file, ml_file, trf_large_index_file):
+def create_graphml(network_file, ml_file, id2nodename):
     ''' Create graphml xml file from tab delimited network_file.
     '''
 
@@ -169,27 +187,27 @@ def create_graphml(network_file, ml_file, trf_large_index_file):
     edge = '<edge id="e%s" source="n%s" target="n%s"><data key="d1">%s</data></edge>\n'
     end = '</graph>\n</graphml>'
 
-    print "Load data..."
-    with open(network_file, "r") as fh:
-        network_data = fh.readlines()
-    print "Parse data..."
-    data = ""
-    data += start
-    seen = {}
-    for k, trf_obj in enumerate(get_all_trf_objs(trf_large_index_file)):
-        data += node % (k, trf_obj.trf_id)
-        seen[trf_obj.trf_id] = k
-    for i, line in enumerate(network_data):
-        a, b, w = line.strip().split("\t")
-        a = int(a)
-        b = int(b)
-        w = round(float(w), 4)
-        data += edge % (i, seen[a], seen[b], w)
-    data += end
-    print "Save data..."
-    with open(ml_file, "w") as fh:
-        fh.write(data)
-
+    print "Load and save data..."
+    with open(ml_file, "w") as fw:
+        fw.write(start)
+        seen = {}
+        print "Write node data"
+        for k, id in enumerate(id2nodename):
+            print k
+            fw.write(node % (k, id))
+            seen[id] = k
+        print "Write edge data"
+        with open(network_file, "r") as fh:
+            for i, line in enumerate(fh):
+                if not line:
+                    continue
+                a,b,w = line.strip().split("\t")
+                a = int(a)
+                b = int(b)
+                w = round(float(w), 4)
+                fw.write(edge % (i, seen[a], seen[b], w))
+        fw.write(end)
+    
 #
 # Networkx section
 #
@@ -221,15 +239,15 @@ def load_networkx(network_file):
     print "#edges: ", k
     return (a_nodes, b_nodes, weights, k)
 
-def init_graph_networkx(network_data, start=0, precise=1, trf_large_index_file=None):
+def init_graph_networkx(network_data, start=0, precise=1, id2nodename=None):
     ''' Init graph with data.'''
 
     print "Graph creation..."
     G = networkx.Graph()
 
     print "Populate nodes..."
-    for trf_obj in sc_iter_tab_file(trf_large_index_file, TRModel):
-        G.add_node(int(trf_obj.trf_id))
+    for id in id2nodename.keys():
+        G.add_node(int(id))
 
     a_nodes, b_nodes, weight_vals, n = network_data
     print "Add edges..."
@@ -239,7 +257,7 @@ def init_graph_networkx(network_data, start=0, precise=1, trf_large_index_file=N
         G.add_edge(a, b)
     return G
 
-def analyse_networkx(G, network_data, output_file_pattern, trf_large_index_file):
+def analyse_networkx(G, network_data, output_file_pattern, id2nodename):
     ''' Analize network and save slices.
     G is a networkx graph
     network_data - (a_nodes, b_nodes, weight_vals, n) parsed network data
@@ -248,8 +266,8 @@ def analyse_networkx(G, network_data, output_file_pattern, trf_large_index_file)
     a_nodes, b_nodes, weight_vals, n = network_data
 
     print "Read meta trid"
-    if trf_large_index_file:
-        trid2meta = read_trid2meta(trf_large_index_file)
+    if id2nodename:
+        trid2meta = id2nodename
 
     print "Network analyzing..."
     last = -1
