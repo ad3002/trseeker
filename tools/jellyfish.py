@@ -7,6 +7,7 @@ from PyExp import sc_iter_filepath_folder
 import subprocess
 from trseeker.tools.seqfile import sort_file_by_int_field
 from trseeker.tools.ngrams_tools import process_list_to_kmer_index
+from trseeker.tools.sequence_tools import get_revcomp
 
 settings = load_settings()
 location = settings["blast_settings"]["jellyfish_location"]
@@ -38,7 +39,7 @@ def count_kmers(input_file, ouput_prefix, k, mintf=None):
         params["mintf"] = "--lower-count=%s" % mintf
     command = "%(location)s count %(mintf)s -m %(k)s -o %(ouput_prefix)s -c %(hash_bits)s -s %(hash_size)s %(both_strands)s -t %(threads)s %(input_fasta)s" % params
     print "Execute:", command
-    os.system(command)
+    return os.system(command)
 
 def merge_kmers(folder, ouput_prefix, ouput_file):
     '''Merge Jellyfish count output to one file.
@@ -64,10 +65,9 @@ def merge_kmers(folder, ouput_prefix, ouput_file):
     print "Execute:", command
     os.system(command)
 
-    # command = "rm %(ouput_prefix)s_*" % params
-    # os.system(command)
-
-    # return params["ouput_file"]
+    command = "rm %(ouput_prefix)s_*" % params
+    print command
+    os.system(command)
 
 def stats_kmers(db_file, stats_file):
     '''Compute statistics.
@@ -93,15 +93,16 @@ def histo_kmers(db_file, histo_file):
     print "Execute:", command
     os.system(command)
 
-def dump_kmers(db_file, kmers_file):
+def dump_kmers(db_file, kmers_file, dumpmintf):
     '''Dump k-mers database to tab-delimited file.
     '''
     params = {
         "location": location,
         "db_file": db_file,
         "kmers_file": kmers_file,
+        "dumpmintf": dumpmintf,
     }
-    command = "%(location)s dump --column --tab -o %(kmers_file)s %(db_file)s" % params
+    command = "%(location)s dump --column -L %(dumpmintf)s --tab -o %(kmers_file)s %(db_file)s" % params
     print "Execute:", command
     os.system(command)
     sort_file_by_int_field(kmers_file, 1)
@@ -132,10 +133,12 @@ def query_kmers(db_file, query_hashes, both_strands=True, verbose=True):
             return None
         for item in data[0].strip().split("\n"):
             if item:
+                print item
                 key, value = item.strip().split()
                 final_result[key] = value
             else:
-                final_result[key] = data[1]
+                print data
+                final_result[-1] = data[1]
     return final_result
 
 def get_kmer_db_and_fasta(folder, input_file, kmers_file, k=23, mintf=None):
@@ -153,26 +156,39 @@ def query_and_write_coverage_histogram(db_file, query_sequence, output_file, k=2
     query_hashes = [x[0] for x in index]
     data =  query_kmers(db_file, query_hashes, both_strands=True)
     with open(output_file, "w") as fh:
-        p = 0
-        for i in xrange(0, len(query_sequence)-18):
-            kmer = query_sequence[i:i+17]
+        for i in xrange(0, len(query_sequence)-k + 1):
+            kmer = query_sequence[i:i+k]
+            p0 = 0
+            p1 = 0
+            p2 = 0
+            rkmer = get_revcomp(kmer)
             if kmer in data:
-                if int(data[kmer]) > 0:
-                    p += 2
-            p -= 1
-            if p < 0:
-                p = 0
-            fh.write("%s\t%s\n" % (i, "*"*p))
+                p1 = int(data[kmer])
+            if rkmer in data:
+                p2 = int(data[rkmer])
+            p = max(p1,p2,p0)
+            fh.write("%s\t%s\t%s\n" % (kmer, i, p))
    
-def sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf):
+def sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf, dumpmintf):
     '''
     '''
     ouput_prefix = os.path.join(
             jellyfish_data_folder,
-            "data_"
+            "%s___" % jf_db,
         )
     count_kmers(fasta_file, ouput_prefix, k, mintf=mintf)
     merge_kmers(jellyfish_data_folder, ouput_prefix, jf_db)
-    dump_kmers(jf_db, jf_dat)
+    dump_kmers(jf_db, jf_dat, dumpmintf=dumpmintf)
     print "Sort data..."
-    sort_file_by_int_field(jf_dat, 1)
+    temp_file = jf_dat+".temp"
+    D = {
+        "in": jf_dat,
+        "out": temp_file,
+    }
+    command = "sort -k2nr %(in)s > %(out)s" % D
+    print command
+    os.system(command)
+    command = "mv %(out)s %(in)s" % D
+    print command
+    os.system(command)
+    
