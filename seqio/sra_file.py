@@ -44,6 +44,15 @@ class FastqObj(object):
                     self.qual,
             )
 
+    def fastq_with_error(self, error):
+        return "@%s__%s\n%s\n%s\n%s\n" % (
+                    error,
+                    self.head[1:],
+                    self.seq,
+                    self.strain,
+                    self.qual,
+            )
+
     @property
     def trimmed_fastq(self):
         return "%s%s\n%s%s\n" % (
