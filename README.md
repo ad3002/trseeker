@@ -1855,7 +1855,7 @@ trs_types = {
 Usage:
 
 ```python
-get_trs_types(trf_all_file, trf_all_class_file, settings)
+trs_types, class_objs, trf_objs = get_trs_types(trf_all_file, trf_all_class_file, settings)
 ```
 
 Used settings:
