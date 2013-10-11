@@ -53,6 +53,7 @@
     - [Networks](#_tools_ncbi_ann)
     - [Jellyfish](#_tools_jellyfish)
     - [Trees](#_tools_tree)
+    - [Classifiction TRs in types](#_trs_types)
 
 
 
@@ -1063,6 +1064,7 @@ from trseeker.seqio.sra_file import FastqObj
 
 fastq_obj = FastqObj(head, seq, strain, qual_str, phred33=False)
 print fastq_obj.fastq
+print fastq_obj.fastq_with_error(error)
 print fastq_obj.sequence
 print fastq_obj.fasta
 print fastq_obj.trimmed_fastq
@@ -1823,6 +1825,49 @@ Shortcut:
 from trseeker.tools.jellyfish import sc_compute_kmer_data
 
 sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf, dumpmintf)
+```
+
+<a name="_trs_types"/>
+### Classifiction TRs in types
+
+Classification of TRs into types.
+
+```python
+from trseeker.tools.trs_types import *
+```
+
+Available types:
+
+```python
+trs_types = {
+    "all": 0,
+    "micro": 0,
+    "perfect": 0,
+    "too_short": 0,
+    "100bp": 0,
+    "gc": 0,
+    "x4": 0,
+    "entropy": 0,
+    "ok": 0,
+}
+```
+
+Usage:
+
+```python
+get_trs_types(trf_all_file, trf_all_class_file, settings)
+```
+
+Used settings:
+
+```python
+settings["other"]["trs_types"]["possible_array_length"]
+settings["other"]["trs_types"]["microsat_monomer"]
+settings["other"]["trs_types"]["min_array_length"]
+settings["other"]["trs_types"]["min_gc"]
+settings["other"]["trs_types"]["max_gc"]
+settings["other"]["trs_types"]["min_copy_number"]
+settings["other"]["trs_types"]["min_entropy"]
 ```
 
 <a name="_tools_tree"/>
