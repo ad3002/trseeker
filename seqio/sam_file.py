@@ -52,15 +52,16 @@ class SAMFileIO(TabDelimitedFileIO):
                 _features = {
                     k: t(v),
                 }
-                for line in data[None]:
-                    k, t, v = line.split(":")
-                    if t == "i":
-                        t = int
-                    else:
-                        t = str
-                    _features[k] = t(v)
+                if data.has_key(None):
+                    for line in data[None]:
+                        k, t, v = line.split(":")
+                        if t == "i":
+                            t = int
+                        else:
+                            t = str
+                        _features[k] = t(v)
+                    del data[None]
                 data["features"] = _features
-                del data[None]
                 obj = SAMModel()
                 obj.set_with_dict(data)
                 yield obj
