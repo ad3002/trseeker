@@ -14,8 +14,8 @@ Classes:
 import re, os
 from trseeker.models.sam_model import SAMModel
 from trseeker.seqio.tab_file import TabDelimitedFileIO
-from PyExp import AbstractFileIO
-from PyExp import WizeOpener
+import csv
+
 
 class SAMFileIO(TabDelimitedFileIO):
     """ 
@@ -38,7 +38,7 @@ class SAMFileIO(TabDelimitedFileIO):
         with open(file_name) as fh:
             for i, line in enumerate(fh):
                 if line.startswith("@"):
-                    self.headers.append()
+                    self.headers.append(line)
                 else:
                     break
 
@@ -46,7 +46,8 @@ class SAMFileIO(TabDelimitedFileIO):
 
         with open(file_name) as fh:
             for data in csv.DictReader(skip_comments(fh), fieldnames=fields, delimiter='\t', quoting=csv.QUOTE_NONE):
-                obj = data_type()
+                print data
+                obj = SAMModel()
                 obj.set_with_dict(data)
                 yield obj
 
