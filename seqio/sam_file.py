@@ -29,14 +29,21 @@ class SAMFileIO(TabDelimitedFileIO):
 
     def read_online(self, file_name):
         """ Overrided. Yield items online from data from input_file."""
+
+        def skip_comments(iterable):
+            for line in iterable:
+                if not line.startswith('@'):
+                    yield line
+
         with open(input_file) as fh:
             for i, line in enumerate(fh):
                 if line.startswith("@"):
                     self.headers.append()
                 else:
                     break
+
         fields = SAMModel().dumpable_attributes
-        for data in csv.DictReader(fh, fieldnames=fields, delimiter='\t', quoting=csv.QUOTE_NONE):
+        for data in csv.DictReader(skip_comments(fh), fieldnames=fields, delimiter='\t', quoting=csv.QUOTE_NONE):
             obj = data_type()
             obj.set_with_dict(data)
             yield obj
@@ -45,4 +52,5 @@ def sc_sam_reader(sam_file):
     """
     """
     reader = SAMFileIO()
-    
+    for sam_obj in reader.read_online(sam_file):
+        yield sam_obj
