@@ -51,5 +51,5 @@ class SAMModel(AbstractModel):
     ]
 
     @property
-    def get_fragment_length(self):
+    def fragment_length(self):
         return self.POS - self.PNEXT
