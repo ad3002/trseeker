@@ -6,11 +6,13 @@
 #@contact: ad3002@gmail.com 
 '''
 '''
-import numpy as np
 import matplotlib
+matplotlib.use('Agg')
+
+import numpy as np
 import matplotlib.pyplot as plt
 
-matplotlib.use('Agg')
+
 
 def draw_distribution_plot(distribution, image_file):
     ''' Draw distribution plot.
@@ -23,5 +25,5 @@ def draw_distribution_plot(distribution, image_file):
     x = np.asarray(x)
     y = np.asarray(y)
     plt.plot(x,y)
-    print "Save image to", image_file
     plt.savefig(image_file)
+    plt.clf()
