@@ -72,14 +72,14 @@ class SAMFileIO(TabDelimitedFileIO):
 
         with open(file_name) as fh:
             for data in csv.DictReader(skip_comments(fh), fieldnames=fields, delimiter='\t', quoting=csv.QUOTE_NONE):
-                k, t, v = data["features"].split(":")
-                if t == "i":
-                    t = int
-                else:
-                    t = str
-                _features = {
-                    k: t(v),
-                }
+                _features = {}
+                if data["features"]:
+                    k, t, v = data["features"].split(":")
+                    if t == "i":
+                        t = int
+                    else:
+                        t = str
+                    _features[k] = t(v)
                 if data.has_key(None):
                     for line in data[None]:
                         k, t, v = line.split(":")
