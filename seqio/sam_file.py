@@ -75,6 +75,8 @@ class SAMFileIO(TabDelimitedFileIO):
                 k, t, v = data["features"].split(":")
                 if t == "i":
                     t = int
+                else:
+                    t = str
                 _features = {
                     k: t(v),
                 }
