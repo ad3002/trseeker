@@ -199,6 +199,7 @@ def get_all_gi_from_blast(blast_file, mode="gi"):
     Get all GI from blast results file.
     @param blast_file: blast file
     @param mode: parsing mode GI or ref based
+    @raise: Unknown mode
     @return: a dictionary of gi or ref to number of hist
     """
     result = {}
@@ -220,9 +221,9 @@ def get_all_gi_from_blast(blast_file, mode="gi"):
 def get_all_blast_obj_from_blast(blast_file, mode="ref"):
     """
     Get all GI to blast_obj list dictionary from blast output.
-    @param blast_file:
-    @param mode:
-    @return:
+    @param blast_file: blast file
+    @param mode: parsing mode (gi or ref)
+    @return: dictionary GI to blast_obj
     """
     result = {}
     for blast_obj in sc_iter_tab_file(blast_file, BlastResultModel, remove_starts_with="#"):
@@ -240,12 +241,11 @@ def get_all_blast_obj_from_blast(blast_file, mode="ref"):
 def bl2seq_search_for_trs(trf_large_file, annotation_bl2seq_folder, temp_file):
     """
     Pairwise search of TRs with bl2seq.
-    @param trf_large_file:
-    @param annotation_bl2seq_folder:
-    @param temp_file:
-    @return:
+    @param trf_large_file: file with TRs
+    @param annotation_bl2seq_folder: folder for output files
+    @param temp_file: temp file name
+    @return: None
     """
-    # read trf_objs
     print "Read TRs..."
     trf_objs = get_all_trf_objs(trf_large_file)
     N = len(trf_objs)
@@ -268,47 +268,41 @@ def bl2seq_search_for_trs(trf_large_file, annotation_bl2seq_folder, temp_file):
 def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file, skip_by_family=None, is_huge_alpha=False):
     """
     Search TRs in given DB.
-    @param trf_large_file:
-    @param db:
-    @param annotation_self_folder:
-    @param temp_file:
-    @param skip_by_family:
-    @param is_huge_alpha:
-    @return:
+    @param trf_large_file: TRs file
+    @param db: database
+    @param annotation_self_folder: folder for output files
+    @param temp_file: temp file
+    @param skip_by_family: skip TRs by family name
+    @param is_huge_alpha: skip ALPHA families
+    @return: None
     """
-    # count files
     for n, u in enumerate(sc_iter_tab_file(trf_large_file, TRModel)):
         pass
     if is_huge_alpha:
         alpha_sets = {}
     for i, u in enumerate(sc_iter_tab_file(trf_large_file, TRModel)):
         print "%s/%s" % (i, n)
-        
         if skip_by_family:
             if u.trf_family in skip_by_family:
                 continue
         if u.trf_family == "ALPHA":
             continue
-        
         blast_output_file = os.path.join(annotation_self_folder, "%s.blast" % u.trf_id)
         if os.path.isfile(blast_output_file):
             with open(blast_output_file) as fh:
                     data = fh.read()
             if data.startswith("ALPHA"):
                 continue
-            
         seen = False
         if is_huge_alpha:
             for key, tr_set in alpha_sets.items():
                 if u.trf_id in tr_set:
-                    # print "SEEN ALPHA", key, u.trf_id
                     with open(blast_output_file, "w") as fh:
                         fh.write("ALPHA\t%s" % key)
                     seen = True
         if seen:
             continue
 
-        
         if os.path.isfile(blast_output_file) and os.stat(blast_output_file).st_size != 0:
             trids = _get_trids_from_blast_file(blast_output_file)
             alpha_sets[u.trf_id] = trids
@@ -329,8 +323,9 @@ def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file,
 
 def _get_trids_from_blast_file(blast_output_file):
     """
-    @param blast_output_file:
-    @return:
+    Get trids from blast output file.
+    @param blast_output_file: blast output file
+    @return: return list of trids
     """
     result = set()
     gi2obj = get_all_blast_obj_from_blast(blast_output_file)
