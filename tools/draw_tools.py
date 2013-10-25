@@ -12,8 +12,6 @@ matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-
 def draw_distribution_plot(distribution, image_file):
     ''' Draw distribution plot.
     '''
