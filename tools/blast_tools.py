@@ -18,7 +18,7 @@ Used settings
 
 """
 
-from trseeker.seqio.tab_file import sc_iter_tab_files
+from trseeker.seqio.tab_file import sc_iter_tab_file
 from trseeker.models.blast_model import BlastResultModel
 from trseeker.models.trf_model import TRModel
 import os
@@ -179,7 +179,12 @@ def create_db_for_genome(file_pattern=None, chromosome_list=None, output=None, t
 
 
 def get_gi_list(gi_score_file, score_limit=90):
-    ''' Function return GI list from given score file. '''
+    """
+    Get GI list from given score file.
+    @param gi_score_file: GI score file
+    @param score_limit: get only GI with score greater than score limit (default 90)
+    @return: list of GI
+    """
     result = []
     with open(gi_score_file, "rb") as fh:
         for line in fh:
@@ -190,43 +195,56 @@ def get_gi_list(gi_score_file, score_limit=90):
 
 
 def get_all_gi_from_blast(blast_file, mode="gi"):
-    ''' Get gi or ref -> hits list from blast output.'''
-
+    """
+    Get all GI from blast results file.
+    @param blast_file: blast file
+    @param mode: parsing mode GI or ref based
+    @return: a dictionary of gi or ref to number of hist
+    """
     result = {}
-    for blast_obj in sc_iter_tab_file(blast_file, BlastResultModel, skip_starts_with="#"):
-
+    for blast_obj in sc_iter_tab_file(blast_file, BlastResultModel, remove_starts_with="#"):
         if mode == "gi":
-            id = blast_obj.subject_gi
+            _id = blast_obj.subject_gi
         elif mode == "ref":
-            id = blast_obj.subject_ref
+            _id = blast_obj.subject_ref
         else:
-            raise Exception
+            raise Exception("Unknown mode")
+        result.setdefault(_id, 0)
+        result[_id] += 1
 
-        result.setdefault(id, 0)
-        result[id] += 1
-
-    result = [ (id, result[id]) for id in result.keys() ]
+    result = [(_id, result[_id]) for _id in result.keys()]
     result.sort(reverse=True, key=lambda x: x[1])
     return result
 
 
 def get_all_blast_obj_from_blast(blast_file, mode="ref"):
-    ''' Get all gi to blast_obj list dictionary from blast output.'''
+    """
+    Get all GI to blast_obj list dictionary from blast output.
+    @param blast_file:
+    @param mode:
+    @return:
+    """
     result = {}
     for blast_obj in sc_iter_tab_file(blast_file, BlastResultModel, remove_starts_with="#"):
         if mode == "gi":
-            id = blast_obj.subject_gi
+            _id = blast_obj.subject_gi
         elif mode == "ref":
-            id = blast_obj.subject_ref
+            _id = blast_obj.subject_ref
         else:
             raise Exception
-        result.setdefault(id, [])
+        result.setdefault(_id, [])
         result[id].append(blast_obj)
     return result
-        
+
+
 def bl2seq_search_for_trs(trf_large_file, annotation_bl2seq_folder, temp_file):
-    ''' Pairwise search of TRs with bl2seq.
-    '''
+    """
+    Pairwise search of TRs with bl2seq.
+    @param trf_large_file:
+    @param annotation_bl2seq_folder:
+    @param temp_file:
+    @return:
+    """
     # read trf_objs
     print "Read TRs..."
     trf_objs = get_all_trf_objs(trf_large_file)
@@ -248,9 +266,16 @@ def bl2seq_search_for_trs(trf_large_file, annotation_bl2seq_folder, temp_file):
 
 
 def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file, skip_by_family=None, is_huge_alpha=False):
-    ''' Search TRs in given DB.
-    '''
-
+    """
+    Search TRs in given DB.
+    @param trf_large_file:
+    @param db:
+    @param annotation_self_folder:
+    @param temp_file:
+    @param skip_by_family:
+    @param is_huge_alpha:
+    @return:
+    """
     # count files
     for n, u in enumerate(sc_iter_tab_file(trf_large_file, TRModel)):
         pass
@@ -299,12 +324,14 @@ def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file,
         if is_huge_alpha:
             trids = _get_trids_from_blast_file(blast_output_file)
             alpha_sets[u.trf_id] = trids
-            print "ADDED ALPHA by %s with length %s" % (u.trf_id, len(trids)) 
+            print "ADDED ALPHA by %s with length %s" % (u.trf_id, len(trids))
 
 
 def _get_trids_from_blast_file(blast_output_file):
-    '''
-    '''
+    """
+    @param blast_output_file:
+    @return:
+    """
     result = set()
     gi2obj = get_all_blast_obj_from_blast(blast_output_file)
     for gi, hits in gi2obj.items():
