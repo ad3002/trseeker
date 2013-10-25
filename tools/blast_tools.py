@@ -81,24 +81,27 @@ def blastn(database, query, output, e_value=None):
 
 
 def create_db(fasta_file, output, verbose=False, title=None):
-    """ Create BLAST database.
-
-    >>> # string
-    >>> "%s%s -in %s -hash_index -dbtype nucl -parse_seqids -out %s" % (location, progr_name, fasta_file, output)
-
+    """  Create BLAST database.
+    Command example:
+        "%s%s -in %s -hash_index -dbtype nucl -parse_seqids -out %s" % (location, progr_name, fasta_file, output)
+        formatdb.exe -i E:\home\ad3002\work\mouse_wgs\fa\name.fa -p F -o T -V T -n mouse_wgs -t mouse_wgs
+        makeblastdb -in hs_chr.fa    hs_chr -title "Human chromosomes, Ref B37.1"
+    @todo: do something with parameters
+    @param fasta_file: fasta file
+    @param output: output database path
+    @param verbose: verbose
+    @param title: database title
+    @return: None
     """
-
-    # TODO: parameters
-
     if verbose:
-        print "Format fasta file for BLAST search ...";
+        print "Format fasta file for BLAST search ..."
 
     if OS == "win":
-        progr_name = "makeblastdb.exe"
+        program_name = "makeblastdb.exe"
     else:
-        progr_name = "makeblastdb"
+        program_name = "makeblastdb"
 
-    string = "%s%s -in %s -hash_index -dbtype nucl -parse_seqids -out %s" % (location, progr_name, fasta_file, output)
+    string = "%s%s -in %s -hash_index -dbtype nucl -parse_seqids -out %s" % (location, program_name, fasta_file, output)
     if title:
         string += " -title %s" % title
     if verbose:
@@ -107,68 +110,68 @@ def create_db(fasta_file, output, verbose=False, title=None):
     if verbose:
         print "Format fasta file for BLAST search complete!"
 
-    # formatdb.exe -i E:\home\ad3002\work\mouse_wgs\fa\name.fa -p F -o T -V T -n mouse_wgs -t mouse_wgs
-    # makeblastdb -in hs_chr.fa    hs_chr -title "Human chromosomes, Ref B37.1"
-
 
 def alias_tool(dblist, output, title):
-    """ Create alias database """
-
+    """ Create alias database
+    Command example:
+        blastdb_aliastool -dblist "nematode_mrna nematode_genomic" -dbtype nucl -out nematode_all -title "Nematode RefSeq mRNA + Genomic"
+    @param dblist: list of database paths
+    @param output: output database path
+    @param title: alias database title
+    @return: None
+    """
     if OS == "win":
-        progr_name = "blastdb_aliastool.exe"
+        program_name = "blastdb_aliastool.exe"
     else:
-        progr_name = "blastdb_aliastool"
-    string = "%s%s -dblist %s -dbtype nucl -out %s -title %s" % (location, progr_name, dblist, output, title)
+        program_name = "blastdb_aliastool"
+    string = "%s%s -dblist %s -dbtype nucl -out %s -title %s" % (location, program_name, dblist, output, title)
     print string
     os.system(string)
 
-    # blastdb_aliastool -dblist "nematode_mrna nematode_genomic" -dbtype nucl -out nematode_all -title "Nematode RefSeq mRNA + Genomic"
-
 
 def bl2seq(input1, input2, output):
-    """ Blast two seq."""
-
+    """
+    Compare two sequences with blast.
+    @todo: do something with parameters
+    @param input1: file with fasta
+    @param input2: file with fasta
+    @param output: output file
+    @return: None
+    """
     if OS == "win":
         _location = settings["blast_settings"]["blast_location_WIN"]
     else:
         _location = settings["blast_settings"]["blast_location_NIX"]
 
-    # TODO: parameters
     string = "perl %s -p blastn -i %s -j %s -o %s -F F -W 5 -D 1 -e %s" % (
-                                          _location,
-                                          input1,
-                                          input2, 
-                                          output, 
-                                          e)
-    print _location
-    print string[:100]
+                                                        _location,
+                                                        input1,
+                                                        input2,
+                                                        output,
+                                                        e)
+    print string
     os.system(string)
-    exit()
 
-def create_db_for_genome(file_pattern=None,
-                         chromosome_list=None,
-                         output=None,
-                         title=None
-                          ):
-    ''' Create BLAST DB for genome.
 
+def create_db_for_genome(file_pattern=None, chromosome_list=None, output=None, title=None):
+    """
+    Create BLAST database for genome.
     Example:
-
-    >>> create_db_for_genome(file_pattern="E:/eukaryota_genomes/mus_musculus/fasta/%s.fsa_nt",
-    ...                 chromosome_list=["wgs.AAHY.1", "wgs.AAHY.2", "wgs.AAHY.3", "wgs.AAHY.4", "wgs.AAHY.5", "wgs.AAHY.6", "wgs.CAAA"],
-    ...                 output="mus_musculus_wgsa",
-    ...                 title="Mouse WGSAs"
-    ...                   )
-
-    '''
+        create_db_for_genome(file_pattern="E:/eukaryota_genomes/mus_musculus/fasta/%s.fsa_nt",
+                     chromosome_list=["wgs.AAHY.1", "wgs.AAHY.2", "wgs.AAHY.3", "wgs.AAHY.4", "wgs.AAHY.5", "wgs.AAHY.6", "wgs.CAAA"],
+                     output="mus_musculus_wgsa",
+                     title="Mouse WGSAs")
+    @param file_pattern: path pattern
+    @param chromosome_list: list of chromosomes for file pattern
+    @param output: final database path
+    @param title: final database title
+    @return: None
+    """
     files = []
     for x in chromosome_list:
-
         fasta_file = file_pattern % x
-        print "DB construction: ", fasta_file
-
+        print "Database construction: ", fasta_file
         create_db(fasta_file, fasta_file, verbose=True, title=fasta_file.split("/")[-1])
-
         files.append(fasta_file)
     dblist = '"' + " ".join(files) + '"'
     title = '"%s"' % title
