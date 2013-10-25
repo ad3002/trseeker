@@ -4,20 +4,21 @@
 #@created: 07.09.2010
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com 
-'''
+"""
 Functions related to tulip graph format.
-'''
+"""
 
 import csv
 
-def format_distances_to_tulip(distance_file, tulip_file_output, cutoff=90):
-    """ Format and write network data to tulip format from distance_file with given cutoff (defaul=90).
-    
-    - distance_file: (node_a, node_b, distance)
-    - tulip_file_output: network in tulip format
-    - cutoff: distance cutoff
-    """
 
+def format_distances_to_tulip(distance_file, tulip_file_output, cutoff=90):
+    """
+    Format and write network data to tulip format from distance_file with given cutoff (default=90).
+    @param distance_file: distance_file tab delimited (node_a, node_b, distance)
+    @param tulip_file_output: output file with network data in tulip format
+    @param cutoff: distance cutoff (default=90)
+    @return: None
+    """
     NODES = set()
     EDGES = set()
 
@@ -35,7 +36,7 @@ def format_distances_to_tulip(distance_file, tulip_file_output, cutoff=90):
         node_str = "(nodes"
         for node in NODES:
             node_str = node_str + " " + str(node)
-        node_str = node_str + ")\n"
+        node_str = "%s)\n" % node_str
         fw.write(node_str)
         # write edges
         i = 0
