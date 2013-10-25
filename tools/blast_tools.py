@@ -7,12 +7,7 @@
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution.
 """
-Python BLAST wrapper.
-
-- blastn(database, input, output)
-- create_db(fasta_file, verbose=False, base_name=False, title=False)
-- bl2seq(input1, input2, output)
-
+BLAST wrapper.
 Used settings
 
 >>> location = settings["blast_settings"]["blast_location"]
@@ -23,12 +18,10 @@ Used settings
 
 """
 
-
-from trseeker.seqio.tab_file import sc_iter_tab_file
+from trseeker.seqio.tab_file import sc_iter_tab_files
 from trseeker.models.blast_model import BlastResultModel
 from trseeker.models.trf_model import TRModel
 import os
-import re
 
 from trseeker.settings import load_settings
 from trseeker.seqio.tr_file import get_all_trf_objs
@@ -42,45 +35,49 @@ e = settings["blast_settings"]["blast_e"]
 v = settings["blast_settings"]["blast_v"]
 OS = settings["trseeker"]["os"]
 
+
 def blastn(database, query, output, e_value=None):
-    """ Blastn. 
-
-    Input format parametr:
-
-    7 qseqid qgi qacc sseqid means sgi sacc qstart qend sstart send evalue bitscore score length pident nident mismatch positive gapopen gaps ppos frames qframe sframe
-
+    """ Blast fasta file versus blast database.
+    Available output format parameters:
+        7 qseqid qgi qacc sseqid means sgi sacc qstart qend sstart send evalue bitscore score length pident nident mismatch positive gapopen gaps ppos frames qframe sframe
+    Command examples:
+        blastn -query HTT_gene -task megablast -db hs_chr -db_soft_mask 30 -outfmt 7 -out HTT_megablast_mask.out -num_threads 4
+        $ echo 1786181 | ./blastn -db ecoli -outfmt "7 qacc sacc evalue qstart qend sstart send"
+    @todo: do something with parameters
+    @param database: database created with makeblastdb
+    @param query: fasta file
+    @param output: output file
+    @param e_value: e value, e.g. 1e-20
+    @return: None
     """
-
     if OS == "win":
-        progr_name = "blastn.exe"
+        program_name = "blastn.exe"
     else:
-        progr_name = "blastn"
-
-    # TODO: parameters
-    format = '"7 qseqid qgi qacc sseqid sallseqid means sgi sallgi sacc sallacc qstart qend sstart send qseq sseq evalue bitscore score length pident nident mismatch positive gapopen gaps ppos frames qframe sframe"'
-
-    format = '"7 qseqid qgi qacc sseqid means sgi sacc qstart qend sstart send evalue bitscore score length pident nident mismatch positive gapopen gaps ppos frames qframe sframe"'
+        program_name = "blastn"
+    format_string = '"7 qseqid qgi qacc sseqid means sgi sacc qstart qend sstart send evalue bitscore score length pident nident mismatch positive gapopen gaps ppos frames qframe sframe"'
 
     if not e_value:
         e_value = e
 
-    string = '%s%s -query %s -task blastn -db %s -out %s -evalue %s -word_size 10 -outfmt %s -dust no -soft_masking "false" -max_target_seqs %s -num_descriptions %s -num_threads 8 -num_alignments %s' % (location,
-                          progr_name,
-                          query,
-                          database,
-                          output,
-                          e_value,
-                          format,
-                          b,
-                          v,
-                          b,
-                          )
+    data = {
+        'location': location,
+        'program_name': program_name,
+        'query': query,
+        'database': database,
+        'output': output,
+        'e_value': e_value,
+        'format_string': format_string,
+        'b': b,
+        'v': v,
+    }
+
+    string = '%(location)s%(program_name)s -query %(query)s -task blastn -db %(database)s ' +\
+             '-out %(output)s -evalue %(e_value)s -word_size 10 -outfmt %(format_string)s ' +\
+             '-dust no -soft_masking "false" -max_target_seqs %(b)s -num_descriptions %(v)s ' +\
+             '-num_threads 8 -num_alignments %(b)s' % data
+
     print string
     os.system(string)
-
-    # Examples:
-    #    blastn -query HTT_gene -task megablast -db hs_chr -db_soft_mask 30 -outfmt 7 -out HTT_megablast_mask.out -num_threads 4
-    #    $ echo 1786181 | ./blastn -db ecoli -outfmt "7 qacc sacc evalue qstart qend sstart send"
 
 
 def create_db(fasta_file, output, verbose=False, title=None):
@@ -113,6 +110,7 @@ def create_db(fasta_file, output, verbose=False, title=None):
     # formatdb.exe -i E:\home\ad3002\work\mouse_wgs\fa\name.fa -p F -o T -V T -n mouse_wgs -t mouse_wgs
     # makeblastdb -in hs_chr.fa    hs_chr -title "Human chromosomes, Ref B37.1"
 
+
 def alias_tool(dblist, output, title):
     """ Create alias database """
 
@@ -125,6 +123,7 @@ def alias_tool(dblist, output, title):
     os.system(string)
 
     # blastdb_aliastool -dblist "nematode_mrna nematode_genomic" -dbtype nucl -out nematode_all -title "Nematode RefSeq mRNA + Genomic"
+
 
 def bl2seq(input1, input2, output):
     """ Blast two seq."""
@@ -186,6 +185,7 @@ def get_gi_list(gi_score_file, score_limit=90):
                 result.append(data[0])
     return result
 
+
 def get_all_gi_from_blast(blast_file, mode="gi"):
     ''' Get gi or ref -> hits list from blast output.'''
 
@@ -205,6 +205,7 @@ def get_all_gi_from_blast(blast_file, mode="gi"):
     result = [ (id, result[id]) for id in result.keys() ]
     result.sort(reverse=True, key=lambda x: x[1])
     return result
+
 
 def get_all_blast_obj_from_blast(blast_file, mode="ref"):
     ''' Get all gi to blast_obj list dictionary from blast output.'''
@@ -241,6 +242,7 @@ def bl2seq_search_for_trs(trf_large_file, annotation_bl2seq_folder, temp_file):
             with open(input_file2, "w") as fh:
                 fh.write(">%s\n%s" % (trf_objs[j].trf_id, input2))
             bl2seq(input_file1, input_file2, blast_output_file)
+
 
 def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file, skip_by_family=None, is_huge_alpha=False):
     ''' Search TRs in given DB.
@@ -295,7 +297,8 @@ def blastn_search_for_trs(trf_large_file, db, annotation_self_folder, temp_file,
             trids = _get_trids_from_blast_file(blast_output_file)
             alpha_sets[u.trf_id] = trids
             print "ADDED ALPHA by %s with length %s" % (u.trf_id, len(trids)) 
-            
+
+
 def _get_trids_from_blast_file(blast_output_file):
     '''
     '''
@@ -306,4 +309,3 @@ def _get_trids_from_blast_file(blast_output_file):
             if hit.score >= 90:
                 result.add(int(hit.subject_ref))
     return list(result)
-            
