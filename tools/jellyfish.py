@@ -109,6 +109,7 @@ def dump_kmers(db_file, kmers_file, dumpmintf):
 
 def query_kmers(db_file, query_hashes, both_strands=True, verbose=True):
     '''Query jellyfish database.
+    @return: dictionary hash to tf
     '''
     params = {
         "location": location,
@@ -133,11 +134,13 @@ def query_kmers(db_file, query_hashes, both_strands=True, verbose=True):
             return None
         for item in data[0].strip().split("\n"):
             if item:
-                print item
+                if verbose:
+                    print item
                 key, value = item.strip().split()
                 final_result[key] = value
             else:
-                print data
+                if verbose:
+                    print data
                 final_result[-1] = data[1]
     return final_result
 
