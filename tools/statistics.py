@@ -4,24 +4,33 @@
 #@created: 26.09.2010
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com 
-'''
-Simple statistics.
-'''
+"""
+Collection of functions related to simple statistics.
+"""
+
 import math
 from collections import defaultdict
 
+
 def get_variance(data):
-    '''Calculated variance for given list.
-    '''
+    """
+    Calculated variance for given list.
+    @param data: list of numbers
+    @return: variance
+    """
     if not data:
         raise Exception("Empty arrays for variance computation.")
     mean = get_mean(data)
     N = float(len(data))
     return sum([ (x-mean)**2 for x in data ])/N
 
+
 def get_sigma(data):
-    ''' Calculate sigma, return sum(module(xi - mean).
-    '''
+    """
+    Calculate sigma, return sum(module(xi - mean).
+    @param data: list of numbers
+    @return: sigma
+    """
     if not data:
         raise Exception("Empty arrays for variance computation.")
     n = len(data)
@@ -30,57 +39,65 @@ def get_sigma(data):
     mean = get_mean(data)
     return sum( [ abs(x - mean) for x in data ] )
 
+
 def get_mean(data):
-    ''' Calculated mean for given list.
-    '''
+    """
+    Calculated mean for given list.
+    @param data: list of numbers
+    @return: arithmetic mean
+    """
     if not data:
         raise Exception("Empty data.")
     sum_x = sum(data)
     mean = float(sum_x) / len(data)
     return mean
 
+
 def get_standard_deviation(variance):
-    ''' Get sample deviation for variance.
-    '''
+    """
+    Get sample deviation for variance.
+    @param variance:
+    @return: standard deviation
+    """
     if variance<0:
         raise Exception("Wrong variance value %s" % variance)
     return math.sqrt(variance)
 
+
 def t_test(sample_mean, dist_mean, variance, N):
-    ''' T test.
-    
-    - sample_mean: sample mean
-    - dist_mean: distribution mean
-    - variance: sample variance
-    - N: sample size
-    '''
+    """
+    Compute t-test.
+    @param sample_mean: sample mean
+    @param dist_mean: distribution mean
+    @param variance: sample variance
+    @param N: sample size
+    @return: t_test
+    """
     if N<=0:
         raise Exception("Wrong N value %s" % N)
     if variance<=0:
         raise Exception("Wrong variance value %s" % variance)
     return (sample_mean-dist_mean)/float( math.sqrt( variance/N ) )
 
-def get_element_frequences(data):
-    ''' Get defaultdictionary of elements frequences in given list
-    TODO: refr this.
-    '''
+
+def get_element_frequencies(data):
+    """
+    Get default dictionary of element frequencies in given list
+    @param data:
+    @return: default dictionary element to tf
+    """
     d = defaultdict(int)
     for element in data:
         d[element] += 1
     return d
 
+
 def get_simple_statistics(data):
-    ''' Return dictionary containing simple statistics for given list. 
-    Dictionary keys: mean, variance, sigma, sample_derivation.
-    
-    >>> result = {
-    >>>    'mean': get_mean(data),
-    >>>    'variance': get_variance(data),
-    >>>    'sigma': get_sigma(data),
-    >>>    'standard_deviation': get_standard_deviation(data),
-    >>> }
-    
-    '''
+    """
+    Compute simple statistics
+    @param data: list of numbers
+    @return: dictionary with keys (mean, variance, sigma, sample_derivation)
+    """
     variance = get_variance(data)
     mean = get_mean(data)
     result = {
