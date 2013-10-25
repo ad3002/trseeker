@@ -4,16 +4,24 @@
 #@created: 07.06.2011
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com 
+"""
+Function related to TRs classification.
+"""
 
 from trseeker.seqio.tab_file import sc_iter_tab_file
-from collections import defaultdict
 from trseeker.tools.sequence_tools import fix_strand
 from trseeker.models.trf_model import TRModel
 from trseeker.models.trf_model import TRsClassificationModel
 
+
 def get_trs_types(trf_all_file, trf_all_class_file, settings):
-    ''' Classificate tandem repeats types.
-    '''
+    """
+    Classify TRs into raw types.
+    @param trf_all_file: input file with TRs
+    @param trf_all_class_file: input file with TRs classification
+    @param settings: PySatDNA settings dictionary
+    @return: (trs_types, class_objs, trf_objs)
+    """
     trs_types = {
         "all": 0,
         "micro": 0,
