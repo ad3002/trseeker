@@ -1,6 +1,19 @@
-'''
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#@created: 07.09.2010
+#@author: Aleksey Komissarov
+#@contact: ad3002@gmail.com
+"""
 Jellyfish python wrapper
-'''
+
+Used settings:
+settings["blast_settings"]["jellyfish_location"]
+settings["jellyfish_settings"]["hash_size"]
+settings["jellyfish_settings"]["threads"]
+settings["jellyfish_settings"]["both_strands"]
+"""
+
 import os
 from trseeker.settings import load_settings
 from PyExp import sc_iter_filepath_folder
@@ -12,18 +25,16 @@ from trseeker.tools.sequence_tools import get_revcomp
 settings = load_settings()
 location = settings["blast_settings"]["jellyfish_location"]
 
-def count_kmers(input_file, ouput_prefix, k, mintf=None):
-    '''Count kmers with Jellyfish.
 
-    Args:
-        input_fasta: An input fasta or fastq file name.
-        ouput_prefix: An output path with file prefix.
-        k: A k-mer length.
-        mintf: Count only k-mers with frequency greater than mintf.
-
-    Returns:
-        None.
-    '''
+def count_kmers(input_file, output_prefix, k, mintf=None):
+    """
+    Count kmers with Jellyfish.
+    @param input_file: input fasta or fastq file name
+    @param output_prefix: output path with file prefix
+    @param k: k-mer length
+    @param mintf: count only kmers with frequency greater than mintf
+    @return: None
+    """
     params = {
         "location": location,
         "input_fasta": input_file,
@@ -32,46 +43,54 @@ def count_kmers(input_file, ouput_prefix, k, mintf=None):
         "hash_bits": settings["jellyfish_settings"]["hash_bits"],
         "threads": settings["jellyfish_settings"]["threads"],
         "both_strands": settings["jellyfish_settings"]["both_strands"],
-        "ouput_prefix": ouput_prefix,
+        "output_prefix": output_prefix,
         "mintf": "",
     }
     if mintf:
         params["mintf"] = "--lower-count=%s" % mintf
-    command = "%(location)s count %(mintf)s -m %(k)s -o %(ouput_prefix)s -c %(hash_bits)s -s %(hash_size)s %(both_strands)s -t %(threads)s %(input_fasta)s" % params
+    command = "%(location)s count %(mintf)s -m %(k)s -o %(output_prefix)s -c %(hash_bits)s -s %(hash_size)s %(both_strands)s -t %(threads)s %(input_fasta)s" % params
     print "Execute:", command
-    return os.system(command)
+    os.system(command)
 
-def merge_kmers(folder, ouput_prefix, ouput_file):
-    '''Merge Jellyfish count output to one file.
-    '''
-    if not ouput_file.endswith(".jf"):
-        ouput_file += ".jf"
+
+def merge_kmers(folder, output_prefix, output_file):
+    """
+    Merge Jellyfish count output to one file.
+    @param folder: folder with input files
+    @param output_prefix: output prefix
+    @param output_file: output file
+    @return: None
+    """
+    if not output_file.endswith(".jf"):
+        output_file += ".jf"
     params = {
         "location": location,
-        "ouput_file": ouput_file,
-        "ouput_prefix": ouput_prefix,
+        "output_file": output_file,
+        "output_prefix": output_prefix,
     }
     file_count = 0
     for file_name in sc_iter_filepath_folder(folder, mask="."):
-        if ouput_prefix in file_name:
-        # head, tail = os.path.split(ouput_file)
-        # if tail in file_name:
+        if output_prefix in file_name:
             file_count += 1
-    assert file_count>0
+    assert file_count > 0
     if file_count == 1:
-        command = "cp %(ouput_prefix)s_0 %(ouput_file)s" % params
+        command = "cp %(output_prefix)s_0 %(output_file)s" % params
     else:
-        command = "%(location)s merge -o %(ouput_file)s %(ouput_prefix)s\_*" % params
+        command = "%(location)s merge -o %(output_file)s %(output_prefix)s\_*" % params
     print "Execute:", command
     os.system(command)
-
-    command = "rm %(ouput_prefix)s_*" % params
+    command = "Execute: rm %(output_prefix)s_*" % params
     print command
     os.system(command)
 
+
 def stats_kmers(db_file, stats_file):
-    '''Compute statistics.
-    '''
+    """
+    Compute statistics for kmers.
+    @param db_file: jf db file
+    @param stats_file: output stats file
+    @return: None
+    """
     params = {
         "location": location,
         "db_file": db_file,
@@ -81,9 +100,14 @@ def stats_kmers(db_file, stats_file):
     print "Execute:", command
     os.system(command)
 
+
 def histo_kmers(db_file, histo_file):
-    '''Compute frequence histogram.
-    '''
+    """
+    Compute frequencies histogram.
+    @param db_file: jf db file
+    @param histo_file: histogram output file
+    @return: None
+    """
     params = {
         "location": location,
         "db_file": db_file,
@@ -93,9 +117,15 @@ def histo_kmers(db_file, histo_file):
     print "Execute:", command
     os.system(command)
 
+
 def dump_kmers(db_file, kmers_file, dumpmintf):
-    '''Dump k-mers database to tab-delimited file.
-    '''
+    """
+    Dump and sort k-mers database to tab-delimited file.
+    @param db_file: jf db file
+    @param kmers_file: output kmer file
+    @param dumpmintf: minimum tf to dump
+    @return: None
+    """
     params = {
         "location": location,
         "db_file": db_file,
@@ -107,10 +137,16 @@ def dump_kmers(db_file, kmers_file, dumpmintf):
     os.system(command)
     sort_file_by_int_field(kmers_file, 1)
 
+
 def query_kmers(db_file, query_hashes, both_strands=True, verbose=True):
-    '''Query jellyfish database.
+    """
+    Query jellyfish database.
+    @param db_file: jf db file
+    @param query_hashes: kmers to query
+    @param both_strands: use both strands
+    @param verbose: verbose
     @return: dictionary hash to tf
-    '''
+    """
     params = {
         "location": location,
         "db_file": db_file,
@@ -144,17 +180,16 @@ def query_kmers(db_file, query_hashes, both_strands=True, verbose=True):
                 final_result[-1] = data[1]
     return final_result
 
-def get_kmer_db_and_fasta(folder, input_file, kmers_file, k=23, mintf=None):
-    '''Count kmer, merge them, and save to tab-delimited kmers_file.
-    '''
-    count_kmers(input_file, input_file, k, mintf=mintf)
-    merge_kmers(folder, input_file, input_file)
-    db_file = "%s.jf" % input_file
-    dump_kmers(db_file, kmers_file)
 
 def query_and_write_coverage_histogram(db_file, query_sequence, output_file, k=23):
-    '''Save coverage histogram into output_file for given query_sequence.
-    '''
+    """
+    Save coverage histogram into output_file for given query_sequence.
+    @param db_file:
+    @param query_sequence:
+    @param output_file:
+    @param k:
+    @return:
+    """
     index = process_list_to_kmer_index([query_sequence], k, docids=False, cutoff=None)
     query_hashes = [x[0] for x in index]
     data =  query_kmers(db_file, query_hashes, both_strands=True)
@@ -171,10 +206,35 @@ def query_and_write_coverage_histogram(db_file, query_sequence, output_file, k=2
                 p2 = int(data[rkmer])
             p = max(p1,p2,p0)
             fh.write("%s\t%s\t%s\n" % (kmer, i, p))
-   
-def sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf, dumpmintf):
-    '''
-    '''
+
+
+def sc_count_and_dump_kmers_for_folder(folder, output_prefix, kmers_file, k=23, mintf=None):
+    """
+    Count kmers, merge them, and save to tab-delimited kmers_file.
+    @param folder: folder with input files
+    @param output_prefix: prefix for input files
+    @param kmers_file: output dump file
+    @param k: kmer length
+    @param mintf: minimal tf for count
+    @return: None
+    """
+    count_kmers(input_file, output_prefix, k, mintf=mintf)
+    merge_kmers(folder, input_file, input_file)
+    db_file = "%s.jf" % input_file
+    dump_kmers(db_file, kmers_file)
+
+def sc_count_and_dump_kmers_for_file(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf, dumpmintf):
+    """
+    Count kmers, merge them, and save to tab-delimited kmers_file.
+    @param fasta_file: fasta file
+    @param jellyfish_data_folder: output jellyfish folder
+    @param jf_db: jf database output file
+    @param jf_dat: jf dump output file
+    @param k: kmer length
+    @param mintf: minimal tf for count
+    @param dumpmintf: minimal tf for dump
+    @return: None
+    """
     ouput_prefix = os.path.join(
             jellyfish_data_folder,
             "%s___" % jf_db,
@@ -184,14 +244,13 @@ def sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mi
     dump_kmers(jf_db, jf_dat, dumpmintf=dumpmintf)
     print "Sort data..."
     temp_file = jf_dat+".temp"
-    D = {
+    data = {
         "in": jf_dat,
         "out": temp_file,
     }
-    command = "sort -k2nr %(in)s > %(out)s" % D
+    command = "sort -k2nr %(in)s > %(out)s" % data
     print command
     os.system(command)
-    command = "mv %(out)s %(in)s" % D
+    command = "mv %(out)s %(in)s" % data
     print command
     os.system(command)
-    
