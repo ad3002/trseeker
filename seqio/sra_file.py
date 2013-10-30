@@ -77,6 +77,10 @@ class FastqObj(object):
     def gc(self):
         return get_gc(self.seq)
 
+    @property
+    def length(self):
+        return len(self.seq)
+
     def trim(self):
         '''
         '''
@@ -101,6 +105,9 @@ class FastqObj(object):
         '''
         '''
         raise NotImplemented
+
+class PERun(object):
+    pass
 
 def fastq_reader(fastq_file, phred33=False):
     with open(fastq_file) as fh:
