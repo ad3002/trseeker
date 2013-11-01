@@ -105,7 +105,7 @@ class NCBIFtpIO(AbstractFtpIO):
                 self.unzip(output_file)
                 print "Done %i from %s" % (i, n)
 
-    def download_chromosomes_in_fasta(self, ftp_address, name, output_folder):
+    def download_chromosomes_in_fasta(self, ftp_address, name, output_folder, unzip=False):
         """ Download all WGS files from NCBI in fasta format."""
         paths = ftp_address.split("/")
         if paths[-1].endswith("/"):
@@ -127,11 +127,12 @@ class NCBIFtpIO(AbstractFtpIO):
                 print "--> was downloaded early"
                 continue
             self.get(file, output_file)
-            print "Unzip..."
-            self.unzip(output_file)
+            if unzip:
+                print "Unzip..."
+                self.unzip(output_file)
             print "Done %i from %s" % (i, n)
 
-    def download_all_wgs_in_gbff(self, output_folder):
+    def download_all_wgs_in_gbff(self, output_folder, unzip=False):
         """ Download all WGS files from NCBI in genbank format."""
         file_suffix = "gbff"
         path = ["genbank", "wgs"]
@@ -144,10 +145,11 @@ class NCBIFtpIO(AbstractFtpIO):
             print "Start download: %s ..." % file,
             print " to %s" % output_file
             self.get(file, output_file)
-            print "Unzip..."
-            self.unzip(output_file)
+            if unzip:
+                print "Unzip..."
+                self.unzip(output_file)
 
-    def download_trace_data(self, taxon, output_folder):
+    def download_trace_data(self, taxon, output_folder, unzip=False):
         """ Download Trace data."""
         file_suffix = "gbff"
         path = ["pub", "TraceDB", taxon]
@@ -156,14 +158,15 @@ class NCBIFtpIO(AbstractFtpIO):
         files = self.ls()
         files = [ item for item in files if "fasta" in item or "clip" in item ] 
         index = set()
-        for file in files:
-            output_file = os.path.join(output_folder, file)
-            print "Start download: %s ..." % file,
+        for file_name in files:
+            output_file = os.path.join(output_folder, file_name)
+            print "Start download: %s ..." % file_name,
             print " to %s" % output_file
-            self.get(file, output_file)
-            print "Unzip..."
-            self.unzip(output_file)
-            index.add(file.split(".")[-2])
+            self.get(file_name, output_file)
+            if unzip:
+                print "Unzip..."
+                self.unzip(output_file)
+            index.add(file_name.split(".")[-2])
         return index
 
     def download_sra_from_ddbj(self, ftp_address, output_folder):
