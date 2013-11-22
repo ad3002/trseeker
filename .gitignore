@@ -34,3 +34,4 @@ pip-log.txt
 
 .DS_store
 websites/flask/hello/log.txt
+/.idea/
