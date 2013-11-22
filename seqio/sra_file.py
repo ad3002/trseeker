@@ -81,6 +81,10 @@ class FastqObj(object):
     def length(self):
         return len(self.seq)
 
+    @property
+    def read_id(self):
+        return int(self.head.split()[0].split(".")[-1])
+
     def trim(self):
         '''
         '''
