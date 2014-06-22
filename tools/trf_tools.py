@@ -154,7 +154,7 @@ def trf_worker(args):
         shutil.copyfile(result_file, dist_file)
         os.unlink(result_file)
 
-def trf_search_in_dir_parallel(folder, verbose=True, file_suffix=".fa", output_folder=None, threads=1):
+def trf_search_in_dir_parallel(folder, verbose=True, file_suffix=".fa", output_folder=None, threads=30):
     """ TRF search in each file in the given folder.
     
     - folder with fasta files
