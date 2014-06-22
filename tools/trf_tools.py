@@ -23,7 +23,7 @@ from multiprocessing import Pool
 
 settings = load_settings()
 
-def trf_search(file_name):
+def trf_search(file_name, pacbio=False):
     """ TRF search in fasta file."""
 
     # TRF search, only data, mask
@@ -35,6 +35,8 @@ def trf_search(file_name):
                                        settings["trf_settings"]["trf_threshold"],
                                        settings["trf_settings"]["trf_length"],
                                        )
+    if pacbio:
+        params = "2 3 5 80 10 50 2000"
     if settings["trf_settings"]["trf_masked_file"]:
         params += " -m"
     if settings["trf_settings"]["trf_flanked_data"]:
