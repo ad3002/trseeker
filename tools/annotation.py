@@ -4,7 +4,9 @@
 #@created: 07.09.2010
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com
-
+"""
+Functions related to annotation data.
+"""
 
 def compute_intersection_intervals(data_a, data_b):
     """ Compute intersection between two datasets.
