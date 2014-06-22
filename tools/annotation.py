@@ -110,23 +110,23 @@ def test_compute_intersection_intervals():
     @return: None
     """
     data_a = [
-    ("chrA", 0, 10, 0),
-    ("chrA", 25, 40, 1),
-    ("chrA", 45, 50, 2),
-    ("chrA", 60, 70, 3),
-    ("chrA", 80, 90, 4),
-    ("chrA", 100, 150, 5),
-    ("chrA", 250, 270, 6),
-    ("chrA", 290, 340, 7),
+        ("chrA", 0, 10, 0),
+        ("chrA", 25, 40, 1),
+        ("chrA", 45, 50, 2),
+        ("chrA", 60, 70, 3),
+        ("chrA", 80, 90, 4),
+        ("chrA", 100, 150, 5),
+        ("chrA", 250, 270, 6),
+        ("chrA", 290, 340, 7),
     ]
 
     data_b = [
-    ("chrA", 25, 40, 10),
-    ("chrA", 47, 49, 20),
-    ("chrA", 59, 90, 30),
-    ("chrA", 80, 90, 40),
-    ("chrA", 125, 175, 50),
-    ("chrA", 275, 280, 60),
+        ("chrA", 25, 40, 10),
+        ("chrA", 47, 49, 20),
+        ("chrA", 59, 90, 30),
+        ("chrA", 80, 90, 40),
+        ("chrA", 125, 175, 50),
+        ("chrA", 275, 280, 60),
     ]
     data = compute_intersection_intervals(data_a, data_b)
     assert data[0] == ('chrA', 25, 40, 1, 'chrA', 25, 40, 10, 'match')
