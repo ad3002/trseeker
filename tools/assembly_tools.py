@@ -5,13 +5,12 @@
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com 
 """
-Functions related to assembler statistics
+Functions related to assembly statistics
 """
 
 
 def get_n50(lengths):
-    """
-    Get (N50 contig length, N50, shortest contig, longest contig) statistics for list of contigs lengths.
+    """ Get (N50 contig length, N50, shortest contig, longest contig) statistics for list of contigs lengths.
     @param lengths: a list of contig lengths
     @return (N50, L50, shortest contig, longest contig)
     """
