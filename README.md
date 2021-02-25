@@ -58,6 +58,7 @@
 
 
 <a name="_toolkit_intro"/>
+
 ## Introduction
 
 Framework состоит из следующих частей:
@@ -67,6 +68,7 @@ Framework состоит из следующих частей:
 - инструменты работы с этими данными
 
 <a name="_toolkit_settings"/>
+
 ## Настройки фреймворка
 
 В файле settings.py:
@@ -125,8 +127,11 @@ ngrams_settings:
     ngram_m: 10000000
 ```
 <a name="_models"/>
+
 ## Avaliable Models
+
 <a name="_models_seq"/>
+
 ### DNA Sequence
 
 ```python
@@ -201,6 +206,7 @@ Chromosome name is **?** or setted with parse_chromosome_name(head["description"
 Sequence is cleared with clear_sequence(s) function. Lowercase and all non-DNA characters replacing with **n**. If the sequence has **n** then it is gapped.
 
 <a name="_models_trf"/>
+
 ### TRF results
 
 ```python
@@ -351,6 +357,7 @@ print class_obj.network_head()
 ```
 
 <a name="_models_organism"/>
+
 ### Organism model
 
 ```python
@@ -367,6 +374,7 @@ Attributes:
 - organism_genome_assemblies
 
 <a name="_models_dataset"/>
+
 ### Dataset model
 
 ```python
@@ -387,6 +395,7 @@ Attributes:
 - dataset_trs_fraq (float)
 
 <a name="_models_blast"/>
+
 ### Blast Results Model
 
 ```python
@@ -432,6 +441,7 @@ ref_to_blast_obj = read_blast_file(file_name)
 ```
 
 <a name="_models_chr"/>
+
 ### Chromosome model
 
 ```python
@@ -459,6 +469,7 @@ Attributes:
 - chr_sum_gc
 
 <a name="_models_wgs"/>
+
 ### WGS assembly model
 
 ```python
@@ -497,6 +508,7 @@ wgs_obj.clear_trf()
 ```
 
 <a name="_models_genome"/>
+
 ### Genome model
 
 ```python
@@ -550,6 +562,7 @@ Table fields:
 ```
 
 <a name="_models_kmer"/>
+
 ### Ngram/kmer model
 
 ```python
@@ -578,6 +591,7 @@ Attributes
 - families (dict)
 
 <a name="_models_kmers"/>
+
 ### Kmer index model
 
 ```python
@@ -659,9 +673,12 @@ read_kmer_index(ngram_index_file, micro_kmers, cutoff=1)
 ```
 
 <a name="_io"/>
+
 ## IO functions
 
+
 <a name="_io_tab"/>
+
 ### Tab file
 
 ```python
@@ -713,6 +730,7 @@ for data in sc_read_simple_tab_file(file_name):
 ```
 
 <a name="_io_block"/>
+
 ### Block file
 
 ```python
@@ -726,6 +744,7 @@ for (head, body, start, next) in reader.read_online(file_name):
 Avaliable all functions from parent class AbstractFileIO from PyExp package.
 
 <a name="_io_fasta"/>
+
 ### Fasta file
 
 ```python
@@ -769,6 +788,7 @@ sort_fasta_file_by_length(file_name)
 ```
 
 <a name="_io_gbff"/>
+
 ### GBFF file
 
 ```python
@@ -805,6 +825,7 @@ sc_parse_gbff_in_folder("/home/user/", "/home/user/fasta", "fa", "mouse")
 
 
 <a name="_io_ftp"/>
+
 ### FTP IO
 
 ```python	
@@ -833,6 +854,7 @@ download_with_aspera_from_ncbi(source, destination)
 ```
 
 <a name="_io_ncbi_ftp"/>
+
 ### NCBI ftp
 
 ```python
@@ -856,6 +878,7 @@ reader.download_with_aspera(local_path, remove_server, remote_path)
 ```
 
 <a name="_io_mongo"/>
+
 ### Mongo db reader
 
 Not implemented yet.
@@ -868,6 +891,7 @@ db = reader.get_trdb_conn()
 ```
 
 <a name="_io_trf"/>
+
 ### TRF file
 
 #### Useful functions:
@@ -957,6 +981,7 @@ read_trid2ngrams(annotation_ngram_folder, trf_large_file)
 TODO: rewrite this with AbstractReaders
 
 <a name="_io_ngram"/>
+
 ### Ngram file
 
 TODO: rewrite this with AbstractReaders
@@ -980,6 +1005,7 @@ save_distance_data(dist_file, distances)
 ```
 
 <a name="_io_blast"/>
+
 ### Blast results file
 
 ```python	
@@ -1056,6 +1082,7 @@ While blast results parsing:
 - joined gapped if gap less than gap_size paramter
 
 <a name="_io_sra"/>
+
 ### SRA file
 
 TODO: move FastqObj to models
@@ -1106,9 +1133,11 @@ for fastq_obj in fastq_reader(fastq_file, phred33=False):
 
 
 <a name="_tools"/>
+
 ## Toolkit
 
 <a name="_annotation"/>
+
 ### Assembly annotation
 
 Compute intersection between two datasets.
@@ -1132,6 +1161,7 @@ for x in compute_intersection_intervals(data_a, data_b):
 ```
 
 <a name="_assembly_tools"/>
+
 ### Assembly tools
 
 ```python
@@ -1141,6 +1171,7 @@ N50_contig_length, N50, shortest_seq, longest_seq = get_N50(lengths)
 ```
 
 <a name="_tools_tulip"/>
+
 ### Tulip files
 
 Format and write network data to tulip format from distance_file with given cutoff (defaul=90).
@@ -1156,6 +1187,7 @@ format_distances_to_tulip(distance_file, tulip_file_output, cutoff=90)
 ```
 
 <a name="_tools_trs_nomen"/>
+
 ### TRs nomenclature
 
 TODO: rename package
@@ -1180,6 +1212,7 @@ join_families_with_common(families)
 ```
 
 <a name="_tools_sequence"/>
+
 ### Sequence tools
 
 ```python
@@ -1263,6 +1296,7 @@ remove_consensus_redundancy(trf_objs)
 ```
 
 <a name="_tools_var"/>
+
 ### Various useful functions for working with files
 
 ```python
@@ -1276,6 +1310,7 @@ from trseeker.tools.seqfile import *
 - sort_file_by_int_field(file_name, field)
 
 <a name="_tools_other"/>
+
 ### Other useful functions (other_tools.py)
 
 ```python
@@ -1317,6 +1352,7 @@ clear_fragments_redundancy(data, extend=False, same_case_func=None)
 
 
 <a name="_tools_kmers"/>
+
 ### Ngrams (kmers) tools
 
 ```python
@@ -1409,6 +1445,7 @@ Compute kmer coverage and set of kmers:
 ```
 
 <a name="_tools_ed"/>
+
 ### Edit distance functions
 
 ```python
@@ -1458,6 +1495,7 @@ hamming_distance(s1, s2)
 ```
 
 <a name="_tools_repbase"/>
+
 ### Working with Repbase files
 
 TODO: move to Readers
@@ -1471,6 +1509,7 @@ join_repbase_files(input_folder, output_file)
 ```
 
 <a name="_tools_trace"/>
+
 ### Working with Trace files
 
 ```python
@@ -1489,6 +1528,7 @@ get_clip_data(clip_file_name)
 
 
 <a name="_tools_stat"/>
+
 ### Function related to statistics
 
 ```python
@@ -1513,6 +1553,7 @@ get_simple_statistics(data)
 ```
 
 <a name="_tools_parsers"/>
+
 ### Parsers
 
 ```python
@@ -1534,6 +1575,7 @@ get_wgs_prefix_from_head(head)
 ```
 
 <a name="_tools_trf"/>
+
 ### Functions related to TRF
 ```python
 from trseeker.tools.trf_tools import *
@@ -1595,6 +1637,7 @@ fix_chr_names(trf_file, temp_file_name=None, case=None)
 
 
 <a name="_tools_trs"/>
+
 ### Working with TRs datasets
 ```python
 from trseeker.tools.trs_dataset import *
@@ -1615,6 +1658,7 @@ COLORS_50 = {
 - create_mathematice_dataset_by_family(trs_dataset, path_to_mathematica_folder, min_borders, max_borders)
 
 <a name="_tools_sra"/>
+
 ### Working with SRA data
 ```python
 from trseeker.tools.sra_tools import *
@@ -1647,6 +1691,7 @@ write_ngrams(input_file, output_ngram, NGRAM_N)
 
 
 <a name="_tools_patterns"/>
+
 ### Working with sequence patterns
 ```python
 from trseeker.tools.sequence_patterns import *
@@ -1682,6 +1727,7 @@ get_double_pattern(pattern_static, pattern_dynamic)
 - pattern_search(name, sequence, pattern_function, pattern_function_params)
 
 <a name="_tools_blast"/>
+
 ### Working with BLAST
 ```python
 from trseeker.tools.blast_tools import *
@@ -1699,6 +1745,7 @@ from trseeker.tools.blast_tools import *
 - bl2seq_search_for_trs(trf_large_file, annotation_bl2seq_folder, temp_file)
 
 <a name="_tools_sa"/>
+
 ### Working with suffix arrays
 ```python
 from trseeker.tools.sa_tools import *
@@ -1735,6 +1782,7 @@ iterate_sa_corpus(corpus)
 ```
 
 <a name="_tools_ncbi_genome"/>
+
 ### Working with NCBI genome information
 ```python
 from trseeker.tools.ncbi_genomes import *
@@ -1754,6 +1802,7 @@ print_add_project_data(genome_projects, pid_type, pr_type)
 ```
 
 <a name="_tools_networks"/>
+
 ### Working with graph data
 ```python
 from trseeker.tools.network_tools import *
@@ -1775,6 +1824,7 @@ compute_network(network_file, output_file_pattern, id2nodename)
 - analyse_networkx(G, network_data, output_file_pattern, id2nodename)
 
 <a name="_tools_ncbi_ann"/>
+
 ### Working with NCBI annotations
 ```python
 from trseeker.tools.ncbi_annotation_tools import *
@@ -1790,6 +1840,7 @@ get_gene_list(file_gene_list, color='#000000', left_padding=30, gene_group_label
 ``` 
 
 <a name="_tools_jellyfish"/>
+
 ### Jellyfish wrapper
 
 ```python
@@ -1829,6 +1880,7 @@ sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf,
 ```
 
 <a name="_trs_types"/>
+
 ### Classifiction TRs in types
 
 Classification of TRs into types.
@@ -1872,6 +1924,7 @@ settings["other"]["trs_types"]["min_entropy"]
 ```
 
 <a name="_tools_tree"/>
+
 ### Tree data
 
 ```python
