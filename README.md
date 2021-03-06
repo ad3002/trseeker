@@ -1,4 +1,4 @@
-# Trseeker: a Python framework for working with noncoding DNA
+# Trseeker: a Python library and framework for working with various genomics data
 
 ## Contents
 
