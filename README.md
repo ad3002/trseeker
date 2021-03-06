@@ -1844,7 +1844,7 @@ get_gene_list(file_gene_list, color='#000000', left_padding=30, gene_group_label
 ### Jellyfish wrapper
 
 ```python
-from trseeker.tools.jellyfish import *
+from trseeker.tools.jellyfish_tools import *
 
 # jellyfish settings:
 location = settings["blast_settings"]["jellyfish_location"]
@@ -1874,7 +1874,7 @@ query_and_write_coverage_histogram(db_file, query_sequence, output_file, k=23)
 Shortcut:
 
 ```python
-from trseeker.tools.jellyfish import sc_compute_kmer_data
+from trseeker.tools.jellyfish_tools import sc_compute_kmer_data
 
 sc_compute_kmer_data(fasta_file, jellyfish_data_folder, jf_db, jf_dat, k, mintf, dumpmintf)
 ```

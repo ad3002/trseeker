@@ -57,7 +57,12 @@ class AbstractFtpIO(object):
     def get(self, file, output_file):
         """ Save file in output file."""
         with open(output_file, "ab") as fh:
+            print("Downloading: %s" % file)
             self.ftp.retrbinary("RETR %s" % file, lambda x: fh.write(x))
+
+    def get_aspera_ncbi(self, source, destination):
+        """ Download with aspera."""
+        download_with_aspera_from_ncbi(source, destination)
 
     def size(self, file_name):
         """ Return size of file.
@@ -86,8 +91,9 @@ def download_with_aspera_from_ncbi(source, destination):
         'dest': destination,
 
     }
-    command = "~/.aspera/connect/bin/ascp -i ~/.aspera/connect/etc/asperaweb_id_dsa.putty -Q -l1000m anonftp@ftp-private.ncbi.nlm.nih.gov:%(source)s %(dest)s" % data
+    command = "~/.aspera/connect/bin/ascp -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh -k1 -Tr -l100m anonftp@ftp-private.ncbi.nlm.nih.gov:%(source)s %(dest)s" % data
     print command
     os.system(command)
+
 
 

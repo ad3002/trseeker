@@ -10,6 +10,7 @@ from trseeker.tools.parsers import trf_parse_param, trf_parse_head, \
     parse_fasta_head, parse_chromosome_name, trf_parse_line
 from trseeker.tools.sequence_tools import clear_sequence, get_gc
 
+
 class TRModel(AbstractModel):
     """ Class for tandem repeat wrapping
     
@@ -47,7 +48,7 @@ class TRModel(AbstractModel):
     GC%:
     
     - trf_array_gc,
-    -  trf_consensus_gc
+    - trf_consensus_gc
     
     Other:
     
@@ -183,8 +184,7 @@ class TRModel(AbstractModel):
         - body: parsed trf body
         - line: parsed trf line
         """
-
-        self.trf_param = trf_parse_param(body)
+        self.trf_param = 0
         self.trf_head = trf_parse_head(head).strip()
         self.trf_gi = parse_fasta_head(self.trf_head)[0]
         self.trf_chr = parse_chromosome_name(self.trf_head)
@@ -205,12 +205,12 @@ class TRModel(AbstractModel):
          self.trf_consensus,
          self.trf_array) = trf_parse_line(line)
 
-        self.trf_pvar = 100 - int(self.trf_pmatch)
+        self.trf_pvar = int(100 - float(self.trf_pmatch))
 
         try:
             self.trf_l_ind = int(self.trf_l_ind)
         except:
-            print self
+            print(self)
 
         self.trf_r_ind = int(self.trf_r_ind)
         self.trf_period = int(self.trf_period)
@@ -276,29 +276,26 @@ class TRModel(AbstractModel):
 
     
     def get_gff3_string(self, 
-                                          chromosome=True, 
-                                          trs_type="complex_tandem_repeat", 
-                                          probability=1000,
-                                          tool="PySatDNA",
-                                          prefix=None,
-                                          properties={
-                                              "id":"trf_id",
-                                              "family": "trf_family_self",
-                                          }):
+                        chromosome=True, 
+                        trs_type="complex_tandem_repeat", 
+                        probability=1000,
+                        tool="PySatDNA",
+                        prefix=None,
+                        properties=None,
+                        force_header=False):
       '''Return TR in gff format.
       '''
-      if chromosome:
-        seqid = self.trf_chr
+      if chromosome and self.trf_chr and chromosome != "?":
+          seqid = self.trf_chr
+      elif self.trf_gi and self.trf_gi != "Unknown":
+          seqid = self.trf_gi
       else:
-        seqid = self.trf_gi
-      if self.trf_l_ind < self.trf_r_ind:
-        strand = "+"
-      else:
-        strand = "-"
-        self.trf_l_ind, self.trf_r_ind = self.trf_r_ind, self.trf_l_ind
+          seqid = self.trf_head
       features = []
+      if not properties:
+          properties = {}
       for name, attr in properties.items():
-        features.append("%s=%s" % (
+          features.append("%s=%s" % (
                   name,
                   getattr(self, attr)
                 )
@@ -306,6 +303,14 @@ class TRModel(AbstractModel):
       features = ";".join(features)
       if prefix:
         seqid = prefix + seqid
+      if self.trf_l_ind < self.trf_r_ind:
+        strand = "+"
+      else:
+        strand = "-"
+        self.trf_l_ind, self.trf_r_ind = self.trf_r_ind, self.trf_l_ind
+
+      if force_header:
+        seqid = self.trf_head
       d = (seqid, 
            tool, 
            trs_type, 
@@ -314,9 +319,25 @@ class TRModel(AbstractModel):
            probability, 
            strand, 
            ".", 
-            features,
+           features,
           )
-      return "\t".join(map(str, d))
+      return "%s\n" % "\t".join(map(str, d))
+
+    def get_bed_string(self):
+      '''Return TR in bed format.
+      '''
+      if self.trf_l_ind < self.trf_r_ind:
+        strand = "+"
+      else:
+        strand = "-"
+        self.trf_l_ind, self.trf_r_ind = self.trf_r_ind, self.trf_l_ind
+
+      seqid = self.trf_head
+      d = (seqid, 
+           self.trf_l_ind, 
+           self.trf_r_ind, 
+          )
+      return "%s\n" % "\t".join(map(str, d))
 
 class NetworkSliceModel(TRModel):
     """ Class for network slice data.

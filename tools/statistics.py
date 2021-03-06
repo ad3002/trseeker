@@ -96,8 +96,16 @@ def get_simple_statistics(data):
     """
     Compute simple statistics
     @param data: list of numbers
-    @return: dictionary with keys (mean, variance, sigma, sample_derivation)
+    @return: dictionary with keys (mean, variance, sigma, standard_deviation)
     """
+    if not data:
+        result = {
+        'mean': 0,
+        'variance': 0,
+        'sigma': 0,
+        'standard_deviation': 0,
+        }
+        return result
     variance = get_variance(data)
     mean = get_mean(data)
     result = {

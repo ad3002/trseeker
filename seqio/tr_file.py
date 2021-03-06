@@ -76,16 +76,23 @@ def get_trfid_obj_dict(trf_large_file):
         trid2obj[trf_obj.trf_id] = trf_obj
      return trid2obj
 
-def save_trs_dataset(trs_dataset, output_file):
+def save_trs_dataset(trs_dataset, output_file, dataset_id=None):
     """ Save trs dataset to file."""
     if isinstance(trs_dataset, dict):
         trs_dataset = trs_dataset.items()
         trs_dataset.sort()
         trs_dataset = [x[1] for x in trs_dataset]
-    with open(output_file, "w") as fh:
-        for trf_obj in trs_dataset:
-            data = str(trf_obj)
-            fh.write(data)
+    if dataset_id is None:
+        with open(output_file, "w") as fh:
+            for trf_obj in trs_dataset:
+                data = str(trf_obj)
+                fh.write(data)
+    else:
+        with open(output_file, "a") as fh:
+            for trf_obj in trs_dataset:
+                trf_obj.giid = dataset_id
+                data = str(trf_obj)
+                fh.write(data)
 
 def save_trs_class_dataset(tr_class_dataset, output_file):
     ''' Save TRs classification objects to file.
@@ -99,7 +106,7 @@ def save_trs_class_dataset(tr_class_dataset, output_file):
             data = str(class_obj)
             fh.write(data)
 
-def save_trs_as_fasta(trf_file, fasta_file, add_project=False, skip_alpha=False):
+def save_trs_as_fasta(trf_file, fasta_file, project, add_project=False, skip_alpha=False):
     ''' Save TRs dataset as one fasta file.
     '''
     trf_objs = []

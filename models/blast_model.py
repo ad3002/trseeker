@@ -8,10 +8,11 @@
 from PyExp import AbstractModel
 from trseeker.seqio.tab_file import sc_iter_tab_file
 
-class BlastResultModel(AbstractModel):
-    ''' Class for blast result data.
 
-    Dumpable attributes:
+class BlastResultModel(AbstractModel):
+    """ Class for blast result data.
+
+    Attributes:
 
     - "query_id" (int),
     - "query_gi" (int),
@@ -39,7 +40,7 @@ class BlastResultModel(AbstractModel):
     - "subject_frame" (int),
     - "fraction_of_query" (float),    
 
-    '''
+    """
 
     dumpable_attributes = ["query_id",
                            "query_gi",
@@ -68,7 +69,7 @@ class BlastResultModel(AbstractModel):
                            "fraction_of_query",
                            ]
 
-    int_attributes = [ "query_start",
+    int_attributes = ["query_start",
                        "query_end",
                        "subject_start",
                        "subject_end",
@@ -93,7 +94,7 @@ class BlastResultModel(AbstractModel):
 
 
 def read_blast_file(blast_file, length):
-    ''' Read blast file. Return subject_ref -> list of matches (BlastResultModel models).'''
+    """ Read blast file. Return subject_ref -> list of matches (BlastResultModel models)."""
     #TODO: move it to readers
     
     gi_to_results = {}
@@ -114,9 +115,10 @@ def read_blast_file(blast_file, length):
     # parser data
     for blast_obj in sc_iter_tab_file(blast_file, BlastResultModel):
         if blast_obj.query_end is None or blast_obj.query_end is None:
-          print "Error parsing blast results:", blast_obj
-          continue
-        blast_obj.fraction_of_query = abs(blast_obj.query_start - blast_obj.query_end) / float(length)
+            print "Error parsing blast results:", blast_obj
+            continue
+        if length:
+          blast_obj.fraction_of_query = abs(blast_obj.query_start - blast_obj.query_end) / float(length)
         subject_ref = blast_obj.subject_ref
         gi_to_results.setdefault(subject_ref, [])
         gi_to_results[subject_ref].append(blast_obj)

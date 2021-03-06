@@ -16,6 +16,7 @@ from trseeker.models.sam_model import SAMModel
 from trseeker.seqio.tab_file import TabDelimitedFileIO
 import csv
 import collections
+from PyExp import runner
 
 class SAMFeatureDict(collections.MutableMapping):
     """A dictionary for SAM features
@@ -58,6 +59,8 @@ class SAMFileIO(TabDelimitedFileIO):
 
         def skip_comments(iterable):
             for line in iterable:
+                if line.startswith("    ") or line.startswith(" ") or line.startswith("perl"):
+                    continue
                 if not line.startswith('@'):
                     yield line
 
@@ -74,6 +77,7 @@ class SAMFileIO(TabDelimitedFileIO):
             for data in csv.DictReader(skip_comments(fh), fieldnames=fields, delimiter='\t', quoting=csv.QUOTE_NONE):
                 _features = {}
                 if data["features"]:
+                    data["raw_features"] = " ".join(data["features"])
                     k, t, v = data["features"].split(":")
                     if t == "i":
                         t = int
@@ -81,6 +85,7 @@ class SAMFileIO(TabDelimitedFileIO):
                         t = str
                     _features[k] = t(v)
                 if data.has_key(None):
+                    data["raw_features"] = " ".join(data[None])
                     for line in data[None]:
                         k, t, v = line.split(":")
                         if t == "i":
@@ -91,7 +96,10 @@ class SAMFileIO(TabDelimitedFileIO):
                     del data[None]
                 data["features"] = _features
                 obj = SAMModel()
-                obj.set_with_dict(data)
+                try:
+                    obj.set_with_dict(data)
+                except:
+                    continue
                 yield obj
 
 def sc_sam_reader(sam_file):
@@ -100,3 +108,28 @@ def sc_sam_reader(sam_file):
     reader = SAMFileIO()
     for sam_obj in reader.read_online(sam_file):
         yield sam_obj
+
+
+def sc_sam_to_fastqs(sam_files):
+    """
+    """
+    commands = []
+    for sam_file in sam_files:
+        assert sam_file.endswith("sam")
+        data = {
+            "sam_file": sam_file,
+            "fastq_file_1": sam_file.replace(".sam", "_1.fastq"),
+            "fastq_file_2": sam_file.replace(".sam", "_2.fastq"),
+        }
+        commands.append("""cat %(sam_file)s | grep -v ^@ | awk 'NR%%2==1 {print "@"$1"\\n"$10"\\n+\\n"$11}' > %(fastq_file_1)s""" % data)
+        commands.append("""cat %(sam_file)s | grep -v ^@ | awk 'NR%%2==0 {print "@"$1"\\n"$10"\\n+\\n"$11}' > %(fastq_file_2)s""" % data)
+    runner.run_parallel_no_output(commands)
+
+
+def sc_sam_get_headers(sam_file):
+    """
+    """
+    reader = SAMFileIO()
+    for sam_obj in reader.read_online(sam_file):
+        return reader.headers
+

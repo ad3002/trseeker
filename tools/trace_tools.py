@@ -29,15 +29,25 @@ def get_clip_data(clip_file_name):
     fh.close()
     return id2clip
 
-def unclip_trace_file(fasta_file, clip_file, uncliped_file):
+def unclip_trace_file(fasta_file, clip_file, uncliped_file, trash_file):
     ''' Unclip. Remove vector flanks from Trace data.'''
     id2clip = get_clip_data(clip_file)
     result = []
-    for seq_obj in sc_iter_fasta(fasta_file):
-        id = int(seq_obj.seq_gi)
-        seq = seq_obj.sequence
-        if id in id2clip:
-            seq_obj.seq_sequence = seq_obj.sequence[id2clip[id][0]: id2clip[id][1]]
-        result.append(seq_obj.fasta)
+    with open(trash_file, "a") as fh:
+        for seq_obj in sc_iter_fasta(fasta_file):
+            id = int(seq_obj.seq_gi)
+            seq = seq_obj.sequence
+            if id in id2clip:
+                left_flank = seq_obj.sequence[id2clip[id][1]:]
+                right_flank = seq_obj.sequence[:id2clip[id][0]]
+                seq_obj.seq_sequence = seq_obj.sequence[id2clip[id][0]: id2clip[id][1]]
+                if left_flank:
+                    fh.write(">%s_LF\n%s\n" % (id, left_flank))
+                if right_flank:
+                    fh.write(">%s_RF\n%s\n" % (id, right_flank))
+            result.append(seq_obj.fasta)
+
+            
+
     with open(uncliped_file, "w") as fh:
         fh.writelines(result)

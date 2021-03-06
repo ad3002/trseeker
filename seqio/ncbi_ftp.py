@@ -33,14 +33,13 @@ class NCBIFtpIO(AbstractFtpIO):
     - download_all_wgs_in_gbff(self, output_folder)
     """
 
-    def __init__(self, aspera=True):
+    def __init__(self, aspera=True, ftp_address="ftp.ncbi.nlm.nih.gov"):
         """ Set ftp parameters.
         
         Keyword arguments:
         
         - ftp_address   -- address of ftp server
         """
-        ftp_address = "ftp.ncbi.nlm.nih.gov"
         super(NCBIFtpIO, self).__init__(ftp_address)
         self.aspera = aspera
 
@@ -53,25 +52,91 @@ class NCBIFtpIO(AbstractFtpIO):
         - file_suffix - extension for file_format
         - output_folder -- folder for fasta files
          """
-        
+        if isinstance(wgs_list,  str):
+            wgs_list = [wgs_list]
+        for j, wgs_item in enumerate(wgs_list):
+            if len(wgs_item) > 4:
+                print "Too long WGS ID:", wgs_item
+                wgs_list[j] = wgs_item[:4]
+                print "\tnew WGS ID:", wgs_list[j]
+
         print "WGS list: ", wgs_list
         print "File suffix: ", file_suffix
 
         print "Read NCBI's ftp..."
         path = ["genbank", "wgs"]
         self.connect()
+        print "Connected."
         self.cd(path)
+        print "Reading directory..."
         files = self.ls()
         files = [ item for item in files if [True for project in wgs_list if project in item] ]
         files = [ item for item in files if file_suffix in item ]
 
         print "Files to download: ", files
 
+        total_length = len(files)
+
         for file_name in files:
             output_file = os.path.join(output_folder, file_name)
             if self.aspera:
                 ftp_address = self.ftp_address + "/genbank/wgs/" + file_name
-                self.download_with_aspera(output_file, "NCBI", ftp_address)
+                self.download_with_aspera(output_folder, "NCBI", ftp_address)
+                if not os.path.isfile(output_file):
+                    print "Can't find file: %s" % output_file
+                    print "Trying download with wget"
+                    print "Start download: %s ..." % file_name,
+                    print " to %s" % output_file
+                    self.get(file_name, output_file)
+                    if not os.path.isfile(output_file):
+                        raise Exception("Can't find file: %s" % output_file)
+                    if unzip:
+                        print "Unzip..."
+                        self.unzip(output_file)
+                        os.unlink(output_file)
+            else:
+                print "Start download: %s ..." % file_name,
+                print " to %s" % output_file
+                self.get(file_name, output_file)
+                if unzip:
+                    print "Unzip..."
+                    self.unzip(output_file)
+                    os.unlink(output_file)
+
+    def download_from_ncbi_by_mask(self, file_name, output_folder, unzip=False):
+        """ 
+        """        
+        print "Read NCBI's ftp..."
+        path = file_name.split("/")[1:]
+        file_name = path.pop()
+        print path, file_name
+        self.connect()
+        self.cd(path)
+        files = self.ls()
+        files = [ item for item in files if re.match(file_name, item) ]
+        if not files:
+            print "Wrong mask. Available files:", files
+            raise Exception("Wrong mask.")
+        print "Files to download: ", files
+
+        for file_name in files:
+            output_file = os.path.join(output_folder, file_name)
+            if self.aspera:
+                actual_path = [self.ftp_address] + path + [file_name]
+                ftp_address = "/".join(actual_path)
+                self.download_with_aspera(output_folder, "NCBI", ftp_address)
+                if not os.path.isfile(output_file):
+                    print "Can't find file: %s" % output_file
+                    print "Trying download with wget"
+                    print "Start download: %s ..." % file_name,
+                    print " to %s" % output_file
+                    self.get(file_name, output_file)
+                    if not os.path.isfile(output_file):
+                        raise Exception("Can't find file: %s" % output_file)
+                    if unzip:
+                        print "Unzip..."
+                        self.unzip(output_file)
+                        os.unlink(output_file)
             else:
                 print "Start download: %s ..." % file_name,
                 print " to %s" % output_file
@@ -98,7 +163,7 @@ class NCBIFtpIO(AbstractFtpIO):
             output_file = os.path.join(output_folder, file)
             if self.aspera:
                 ftp_address = self.ftp_address + "/genbank/wgs/" + file
-                self.download_with_aspera(output_file, "NCBI", ftp_address)
+                self.download_with_aspera(output_folder, "NCBI", ftp_address)
             else:
                 print "Start download: %s ..." % file,
                 print " to %s" % output_file
@@ -191,7 +256,13 @@ class NCBIFtpIO(AbstractFtpIO):
         '''
         file_name = ftp_address.rsplit("/")[-1]
         if self.aspera:
-            self.download_with_aspera(output_folder, "NCBI", ftp_address)
+            if "ftp.ddbj.nig.ac.jp" in ftp_address:
+                self.download_with_aspera(output_folder, "DDBJ", ftp_address)
+            elif "fasp" in ftp_address:
+                self.download_with_aspera(output_folder, "EBI", ftp_address)
+            else:
+                self.download_with_aspera(output_folder, "NCBI", ftp_address)
+
         else:
             output_file = os.path.join(output_folder, file_name)
             paths = ftp_address.split("/")
@@ -208,7 +279,17 @@ class NCBIFtpIO(AbstractFtpIO):
         '''
         if remote_server == "NCBI":
             remote_server = "anonftp@ftp-private.ncbi.nlm.nih.gov"
-            remote_path = "/%s" % "/".join(remote_path.split("/")[1:])
+            _command = "%(location)s -QT -l640M -d --overwrite=diff -i %(putty_keys)s %(remote_server)s:%(remote_path)s %(local_path)s"
+        elif remote_server == "DDBJ":
+            remote_server = "anonftp@ascp.ddbj.nig.ac.jp"
+            _command = "%(location)s -P 33001 -QT -l640M -d --overwrite=diff -i %(putty_keys)s %(remote_server)s:%(remote_path)s %(local_path)s"
+        elif remote_server == "EBI":
+            remote_server = "era-fasp@fasp.sra.ebi.ac.uk"
+            _command = "%(location)s  -QT -l640M -d --overwrite=diff -i %(putty_keys)s %(remote_server)s:%(remote_path)s %(local_path)s"
+            'ascp -QT -l 300m -i <aspera connect installation directory>/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:<file or files to download> <download location>'
+        else:
+            raise Exception("Unknown aspera server %s" % remote_server)
+        remote_path = "/%s" % "/".join(remote_path.split("/")[1:])
         params = {
             "location": "/home/akomissarov/.aspera/connect/bin/ascp",
             "putty_keys": "/home/akomissarov/.aspera/connect/etc/asperaweb_id_dsa.putty",
@@ -216,6 +297,6 @@ class NCBIFtpIO(AbstractFtpIO):
             "remote_path": remote_path,
             "local_path": local_path,
         }
-        command = "%(location)s -QT -l640M -d --overwrite=diff -i %(putty_keys)s %(remote_server)s:%(remote_path)s %(local_path)s" % params
+        command = _command % params
         print command
         os.system(command)

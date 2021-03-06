@@ -14,12 +14,15 @@ Classes:
 import re, os
 from trseeker.models.trf_model import TRModel
 from trseeker.seqio.block_file import AbstractBlockFileIO
-from trseeker.tools.sequence_tools import get_gc
+from trseeker.tools.sequence_tools import get_gc, remove_consensus_redundancy
 from trseeker.seqio.mongodb_reader import MongoDBReader
-from PyExp import sc_iter_filepath_folder, WizeOpener
+from PyExp import sc_iter_filepath_folder, WiseOpener
 from trseeker.settings import load_settings
+from trseeker.seqio.tab_file import sc_iter_tab_file
+
 
 settings = load_settings()
+
 
 class TRFFileIO(AbstractBlockFileIO):
     """  Working with raw ouput from TRF, where each block starts with '>' token.
@@ -73,31 +76,38 @@ class TRFFileIO(AbstractBlockFileIO):
     def iter_parse(self, trf_file, filter=True):
         """ Iterate over raw trf data and yield TRFObjs.
         """
+        trf_id = 1
         for head, body, start, next in self.read_online(trf_file):
+            head = head.replace("\t", " ")
             obj_set = []
-            for line in self._gen_data_line(body):
+            print " processing:", head
+            n = body.count("\n")
+            for i, line in enumerate(self._gen_data_line(body)):
+                print "   %s/%s" % (i,n), "\r",
                 trf_obj = TRModel()
-                trf_obj.set_raw_trf(head, body, line)
+                trf_obj.set_raw_trf(head, None, line)
                 obj_set.append(trf_obj)
+            print " filtering..."
             if filter:
-                # Unpack obj_set and sort by left, right induces
-                obj_set = [(int(x.trf_l_ind), int(x.trf_r_ind), x) for x in obj_set]
-                obj_set.sort()
-                # Pack obj_set
-                obj_set = [x[2] for x in obj_set]
                 # Filter object set
                 trf_obj_set = self._filter_obj_set(obj_set)
                 obj_set = [x for x in trf_obj_set if x]
+            ### set trf_id
+            for trf_obj in obj_set:
+                trf_obj.trf_id = trf_id
+                trf_id += 1
+            print " fixing monomers..."
+            obj_set, variants2df = remove_consensus_redundancy(obj_set)
             yield obj_set
 
-    def parse_to_file(self, file_path, output_path, trf_id=0, project=None):
+    def parse_to_file(self, file_path, output_path, trf_id=0, project=None, verbose=True):
         """ Parse trf file in tab delimited file."""
         if trf_id == 0:
             mode = "w"
         else:
             mode = "a"
         
-        with WizeOpener(output_path, mode) as fw:
+        with WiseOpener(output_path, mode) as fw:
             for trf_obj_set in self.iter_parse(file_path):
                 for trf_obj in trf_obj_set:
                     trf_obj.trf_id = trf_id
@@ -129,6 +139,8 @@ class TRFFileIO(AbstractBlockFileIO):
 
         obj_set.sort(key=lambda x: (x.trf_l_ind, x.trf_r_ind))
         for a in range(0, n):
+            print "\t%s\%s" % (a,n), "\r",
+
             obj1 = obj_set[a]
             if not obj1:
                 continue
@@ -233,9 +245,7 @@ class TRFFileIO(AbstractBlockFileIO):
                         continue
 
             obj_set = [a for a in obj_set if not a is None]
-            n = len(obj_set)
-
-        obj_set = [a for a in obj_set if not a is None]
+        
         return obj_set
 
     def _join_overlapped(self, obj1, obj2):
@@ -282,3 +292,12 @@ def sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project=None):
     for file_path in sc_iter_filepath_folder(trf_raw_folder, mask="dat"):
         print "Start parse file %s..." % file_path
         trf_id = reader.parse_to_file(file_path, output_trf_file, trf_id=trf_id, project=project)
+
+def sc_trf_to_fasta(trf_file, fasta_file):
+    """ Convert TRF file to fasta file.
+    """
+    with open(fasta_file, "w") as fw:
+        for trf_obj in sc_iter_tab_file(trf_file, TRModel):
+            fw.write(trf_obj.fasta)
+
+

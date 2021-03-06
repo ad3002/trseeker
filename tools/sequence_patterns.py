@@ -41,7 +41,59 @@ __dna = {'A':'[AN]',
          'V':'[GCAN]',
          'D':'[GATN]',
          'N':'[ACTGN]',
-         }
+ }
+
+
+DNA2IUPAC = {
+
+     'A':'A',
+     'C':'C',
+     'T':'T',
+     'G':'G',
+     'GA':'R',
+     'AG':'R',
+     'TC':'Y',
+     'CT':'Y',
+     'AC':'M',
+     'CA':'M',
+     'GT':'K',
+     'TG':'K',
+     'GC':'S',
+     'CG':'S',
+     'AT':'W',
+     'TA':'W',
+
+     'ACT':'H',
+     'CAT':'H',
+     'CTA':'H',
+     'ATC':'H',
+     'TAC':'H',
+     'TCA':'H',
+
+     'GCT':'B',
+     'GTC':'B',
+     'TGC':'B',
+     'TCG':'B',
+     'CGT':'B',
+     'CTG':'B',
+     
+     'GCA':'V',
+     'GAC':'V',
+     'AGC':'V',
+     'ACG':'V',
+     'CGA':'V',
+     'CAG':'V',
+
+     'GTA':'D',
+     'GAT':'D',
+     'AGT':'D',
+     'ATG':'D',
+     'TGA':'D',
+     'TAG':'D',
+     
+     'ACGT': 'N',
+     }    
+
 
 PATTERNS = {'MARS1' : 'AATAAYAA',
             'MARS2' : 'AWWRTAANNWWGNNNC',
@@ -121,6 +173,19 @@ def get_mutated_pattern_trice(pattern):
             for more_mutated_variant in re_get_plus_minus(mutated_variant):
                 patterns += re_get_plus_minus(more_mutated_variant)
     return remove_redundancy(patterns)
+
+def get_motif_positions(sequence, motif):
+    ''' Return list of motif positions in sequence.
+    '''
+    pos = 0
+    result = []
+    while True:
+        r = sequence.find(motif, pos)
+        if r == -1:
+            return result
+        result.append(r)
+        pos = r+1
+
 
 def pattern_search(name, sequence, pattern_function, pattern_function_params):
     ''' Return list triples (name, match start, match end) for given sequence

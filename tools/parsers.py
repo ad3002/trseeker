@@ -157,7 +157,7 @@ def trf_parse_line(line):
     if groups and len(groups) == 15:
         return list(groups)
     else:
-        print "Failed parse ta: %s" % (line)
+        print("Failed parse ta: %s" % (line))
         return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '0', '0']
 
 def trf_parse_param(line):
@@ -168,7 +168,7 @@ def trf_parse_param(line):
         return res
     except:
         res = 'Unknown'
-        print "Failed parse param: %s" % (line)
+        print("Failed parse param: %s" % (line))
         return res
 
 def trf_parse_head(line):
@@ -183,7 +183,7 @@ def trf_parse_head(line):
             return res2[0]
     except:
         res = 'Unknown'
-        print "Failed parse head: %s" % (line)
+        print("Failed parse head: %s" % (line))
         return res
 
 def get_wgs_prefix_from_ref(ref):
@@ -191,7 +191,7 @@ def get_wgs_prefix_from_ref(ref):
     reg_exp = "([A-Z]+)"
     res = re.search(reg_exp, ref)
     if res:
-        return res.group(0)
+        return(res.group(0))
     else:
         return "UNKN"
 

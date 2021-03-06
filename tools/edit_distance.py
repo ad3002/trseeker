@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2009 Aleksey Komissarov ( ad3002@gmail.com )
-# All rights reserved.
-#
-# This software is licensed as described in the file COPYING, which
-# you should have received as part of this distribution.
+#@created: 07.09.2010
+#@author: Aleksey Komissarov
+#@contact: ad3002@gmail.com
 """ Edit distance functions.
 
 - _delta(a,b) -> True/False
@@ -16,6 +14,7 @@
 
 import numpy
 import re
+
 
 def _delta(a, b):
     ''' Compare two elements, if one element equal "-", than return False.'''
@@ -65,7 +64,7 @@ def get_ed_similarity(s1, s2, monomer_mode=False, full_info=False, verbose=False
         S[0, j] = S[0, j - 1] + _delta("-", s2[j - 1])
     for i in range(1, len1 + 1):
         if verbose:
-            print "%.2f" % (float(i) / len1)
+            print("%.2f" % (float(i) / len1))
         S[i, 0] = S[i - 1, 0] + _delta(s1[i - 1], "-")
         for j in range(1, len2 + 1):
             S[i, j] = max(S[i - 1, j - 1] + _delta(s1[i - 1], s2[j - 1]),

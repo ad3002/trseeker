@@ -9,6 +9,12 @@ from PyExp import AbstractModel
 from trseeker.tools.sequence_tools import get_revcomp, get_gc, check_gapped
 from trseeker.tools.sequence_tools import clear_sequence
 from trseeker.tools.parsers import parse_fasta_head, parse_chromosome_name
+from Bio import Entrez
+import os
+import re
+import pickle
+
+Entrez.email = "aleksey.komissarov@gmail.com"
 
 class SequenceModel(AbstractModel):
     """ Class for sequence wrapping
@@ -52,6 +58,11 @@ class SequenceModel(AbstractModel):
 
     float_attributes = ["seq_gc", ]
 
+    def __init__(self, lower=True, protein=False):
+      super(SequenceModel, self).__init__()
+      self.lower = lower
+      self.protein = protein
+
     @property
     def length(self):
         """ Return a sequence length."""
@@ -69,9 +80,36 @@ class SequenceModel(AbstractModel):
           self.seq_head = ">%s" % self.seq_ref
         return "%s\n%s\n" % (self.seq_head.strip(), self.seq_sequence.strip())
 
+
+    def fastq(self, i):
+        """ Return a fastq representation."""
+        self.seq_head = "%%m%s" % i
+        return "%s\n%s\n%s\n%s\n" % (
+            self.seq_head, 
+            self.seq_sequence.strip(),
+            "+",
+            "A"*self.length,
+          )
+
+
+    @property
+    def fasta60(self):
+        """ Return a fasta representation."""
+        if not self.seq_head:
+          self.seq_head = ">%s" % self.seq_ref
+        seq = self.seq_sequence.strip()
+        s = []
+        for i in xrange(0, len(seq), 60):
+          s.append(seq[i:i+60])
+        seq = "\n".join(s)
+        return "%s\n%s\n" % (self.seq_head.strip(), seq.strip())
+
     @property
     def header(self):
       return self.seq_head[1:].strip()
+
+    def set_header(self, header):
+      self.seq_head = ">%s" % header
 
     @property
     def contige_coverage(self):
@@ -97,19 +135,22 @@ class SequenceModel(AbstractModel):
         """ Add reverse complement."""
         self.seq_revcom = get_revcomp(self.seq_sequence)
 
-    def set_dna_sequence(self, title, sequence, description=None):
+    def set_dna_sequence(self, title, sequence, description=None, skip_clean=False):
         """ Set sequence object."""
         self.seq_ref = title
         self.seq_description = description
-        self.seq_sequence = clear_sequence(sequence)
+        self.seq_sequence = re.sub("\s+", "", sequence)
+        if not self.protein:
+          if not skip_clean:
+            self.seq_sequence = clear_sequence(sequence, lower=self.lower)
+          self.seq_gc = get_gc(self.seq_sequence)
+          self.seq_gaped = check_gapped(self.seq_sequence)
         self.seq_length = len(self.seq_sequence)
-        self.seq_gc = get_gc(self.seq_sequence)
-        self.seq_gaped = check_gapped(self.seq_sequence)
 
-    def set_ncbi_sequence(self, head, sequence):
+    def set_ncbi_sequence(self, head, sequence, skip_clean=False):
         """ Set NCBI fasta sequence object."""
         self.seq_head = head
-        self.set_dna_sequence(None, sequence)
+        self.set_dna_sequence(None, sequence, skip_clean=skip_clean)
         (self.seq_gi,
          self.seq_ref,
          self.seq_description) = parse_fasta_head(head)
@@ -137,3 +178,31 @@ class SequenceModel(AbstractModel):
         chr = parse_chromosome_name(head["description"])
         if chr != "?":
             self.seq_chr = chr
+
+
+    def set_by_genbank(self, genbank_id):
+      '''
+      '''
+      handle = Entrez.efetch(db="nucleotide", id=genbank_id, rettype="fasta", retmode="text")
+      fasta = handle.read().split("\n")
+      head = fasta[0]
+      sequence = "".join(fasta[1:])
+      self.set_ncbi_sequence(head, sequence)
+  
+
+class MarkerModel(AbstractModel):
+
+    dumpable_attributes = [
+      "marker_name",
+      "genbank_id",
+      "lg",
+      "cm_average",
+      "cm_female",
+      "cm_male",
+      "motif",
+      "primer_forward",
+      "primer_reward",
+      "product_length",
+      "ref",
+      
+    ]

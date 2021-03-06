@@ -242,14 +242,15 @@ def load_networkx(network_file):
 def init_graph_networkx(network_data, start=0, precise=1, id2nodename=None):
     ''' Init graph with data.'''
 
+    a_nodes, b_nodes, weight_vals, n = network_data
+
     print "Graph creation..."
     G = networkx.Graph()
 
     print "Populate nodes..."
-    for id in id2nodename.keys():
-        G.add_node(int(id))
+    for node_id in set(a_nodes).union(set(b_nodes)):
+        G.add_node(int(node_id))
 
-    a_nodes, b_nodes, weight_vals, n = network_data
     print "Add edges..."
     for i in xrange(n):
         a = a_nodes[i]
@@ -265,6 +266,12 @@ def analyse_networkx(G, network_data, output_file_pattern, id2nodename):
 
     a_nodes, b_nodes, weight_vals, n = network_data
 
+    weights = []
+    for i, val in enumerate(weight_vals):
+        weights.append((val, i))
+
+    weights.sort(reverse=True)
+
     print "Read meta trid"
     if id2nodename:
         trid2meta = id2nodename
@@ -273,17 +280,15 @@ def analyse_networkx(G, network_data, output_file_pattern, id2nodename):
     last = -1
     last_component = -1
     ended = False
+    last_singletons = -1
 
-    k = len(weight_vals)
-    while weight_vals:
-
-        val = weight_vals.pop()
-        k -= 1
+    while weights:
+        (val, k) = weights.pop()
         if val == last:
-
             G.remove_edge(a_nodes[k], b_nodes[k])
             last = val
             continue
+
 
         components = networkx.connected_components(G)
         if len(components) == last_component:
@@ -293,11 +298,18 @@ def analyse_networkx(G, network_data, output_file_pattern, id2nodename):
 
         last_component = len(components)
 
-        print "Distance: %s | Edges: %s | Nodes: %s | Components: %s" % (val,
+        
+        singletons = len([x for x in components if len(x) == 1])
+        # if (singletons-1) == last_singletons:
+        #     print "...singleton", singletons
+        #     last_singletons = singletons
+        #     continue
+
+        print "Distance: %s | Edges: %s | Nodes: %s | Sing: %s | Components: %s" % (val,
                                                                          G.number_of_edges(),
                                                                          G.number_of_nodes(),
+                                                                         singletons,
                                                                          len(components))
-
         if len(components[0]) == 1:
             ended = True
         output_file = output_file_pattern % (int(val), len(components))

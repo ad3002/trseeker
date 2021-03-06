@@ -11,9 +11,11 @@ Classes:
     
 """
 import csv
-from PyExp import AbstractFileIO, WizeOpener
+from PyExp import AbstractFileIO
+import tempfile
+import os
 
-csv.field_size_limit(10000000)
+csv.field_size_limit(1000000000)
 
 class TabDelimitedFileIO(AbstractFileIO):
     """ Working with tab delimited file.
@@ -105,20 +107,44 @@ class TabDelimitedFileIO(AbstractFileIO):
         with open(output_file, "w") as fh:
             fh.writelines(self._data)
 
-def sc_iter_tab_file(input_file, data_type, remove_starts_with=None):
+def sc_iter_tab_file(input_file, data_type, skip_starts_with=None, remove_starts_with=None, preprocess_function=None, check_function=None):
     """ Iter over tab file, yield an object of given data_type."""
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file_name = temp_file.name
+
     if remove_starts_with:
         with open(input_file, "r") as fh:
             data = fh.readlines()
         data = [x for x in data if not x.startswith(remove_starts_with)]
-        with open(input_file, "w") as fh:
+        with open(temp_file_name, "w") as fh:
             fh.writelines(data)
+        input_file = temp_file_name
+    if preprocess_function:
+        with open(input_file, "r") as fh:
+            data = fh.readlines()
+        data = [preprocess_function(x) for x in data]
+        with open(temp_file_name, "w") as fh:
+            fh.writelines(data)
+        input_file = temp_file_name
+    if check_function:
+        with open(input_file, "r") as fh:
+            data = fh.readlines()
+        data = [x for x in data if check_function(x)]
+        with open(temp_file_name, "w") as fh:
+            fh.writelines(data)
+        input_file = temp_file_name
     with open(input_file) as fh:
-        fields = data_type().dumpable_attributes
+        fields = data_type().dumpable_attributes    
         for data in csv.DictReader(fh, fieldnames=fields, delimiter='\t', quoting=csv.QUOTE_NONE):
+            if skip_starts_with:
+                if data[fields[0]].startswith(skip_starts_with):
+                    continue
             obj = data_type()
             obj.set_with_dict(data)
             yield obj
+    if os.path.isfile(temp_file_name):
+        os.unlink(temp_file_name)
 
 def sc_iter_simple_tab_file(input_file):
     """ Iter tab file, yield a list."""
@@ -144,10 +170,12 @@ def sc_write_model_to_tab_file(output_file, objs):
         for obj in objs:
             fh.write(str(obj))
 
-def sc_read_simple_tab_file(input_file):
+def sc_read_simple_tab_file(input_file, skip_first=False):
     """ Iter tab file, yield a list."""
     result = []
     with open(input_file) as fh:
+        if skip_first:
+            fh.readline()
         for data in csv.reader(fh, delimiter='\t', quoting=csv.QUOTE_NONE):
             result.append(data)
     return result

@@ -29,6 +29,20 @@ import random
 from trseeker.tools.other_tools import sort_dictionary_by_value
 from collections import defaultdict
 
+def get_dust_score(sequence, k=4):
+    ''' Compute dust score for givent score with given window size.
+    '''
+    d = defaultdict(int)
+    for i in xrange(0, len(sequence)-k+1):
+        d[sequence[i:i+k]] += 1
+    score = 0.
+    total = 0.
+    for v in d.values():
+        score += v*(v-1)/2.
+        total += score
+    return total/(len(sequence)-k+1)
+    
+
 def get_shifts_variants(sequence):
     '''
     '''
@@ -38,14 +52,24 @@ def get_shifts_variants(sequence):
     return list(shifts)
     
 def get_revcomp(sequence):
-    '''Return complementary sequence.
+    '''Return reverse complementary sequence.
 
     >>> complementary('AT CG')
     'CGAT'
 
     '''
-    c = dict(zip('ATCGNatcgn[]', 'TAGCNtagcn]['))
+    c = dict(zip('ATCGNatcgn~[]', 'TAGCNtagcn~]['))
     return ''.join(c.get(nucleotide, '') for nucleotide in reversed(sequence))
+
+def get_comp(sequence):
+    '''Return complementary sequence.
+
+    >>> complementary('AT CG')
+    'TAGC'
+
+    '''
+    c = dict(zip('ATCGNatcgn[]', 'TAGCNtagcn]['))
+    return ''.join(c.get(nucleotide, '') for nucleotide in sequence)
 
 def fix_strand(sequence):
     ''' Return normalized sequence with following rules:
@@ -70,9 +94,8 @@ def get_gc(sequence):
     length = len(sequence)
     if not length:
         return 0
-    sequence = clear_sequence(sequence)
-    count_c = sequence.count('c')
-    count_g = sequence.count('g')
+    count_c = sequence.count('c')+sequence.count('C')
+    count_g = sequence.count('g')+sequence.count('G')
     gc = float(count_c + count_g) / float(length)
     return float(gc)
     
@@ -97,16 +120,18 @@ def get_subseq(seq, start, end):
     '''
     return seq[start-1 : end]
     
-def clear_sequence(sequence):
-    """ Clear sequence (ACTGN alphabet):
+def clear_sequence(sequence, lower=True):
+    """ Clear sequence (full alphabet):
     
     - lower case
     - \s -> ""
     - [^actgn] -> ""
     """
-    sequence = sequence.lower().strip()
+    sequence = sequence.strip()
+    if lower:
+        sequence = sequence.lower().strip()
     sequence = re.sub("\s+", "", sequence)
-    return re.sub("[^actgn]", "", sequence)
+    return re.sub("[^actgnuwsmkrybdhvACTGNUWSMKRYBDHV\-]", "", sequence)
 
 def restriction(sequence, pattern, end=None):
     ''' Return list of sequences splited by pattern with added end.
@@ -148,7 +173,7 @@ def check_cyclic_repeats(seq_a, seq_b):
     @param seq_a: sequence with length n
     '''
     if len(seq_a) != len(seq_b):
-        print "Need sequences with same length"
+        print("Need sequences with same length")
         return False
     if seq_a in seq_b*2 or seq_b in seq_a*2:
         return True
@@ -200,18 +225,20 @@ def remove_consensus_redundancy(trf_objs):
     consensuses = list(set(consensuses))
     consensuses.sort(key=lambda x: len(x))
     length2consensuses = {}
-    print "Group monomers by length and GC"
+    # print "Group monomers by length and GC"
     for i, monomer in enumerate(consensuses):
         n = len(monomer)
         length2consensuses.setdefault(n, {})
         gc = get_int_gc(monomer)
         length2consensuses[n].setdefault(gc, [])
         length2consensuses[n][gc].append(i)
-    print "Iterate over consensuses"
+    # print "Iterate over consensuses"
     N = len(consensuses)
     result_rules = {}
     for i, monomer in enumerate(consensuses):
-        print i, N, "\r",
+        if not monomer:
+            continue
+        # print i, N, "\r",
         if monomer in result_rules:
             continue
         gc = get_int_gc(monomer)
@@ -219,6 +246,8 @@ def remove_consensus_redundancy(trf_objs):
         n = base
         # maximal consensus length from TRF is 2000 bp
         variants = set(get_shifts_variants(monomer) + get_shifts_variants(get_revcomp(monomer)))
+        if not variants:
+            raise Exception("Wrong monomer sequence for '%s'" % monomer)
         lex_consensus = min(variants)        
         while n <= 2020:
             if n in length2consensuses and gc in  length2consensuses[n]: 
@@ -240,15 +269,22 @@ def remove_consensus_redundancy(trf_objs):
                         result_rules[consensuses[k]] = lex_consensus
                         
             n += base
-    print
-    print "Fix momomers"
+    # print
+    # print "Fix momomers"
     variants2df = defaultdict(int)
-    for trf_obj in trf_objs:
+    for i,trf_obj in enumerate(trf_objs):
+        if not trf_obj.trf_consensus:
+            trf_objs[i] = None
+            continue
         if trf_obj.trf_consensus in result_rules:
             variants2df[result_rules[trf_obj.trf_consensus]] += 1
         else:
-            print "Error key with length", len(trf_obj.trf_consensus), trf_obj.trf_consensus
+            message = "Error key with length", len(trf_obj.trf_consensus), trf_obj.trf_consensus
+            # print str(trf_obj)
+            # print message
+            raise Exception(message)
         trf_obj.trf_consensus = result_rules[trf_obj.trf_consensus]
-    print "Sort families by df..."
+    # print "Sort families by df..."
     variants2df = sort_dictionary_by_value(variants2df, reverse=True)
+    trf_objs = [x for x in trf_objs if x is not None]
     return trf_objs, variants2df

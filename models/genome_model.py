@@ -5,61 +5,38 @@
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com 
 
-
 from PyExp import AbstractModel
 
+
 class GenomeModel(AbstractModel):
-    ''' Container for genome information.
-
-    Dumpable attributes:
-
-    - "genome_taxon",
-    - "genome_prefix",
-    - "genome_gpid",
-    - "genome_acronym",
-    - "genome_chromosomes",
-    - "genome_contigs",
-    - "genome_length",
-    - "genome_mean_gc",
-    - "genome_trs_all",
-    - "genome_trs_3000",
-    - "genome_trs_all_proc",
-    - "genome_trs_3000_proc",
-    - "genome_trs_all_length",
-    - "genome_trs_3000_length",
-    - "genome_gaps",
-    - "genome_sum_gc",
+    ''' Container for genome information according 
+    to NCBI fields from ftp://ftp.ncbi.nlm.nih.gov/genomes/GENOME_REPORTS/eukaryotes.txt
 
     '''
-
-
     dumpable_attributes = [
         "genome_taxon",
-        "genome_prefix",
-        "genome_gpid",
-        "genome_acronym",
+        "genome_taxid",
+        "genome_bioproject",
+        "genome_bpid",
+        "genome_group",
+        "genome_subgroup",
+        "genome_size_mb",
+        "genome_gc",
+        "genome_assembly_ref",
         "genome_chromosomes",
-        "genome_contigs",
-        "genome_length",
-        "genome_mean_gc",
-        "genome_trs_all",
-        "genome_trs_3000",
-        "genome_trs_all_proc",
-        "genome_trs_3000_proc",
-        "genome_trs_all_length",
-        "genome_trs_3000_length",
-        "genome_gaps",
-        "genome_sum_gc",
+        "genome_organelles",
+        "genome_plasmids",
+        "genome_wgs",
+        "genome_scaffolds",
+        "genome_genes",
+        "genome_proteins",
+        "genome_release_date",
+        "genome_modify_date",
+        "genome_status",
+        "genome_center",
+        "genome_biosample_ref",
         ]
 
-    def preprocess_data(self):
-        ''' Preprocess data.'''
-        if self.genome_trs_all_length:
-            self.genome_trs_all_proc = self.genome_trs_all_length / float(self.genome_length)
-        if self.genome_trs_3000_length:
-            self.genome_trs_3000_proc = self.genome_trs_3000_length / float(self.genome_length)
-        if not self.genome_mean_gc:
-            self.genome_mean_gc = self.genome_sum_gc / self.genome_contigs
 
 class RepeatMaskerAnnotation(AbstractModel):
     ''' Container for RepeatMasker track.

@@ -8,13 +8,12 @@
 Functions related to ngram (k-mer).
 '''
 from collections import defaultdict
-from trseeker.tools.sequence_tools import fix_strand, get_revcomp
-from trseeker.tools.edit_distance import hamming_distance
+from trseeker.tools.sequence_tools import get_revcomp
 from trseeker.seqio.tab_file import sc_iter_tab_file
 from trseeker.models.trf_model import TRModel
-from collections import Counter
-import math
+from trseeker.seqio.fasta_file import sc_iter_fasta
 from trseeker.tools.complexity import get_zlib_complexity
+
 
 def generate_ngrams(text, n=12):
     ''' Yields all ngrams of length k from given text. 
@@ -23,6 +22,13 @@ def generate_ngrams(text, n=12):
     '''
     for i in xrange(0, len(text) - n + 1):
         yield i, text[i:i + n]
+
+def generate_kmers(seq, k):
+    ''' Yields all kmers of length k from given seq. 
+    '''
+    for i in xrange(len(seq) - k + 1):
+        yield seq[i:i + k]
+
 
 def generate_window(text, n=12, step=None):
     ''' Yields all ngrams of length n from given text. 
@@ -55,6 +61,41 @@ def get_ngrams(text, m=None, n=23, k=None, skip_n=False):
     else:
         return ngrams
 
+def get_kmer2tf(sequence, k):
+    ''' Return kmer to tf dictionary.
+    '''
+    kmers = defaultdict(int)
+    for i in xrange(0, len(sequence) - k + 1):
+        kmer = sequence[i:i+k].lower()
+        if 'n' in kmer:
+            continue
+        kmers[kmer] += 1
+    return kmers
+
+
+def get_kmers(sequence, k):
+    ''' Return kmers.
+    '''
+    kmers = set()
+    for i in xrange(0, len(sequence) - k + 1):
+        kmer = sequence[i:i+k].lower()
+        if 'n' in kmer:
+            continue
+        kmers.add(kmer)
+    return list(kmers)
+
+def get_kmers_both_strands(sequence, k):
+    ''' Return kmers.
+    '''
+    kmers = set()
+    for i in xrange(0, len(sequence) - k + 1):
+        kmer = sequence[i:i+k].lower()
+        if 'n' in kmer:
+            continue
+        kmers.add(kmer)
+        kmers.add(get_revcomp(kmer))
+    return list(kmers)
+
 def get_ngrams_freq(text, m=None, n=23, k=None):
     ''' Returns m most frequent (ngram of length n, fraction of possible ngrams) tuples for given text.
     
@@ -72,6 +113,16 @@ def get_ngrams_freq(text, m=None, n=23, k=None):
     if m:
         return ngrams[:m]
     return ngrams
+
+def get_most_freq_kmer(text, k=None):
+    ''' Returns the most frequent kmer
+    '''
+    ngrams = defaultdict(int)
+    for pos, ngram in generate_ngrams(text, n=k):
+        ngrams[ngram] += 1
+    ngrams = [(key, value, k*value) for key, value in ngrams.items()]
+    ngrams.sort(reverse=True, key=lambda x: x[1])
+    return ngrams[0]
 
 def get_ngrams_feature_set(text, m=5, n=12):
     ''' Returns a feature set {'ngram':'ngram',...}  of m most frequent ngram of length n for given text.
@@ -141,29 +192,47 @@ def count_kmer_tfdf(sequence, tf_dict, df_dict, k):
         local_df[ngram] += 1
     return tf_dict, df_dict, local_tf, local_df
 
-def get_kmer_tf_df_for_data(data, k, docids=False):
+def get_kmer_tf_df_for_data(data, k, docids=False, verbose=True):
     '''
     '''
     df = defaultdict(int)
     tf = defaultdict(int)
     kmer2ids = defaultdict(list)
     kmer2freq = defaultdict(list)
-    verbose = False
     N = len(data)
     if N>100:
         verbose = True
     for i, sequence in enumerate(data):
         if verbose:
-            print "Process tf/df: ", i, N, "\r", 
+            print("Process tf/df: ", i, N, sep=" ")
         tf, df, local_tf, local_df = count_kmer_tfdf(sequence, tf, df, k)
         if docids:
             for key in local_tf:
                 kmer2ids[key].append(i)
                 kmer2freq[key].append(local_tf[key])
-    print
+    if verbose:
+        print()
     if docids:
-        return (tf, df, kmer2ids, kmer2freq)
-    return (tf, df)
+        return tf, df, kmer2ids, kmer2freq
+    return tf, df
+
+def get_kmer_tf_df_pos_for_list(data, k):
+    '''
+    '''
+    df = defaultdict(int)
+    tf = defaultdict(int)
+    kmer2pos = defaultdict(list)
+    for docid, sequence in enumerate(data):
+        df_set = set()
+        for i in xrange(len(sequence)-k+1):
+            kmer = sequence[i:i+k]
+            kmer2pos[kmer].append((docid,i))
+            tf[kmer] += 1
+            if not kmer in df_set:
+                df_set.add(kmer)
+                df[kmer] += 1
+    return (tf, df, kmer2pos)
+
     
 def get_df_stats_for_list(data, k, kmer2df):
     ''' Compute max df, number and percentage of sequence with given ngram.
@@ -185,21 +254,25 @@ def get_df_stats_for_list(data, k, kmer2df):
     ngram_seqs = [":".join((k,str(f))) for k,f in ngram_seqs[:10]]
     return (maxdf, nmaxdf, pmaxdf, ngram_seqs)
 
-def process_list_to_kmer_index(data, k, docids=True, cutoff=None):
+def process_list_to_kmer_index(data, k, docids=True, cutoff=None, verbose=True):
     ''' Get list of string.
-    Return list of (kmer, revkmer, tf, df, docids)
+    Return list of (kmer, revkmer, tf, df, None, None)
+    OR
+    Return list of (kmer, revkmer, tf, df, docids, freqs)
     '''
     if docids:
-        (tf_dict, df_dict, doc_data, freq_data) = get_kmer_tf_df_for_data(data, k, docids=docids)
+        (tf_dict, df_dict, doc_data, freq_data) = get_kmer_tf_df_for_data(data, k, docids=docids, verbose=verbose)
     else:
-        (tf_dict, df_dict) = get_kmer_tf_df_for_data(data, k, docids=docids)
+        (tf_dict, df_dict) = get_kmer_tf_df_for_data(data, k, docids=docids, verbose=verbose)
     result = []
     seen = set()
     skipped = 0
     added = 0
-    print "Join data..."
+    if verbose:
+        print("Join data...")
     for key in df_dict:
-        print skipped, added, "\r",
+        if verbose:
+            print(skipped, added, sep=" ")
         if key in seen:
             continue
         revkey = get_revcomp(key)
@@ -227,10 +300,11 @@ def process_list_to_kmer_index(data, k, docids=True, cutoff=None):
         if docids:
             result.append((key, revkey, tf, df, ids, freqs))
         else:
-            result.append((key, revkey, tf, df, "", ""))
+            result.append((key, revkey, tf, df, None, None))
         seen.add(key)
         seen.add(revkey)
-    print
+    if verbose:        
+        print()
     result.sort(key=lambda x: x[-3], reverse=True)
     return result
 
@@ -238,13 +312,13 @@ def compute_kmer_index_for_fasta_file(file_name, index_file, k=23):
     """ 
     """
     data = []
-    print "Read arrays..."
+    print("Read arrays...")
     for i, seq_obj in enumerate(sc_iter_fasta(file_name)):
         data.append(seq_obj.sequence)
-    print "Readed %s arrays." % i
-    print "Compute k-mers..."
+    print("Readed %s arrays." % i)
+    print("Compute k-mers...")
     result = process_list_to_kmer_index(data, k, docids=False)
-    print "Save index..."
+    print("Save index...")
     with open(index_file, "w") as fh:
         for item in result:
             s  = "%s\n" % "\t".join(map(str, item))
@@ -252,16 +326,17 @@ def compute_kmer_index_for_fasta_file(file_name, index_file, k=23):
     return result
 
 def compute_kmer_index_for_trf_file(file_name, index_file, k=23, max_complexity=None, min_complexity=None):
-    """ 
+    """
+    TODO: replace gzip complexity with DUST filter
     """
     data = []
-    print "Read arrays..."
+    print("Read arrays...")
     for i, trf_obj in enumerate(sc_iter_tab_file(file_name, TRModel)):
         data.append(trf_obj.trf_array)
-    print "Readed %s arrays." % i
-    print "Compute k-mers..."
+    print("Readed %s arrays." % i)
+    print("Compute k-mers...")
     result = process_list_to_kmer_index(data, k, docids=False)
-    print "Save index..."
+    print("Save index...")
     with open(index_file, "w") as fh:
         for item in result:
             if max_complexity:
@@ -288,3 +363,165 @@ def get_sequence_kmer_coverage(sequence, kmers, k):
         else:
             mismatch += 1
     return match/(n-k+1), variability
+
+def compute_kmers_libraries_from_fasta(fasta_file, k_diaposon):
+    '''
+    '''
+    index2name = {}
+    arrays = []
+    for i, seq_obj in enumerate(sc_iter_fasta(fasta_file)):
+        index2name[i] = seq_obj.seq_head[1:]
+        arrays.append(seq_obj.sequence)
+    libraries = {}
+    for k in k_diaposon:
+        library = {}
+        index = process_list_to_kmer_index(arrays, k, docids=True)
+        for kmer, revkmer, tf, df, docids, freqs in index:
+            items = []
+            for i, docid in enumerate(docids):
+                name = index2name[docid]
+                freq = freqs[i]
+                items.append("%s:%s" % (name, freq))
+            items = ",".join(items)
+            library[kmer] = (tf, df, items)
+        libraries[k] = library
+    return libraries
+
+def get_for_and_rev_kmers_from_fastq(fasta_file, k):
+    '''
+    '''
+    index2name = {}
+    arrays = []
+    for i, seq_obj in enumerate(sc_iter_fasta(fasta_file)):
+        index2name[i] = seq_obj.seq_head[1:]
+        arrays.append(seq_obj.sequence)
+    library = {}
+    index = process_list_to_kmer_index(arrays, k, docids=True)
+    for kmer, revkmer, tf, df, docids, freqs in index:
+        items = []
+        for i, docid in enumerate(docids):
+            name = index2name[docid]
+            freq = freqs[i]
+            items.append("%s:%s" % (name, freq))
+        items = ",".join(items)
+        library[kmer] = (tf, df, items)
+        library[revkmer] = (tf, df, items)
+    return library
+
+def print_prev_cutoff(kmer, kmer2freq, cutoff=0):
+    ''' Returns:
+    - R as a dictionary nucleotide to tf
+    - n as a number of pathes
+    - nucleotides as a list with nucleotides
+    - max_hits as a sorted list of (tf, nucleotide)
+    '''
+    R = {}
+    n = 0
+    nucleotides = []
+    max_hits = []
+    a = kmer2freq['A'+kmer[:-1]]
+    if a and a > cutoff:
+        R["A"] = a
+        n += 1
+        nucleotides.append('A')
+        max_hits.append((a,'A'))
+    c = kmer2freq['C'+kmer[:-1]]
+    if c and c > cutoff:
+        R["C"] = c
+        n += 1
+        nucleotides.append('C')
+        max_hits.append((c,'C'))
+    t = kmer2freq['T'+kmer[:-1]]
+    if t and t > cutoff:
+        R["T"] = t
+        n += 1
+        nucleotides.append('T')
+        max_hits.append((t,'T'))
+    g = kmer2freq['G'+kmer[:-1]]
+    if g and g > cutoff:
+        R["G"] = g
+        n += 1
+        nucleotides.append('G')
+        max_hits.append((g,'G'))
+
+    max_hits.sort(reverse=True)
+    return R, n, nucleotides, max_hits
+
+def print_next_cutoff(kmer, kmer2freq, cutoff=0):
+    ''' Returns
+    - R as a dictionary nucleotide to tf
+    - n as a number of pathes
+    - nucleotides as a list with nucleotides
+    - max_hits as a sorted list of (tf, nucleotide)
+    '''
+    R = {}
+    n = 0
+    nucleotides = []
+    max_hits = []
+    a = kmer2freq[kmer[1:]+'A']
+    if a and a > cutoff:
+        R["A"] = a
+        nucleotides.append('A')
+        n += 1
+        max_hits.append((a,'A'))
+    c = kmer2freq[kmer[1:]+'C']
+    if c and c > cutoff:
+        R["C"] = c
+        nucleotides.append('C')
+        n += 1
+        max_hits.append((c,'C'))
+    t = kmer2freq[kmer[1:]+'T']
+    if t and t > cutoff:
+        R["T"] = t
+        nucleotides.append('T')
+        max_hits.append((t,'T'))
+        n += 1
+    g = kmer2freq[kmer[1:]+'G']
+    if g and g > cutoff:
+        R["G"] = g
+        nucleotides.append('G')
+        n += 1
+        max_hits.append((g,'G'))
+        
+    max_hits.sort(reverse=True)
+    return R, n, nucleotides, max_hits
+
+
+def print_next_R(kmer, kmer2freq, cutoff=0):
+    ''' Returns
+    - R as a dictionary nucleotide to tf
+    '''
+    R = {}
+    a = kmer2freq[kmer[1:]+'A']
+    if a and a > cutoff:
+        R["A"] = a
+    c = kmer2freq[kmer[1:]+'C']
+    if c and c > cutoff:
+        R["C"] = c
+    t = kmer2freq[kmer[1:]+'T']
+    if t and t > cutoff:
+        R["T"] = t
+    g = kmer2freq[kmer[1:]+'G']
+    if g and g > cutoff:
+        R["G"] = g
+    return R
+
+
+def print_prev_R(kmer, kmer2freq, cutoff=0):
+    ''' Returns:
+    - R as a dictionary nucleotide to tf
+    '''
+    R = {}
+    a = kmer2freq['A'+kmer[:-1]]
+    if a and a > cutoff:
+        R["A"] = a
+    c = kmer2freq['C'+kmer[:-1]]
+    if c and c > cutoff:
+        R["C"] = c
+    t = kmer2freq['T'+kmer[:-1]]
+    if t and t > cutoff:
+        R["T"] = t
+    g = kmer2freq['G'+kmer[:-1]]
+    if g and g > cutoff:
+        R["G"] = g
+    return R

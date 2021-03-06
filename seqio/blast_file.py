@@ -9,6 +9,10 @@ Working with BLAST tab-delimited output files.
 '''
 import os
 from trseeker.models.blast_model import read_blast_file
+from PyExp import core_logger, AbstractModel
+from collections import defaultdict
+from trseeker.seqio.tab_file import sc_iter_tab_file
+
 
 def _get_blast_result_intervals(blast_file, length, min_score):
     ''' Return gi->sorted list of blast objects. '''
@@ -224,4 +228,124 @@ def update_with_ref_blast_result(trs_dataset, annotation_self_folder, filters):
         trs_dataset[i].trf_family_ref = result
     print
     return trs_dataset
+
+
+
+
+def parse_blast_tsv_file_wo_taxonomy(file_name, ref2length=None, add_func=None):
+    ''' Parse blast tsv-file w/o or without taxonomy data.
+    '''
+    core_logger.info("Parsing: %s" % file_name)
+    with open(file_name) as fh:
+        for line in fh:
+            if line.startswith("# Fields:"):
+                fields = [x.strip().replace(" ","_").replace(".","").replace("%","p").replace("/","_") 
+                            for x in line.split("# Fields:")[1].strip().split(",")]
+                break
+    
+    class BlastData(AbstractModel):
+        dumpable_attributes = fields
+
+    def check_consistency(x):
+        return len(x.split("\t")) == len(fields)
+
+    hits = defaultdict(list)
+    for i, tab_obj in enumerate(sc_iter_tab_file(file_name, BlastData, remove_starts_with="#", check_function=check_consistency)):
+        print i, "\r",
+        hit = {
+            "hid": tab_obj.subject_id,
+            "full_hid": tab_obj.subject_id,
+            "S1": int(tab_obj.q_start),
+            "E1": int(tab_obj.q_end),
+            "S2": int(tab_obj.s_start),
+            "E2": int(tab_obj.s_end),
+            "evalue": float(tab_obj.evalue),
+            "alignment_length": int(tab_obj.alignment_length),
+            "p_identity": float(tab_obj.p_identity),
+            "bit_score": int(round(float(tab_obj.bit_score),0)),
+            "score": int(tab_obj.score),
+            "identical": int(tab_obj.identical),
+            "mismatches": int(tab_obj.mismatches),
+            "positives": int(tab_obj.positives),
+            "gap_opens": int(tab_obj.gap_opens),
+            "gaps": int(tab_obj.gaps),
+            "p_positives": float(tab_obj.p_positives),
+            "query_frame": int(tab_obj.query_frame),
+            "sbjct_frame": int(tab_obj.sbjct_frame),
+        }
+        if ref2length:
+            hit["coverage"] = float(hit["alignment_length"])/ref2length[tab_obj.query_id]
+
+        if add_func and hasattr(add_func, "__call__"):
+            hit = add_func(hit, tab_obj)
+
+        hits[tab_obj.query_id].append(hit)
+    print
+    return hits
+
+def check_consistency(x):
+    return len(x.split("\t")) == len(fields)
+
+def iter_blast_tsv_file_wo_taxonomy(file_name, ref2length=None, add_func=None, check_consistency=None):
+    ''' Parse blast tsv-file w/o or without taxonomy data.
+    '''
+    core_logger.info("Parsing: %s" % file_name)
+    fields =None
+    with open(file_name) as fh:
+        for line in fh:
+            if line.startswith("# Fields:"):
+                fields = [x.strip().replace(" ","_").replace(".","").replace("%","p").replace("/","_") 
+                            for x in line.split("# Fields:")[1].strip().split(",")]
+                break
+    if fields is None:
+        raise Exception("Missed field in blast output.")
+    
+    class BlastData(AbstractModel):
+        dumpable_attributes = fields
+
+    hits = []
+    last_obj = None
+    for i, tab_obj in enumerate(sc_iter_tab_file(file_name, BlastData, skip_starts_with="#", check_function=check_consistency)):
+        
+        if last_obj and last_obj != tab_obj.query_id:
+            yield last_obj, hits
+            hits = []
+            last_obj = tab_obj.query_id
+
+        if last_obj is None:
+            last_obj = tab_obj.query_id
+
+        hit = {
+            "query": tab_obj.query_id,
+            "hid": tab_obj.subject_id,
+            "full_hid": tab_obj.subject_id,
+            "S1": int(tab_obj.q_start),
+            "E1": int(tab_obj.q_end),
+            "S2": int(tab_obj.s_start),
+            "E2": int(tab_obj.s_end),
+            "evalue": float(tab_obj.evalue),
+            "alignment_length": int(tab_obj.alignment_length),
+            "p_identity": float(tab_obj.p_identity),
+            "bit_score": int(round(float(tab_obj.bit_score),0)),
+            "score": int(tab_obj.score),
+            "identical": int(tab_obj.identical),
+            "mismatches": int(tab_obj.mismatches),
+            "positives": int(tab_obj.positives),
+            "gap_opens": int(tab_obj.gap_opens),
+            "gaps": int(tab_obj.gaps),
+            "p_positives": float(tab_obj.p_positives),
+            "query_frame": int(tab_obj.query_frame),
+            "sbjct_frame": int(tab_obj.sbjct_frame),
+        }
+        if ref2length:
+            hit["coverage"] = float(hit["alignment_length"])/ref2length[tab_obj.query_id]
+
+        if add_func and hasattr(add_func, "__call__"):
+            hit = add_func(hit, tab_obj)
+
+        hits.append(hit)
+
+        
+    if hits:
+        yield last_obj, hits
 

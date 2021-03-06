@@ -15,13 +15,17 @@ TRF search wrapper
 Command example: **wgs.AADD.1.gbff.fa 2 5 7 80 10 50 2000 -m -f -d -h**
 """
 
-import os, shutil
+import os, shutil, tempfile
 from PyExp import sc_iter_filepath_folder
 from trseeker.settings import load_settings
 import gzip
 from multiprocessing import Pool
+from trseeker.seqio.fasta_file import sc_iter_fasta
+from trseeker.models.trf_model import TRModel
+from trseeker.seqio.trf_file import TRFFileIO
 
 settings = load_settings()
+ 
 
 def trf_search(file_name, pacbio=False):
     """ TRF search in fasta file."""
@@ -36,7 +40,7 @@ def trf_search(file_name, pacbio=False):
                                        settings["trf_settings"]["trf_length"],
                                        )
     if pacbio:
-        params = "2 3 5 80 10 50 2000"
+        params = "2 3 5 80 10 50 2000 -l 6"
     if settings["trf_settings"]["trf_masked_file"]:
         params += " -m"
     if settings["trf_settings"]["trf_flanked_data"]:
@@ -107,6 +111,8 @@ def trf_search_in_dir(folder, verbose=True, file_suffix=".fa", output_folder=Non
             if not os.path.isfile(result_file):
                 raise Exception("TRF search for file %s is failed" % result_file)
             print "Copy: ", result_file, dist_file
+            if os.path.isfile(dist_file):
+                os.unlink(dist_file)
             shutil.copyfile(result_file, dist_file)
             os.unlink(result_file)
 
@@ -114,7 +120,11 @@ def trf_search_in_dir(folder, verbose=True, file_suffix=".fa", output_folder=Non
 def trf_worker(args):
     ''' Worker for paralling.
     '''
-    folder, verbose, file_suffix, output_folder, threads, file_name = args
+    if len(args) == 7:
+        folder, verbose, file_suffix, output_folder, threads, file_name, pacbio = args
+    else:
+        folder, verbose, file_suffix, output_folder, threads, file_name = args
+        pacbio = False
     temp_file_name = None
     if file_name.endswith(".gz"):
         fh = gzip.open(file_name, "r")
@@ -142,7 +152,7 @@ def trf_worker(args):
     if verbose:
         print "Start trf search in %s" % file_name
     
-    trf_search(file_name)
+    trf_search(file_name, pacbio=pacbio)
 
     if temp_file_name:
         print "Remove file:", temp_file_name
@@ -166,17 +176,87 @@ def trf_search_in_dir_parallel(folder, verbose=True, file_suffix=".fa", output_f
     """
     p = Pool(processes=threads)
     map_data = []
-
-
-
     for file_name in sc_iter_filepath_folder(folder, mask=file_suffix):
-        if file_name.endswith("fsa_nt"):
-            os.unlink(file_name)
-            continue
-
-        
+        # if file_name.endswith("fsa_nt"):
+            # os.unlink(file_name)
+            # continue
         args = folder, verbose, file_suffix, output_folder, threads, file_name
         map_data.append(args)
+    p.map(trf_worker, map_data)
+
+
+def trf_search_by_splitting(fasta_file, threads=30, wdir=".", project="NaN"):
+    """ TRF search by splitting on fasta file in files.
+    """
+    folder_path = tempfile.mkdtemp(dir=wdir)
+    
+    ### 1. Split chromosomes into temp file
+    total_length = 0
+    next_file = 0
+    for i, seq_obj in enumerate(sc_iter_fasta(fasta_file)):
+        print seq_obj.header
+        file_path = os.path.join(folder_path, "%s.fa" % next_file)
+        with open(file_path, "a") as fw:
+            fw.write(">%s\n%s\n" % (seq_obj.header, seq_obj.sequence))
+        total_length += len(seq_obj.sequence)
+        if total_length > 100000:
+            next_file += 1
+            total_length = 0
+
+    ### 2. Run TRF
+
+    fasta_name = ".".join(fasta_file.split("/")[-1].split(".")[:-1])
+    output_file = os.path.join(wdir, fasta_name+".trf")
+
+    current_dir = os.getcwd()
+
+    os.chdir(folder_path)
+    
+    command = "ls %s | grep fa | xargs -P %s -I {} /home/akomissarov/libs/trf {} 2 5 7 80 10 50 2000 -l 6 -d -h" % (folder_path, threads)
+    print command
+    os.system(command)
+
+    ### 3. Parse TRF
+
+    parser_programm = "/home/akomissarov/Dropbox/workspace/PyBioSnippets/hiseq/trf_parse_raw.py"
+
+    command = "ls %s | grep dat | xargs -P %s -I {} %s -i {} -o {}.trf -p %s" % (folder_path, threads, parser_programm, project)
+    print command
+    os.system(command)
+
+    ### 3. Aggregate data
+
+    command = "cat %s/*.trf > %s" % (folder_path, output_file)
+    print command
+    os.system(command)
+
+    os.chdir(current_dir)
+
+    ### 4. Remove temp folder
+    raw_input("Remove: %s ?" % folder_path)
+    shutil.rmtree(folder_path)
+
+
+
+def trf_search_for_file_list_parallel(file_list, verbose=True, output_folder=None, threads=30, pacbio=False):
+    """ TRF search in each file in the given folder.
+    
+    - folder with fasta files
+    - verbose
+        
+    """
+    p = Pool(processes=threads)
+    map_data = []
+    file_suffix = "*"
+    folder = ""
+
+    if not file_list:
+        return
+    for file_name in file_list:
+        
+        args = folder, verbose, file_suffix, output_folder, threads, file_name, pacbio
+        map_data.append(args)
+    # print map_data
     p.map(trf_worker, map_data)
         
 

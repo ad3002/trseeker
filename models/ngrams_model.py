@@ -7,6 +7,7 @@
 
 from PyExp import AbstractModel
 from trseeker.seqio.tab_file import sc_iter_tab_file, sc_iter_simple_tab_file
+from trseeker.tools.sequence_tools import get_dust_score
 
 class KmerIndexModel(AbstractModel):
     ''' Model for ngram to TR data.
@@ -132,7 +133,7 @@ def sc_ngram_trid_reader(file_name):
             result.append((int(sids[i]), float(tfs[i])))
         yield int(nid), result
 
-def read_kmer_index(ngram_index_file, micro_kmers, cutoff=1):
+def read_kmer_index(ngram_index_file, micro_kmers, cutoff=1, dust=0):
     ''' Read kmer index data as list
     '''
     data = []
@@ -142,6 +143,9 @@ def read_kmer_index(ngram_index_file, micro_kmers, cutoff=1):
             if index_obj.kmer in micro_kmers:
                 if index_obj.tf < micro_kmers[index_obj.kmer]:
                     continue
+        if dust:
+          if get_dust_score(index_obj.kmer) < dust:
+            continue
         if index_obj.df == cutoff:
             break
         data.append(index_obj)

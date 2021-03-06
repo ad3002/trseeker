@@ -36,6 +36,7 @@ class DatasetModel(AbstractModel):
                            "dataset_trs_mean_gc",
                            "dataset_trs_fraq",
                            ]
+                           
     int_attributes = ["dataset_length",
                        "dataset_trs_n",
                        "dataset_trs_length"]
