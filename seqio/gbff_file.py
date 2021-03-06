@@ -1,12 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-#@created: 01.05.2012
-#@author: Aleksey Komissarov
-#@contact: ad3002@gmail.com 
-
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python# -*- coding: utf-8 -*-
 #
 #@created: 05.06.2011
 #@author: Aleksey Komissarov
@@ -58,7 +50,7 @@ class GbffFileIO(AbstractBlockFileIO):
 
     def __init__(self):
         """ Overrided. Hardcoded start token."""
-        token = "LOCUS       "
+        token = "LOCUS       "0
         super(GbffFileIO, self).__init__(token)
 
 def sc_iter_gbff(file_name):
