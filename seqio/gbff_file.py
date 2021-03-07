@@ -14,7 +14,9 @@ import re
 from trseeker.seqio.block_file import AbstractBlockFileIO
 from trseeker.models.sequence_model import SequenceModel
 from trseeker.tools.sequence_tools import clear_sequence
+from trseeker.models.genbank import GenbankData
 from PyExp import sc_iter_filename_folder
+
 
 class GbffFileIO(AbstractBlockFileIO):
     """ Working with multi fasta files, where each block starts with '>' token.
@@ -211,7 +213,7 @@ def sc_iter_gbff(file_name):
                     else:
                         F["fincomplete"] = 0
                     poses = re.findall("(\d+)", coord)
-                    poses = map(int, poses)
+                    poses = list(map(int, poses))
                     if len(poses) == 2:
                         F["fstart"] = poses[0]
                         F["fend"] = poses[1]
@@ -230,9 +232,15 @@ def sc_iter_gbff(file_name):
     
                     seq_obj.gb_features.append(F)
                 continue
+            if line.startswith("ORIGIN"):
+                while True:
+                    line = fh.readline()
+                    if line.startswith("//"):
+                        break
+                continue
             print("Unexpected line:")   
             print(line)
-                
+
     yield seq_obj
 
 def sc_iter_gbff_simple(file_name):
