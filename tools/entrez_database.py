@@ -15,7 +15,7 @@ Downloading datasets from NCBI
 from Bio import Entrez
 
 
-def download_proteins_from_ncbi(query, output_file, email, batch=500):
+def download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_step=1000):
     '''
     '''
     Entrez.email = email
@@ -27,7 +27,7 @@ def download_proteins_from_ncbi(query, output_file, email, batch=500):
         record = Entrez.read(handle)
         handle.close()
         start += batch
-        if start % 10000 == 0:
+        if start % verbose_step == 0:
             print(len(proteins), end=" ")
         proteins += record["IdList"]
         if len(record["IdList"]) == 0:
@@ -37,7 +37,7 @@ def download_proteins_from_ncbi(query, output_file, email, batch=500):
 
     with open(output_file, "w") as fw:
         for i in range(0,len(proteins), batch):
-            if i % 10000 == 0:
+            if i % verbose_step == 0:
                 print(len(i), end=" ")
             handle = Entrez.efetch(db="protein", 
                                    id=proteins[i:i+batch], 
