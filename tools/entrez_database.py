@@ -8,7 +8,7 @@
 Downloading datasets from NCBI
 
 
-- get_app_proteins(query, output_file, email, batch=500)
+- download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_step=1000)
 
 '''
 
