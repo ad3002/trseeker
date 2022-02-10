@@ -5,16 +5,70 @@
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com
 '''
-Downloading datasets from NCBI
+### Function for downloading datasets from NCBI.
 
+Download all proteins according to a given query into output file and then return these proteins as fasta text.
 
-- download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_step=1000)
+```python
+fasta_data = download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_step=1000)
+```
 
+Download items from given database according to query, rettype, and retmode. Save output to output_file and return as text.
 
-# https://www.ncbi.nlm.nih.gov/assembly/?term=txid3699[Organism:exp]
-# https://linsalrob.github.io/ComputationalGenomicsManual/Databases/NCBI_Edirect.html
+```python
+data = download_items_from_ncbi(query, 
+                             database, 
+                             output_file, 
+                             email, 
+                             rettype="tasta", 
+                             retmode="text", 
+                             batch=500, 
+                             verbose_step=1000)
 
-esearch -db assembly -query "txid3699[Organism:exp]" | efetch -format docsum | xtract -pattern DocumentSummary -element FtpPath_RefSeq | awk -F"/" '{print "curl -o "$NF"_genomic.fna.gz " $0"/"$NF"_genomic.fna.gz"}'
+```
+
+Get items from given database according to query, rettype, and retmode.
+
+```python
+items = get_items_from_ncbi(query, 
+                         database, 
+                         email, 
+                         rettype="tasta", 
+                         retmode="text", 
+                         batch=500, 
+                         verbose_step=1000)
+```
+
+Get RNA SRA datasets from NCBI according to taxid. 
+Output includes LIBRARY_SOURCE, STUDY_ABSTRACT, DESIGN_DESCRIPTION, PRIMARY_ID, DESCRIPTION, LINKS
+And the second part of the output contains full xml data.
+
+```python
+data, _ = get_rna_sra_datasets_by_taxid(taxid, email, batch=500, verbose_step=1)
+
+all_links = {}
+
+for *item, links in data.values():
+    links = dict([
+                   (url.split("/")[-1], url)
+                        for 
+                            url 
+                                in links])
+    all_links.append(links)
+```
+
+Download and unpack SRA filrs from NCBI according to taxid.
+
+```python
+download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, batch=500, verbose_step=1)
+```
+
+Download genomes and annotation from NCBI according to taxid.
+
+```python
+download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True)
+```
+
 '''
 
 from Bio import Entrez
@@ -34,6 +88,7 @@ def _get_feature(feature, record):
     if d:
         return d[0]
     return ""
+
 
 def _download_genomic_links(url):
     '''
@@ -58,6 +113,7 @@ def _download_genomic_links(url):
     print(f" found {len(to_download)} links.")
     return to_download
 
+
 def is_tool(program_name):
     '''Check whether program_name is on PATH and executable.
     '''
@@ -65,7 +121,8 @@ def is_tool(program_name):
 
 
 def download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_step=1000):
-    '''
+    ''' Download all proteins according to a given query into output file 
+        and then return these proteins as fasta text.
     '''
     Entrez.email = email
     
@@ -106,7 +163,8 @@ def download_items_from_ncbi(query,
                              retmode="text", 
                              batch=500, 
                              verbose_step=1000):
-    '''
+    ''' Download items from given database according to query, rettype, and retmode. 
+        Save output to output_file and return as text.
     '''
     Entrez.email = email
     
@@ -178,12 +236,19 @@ def get_items_from_ncbi(query,
     return items, resutls
 
 
-
 def get_rna_sra_datasets_by_taxid(taxid, 
                          email, 
                          batch=500, 
                          verbose_step=1):
-    '''
+    ''' Get RNA SRA datasets from NCBI. 
+    Output includes 
+        LIBRARY_SOURCE, 
+        STUDY_ABSTRACT, 
+        DESIGN_DESCRIPTION, 
+        PRIMARY_ID, 
+        DESCRIPTION, 
+        LINKS
+    And the second part of the output contains full xml data.
     '''
     Entrez.email = email
     
@@ -231,7 +296,7 @@ def get_rna_sra_datasets_by_taxid(taxid,
 
 
 def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, batch=500, verbose_step=1):
-    '''
+    ''' Download and unpack SRA filrs from NCBI according to taxid.
     '''
     if not os.path.isdir(output_folder):
         os.mkdir(output_folder)
@@ -240,16 +305,20 @@ def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, 
         raise NoToolException("Please, install 'mamba install -c bioconda sra-tools'")
 
     data, _ = get_rna_sra_datasets_by_taxid(taxid, email, batch=500, verbose_step=1)
+    all_links = []
     for *item, links in data.values():
         links = dict([
                        (url.split("/")[-1], url)
                             for 
                                 url 
                                     in links])
+        all_links.append(links)
+
     file_with_link = os.path.join(output_folder, "to_download.list")
     with open(file_with_link, "w") as fw:
-        for dataset, url in links.items():
-            fw.write(f"{url}\n")
+        for links in all_links:
+            for dataset, url in links.items():
+                fw.write(f"{url}\n")
 
     os.chdir(output_folder)
     command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
@@ -263,7 +332,7 @@ def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, 
 
 
 def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True):
-    '''
+    ''' Download genomes and annotation from NCBI according to taxid.
     '''
     if not os.path.isdir(output_folder):
         os.mkdir(output_folder)

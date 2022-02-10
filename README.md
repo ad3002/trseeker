@@ -54,6 +54,7 @@
     - [Jellyfish](#_tools_jellyfish)
     - [Trees](#_tools_tree)
     - [Classifiction TRs in types](#_trs_types)
+    - [Working with Entrez NCBI databases](#_tools_entrez)
 
 
 
@@ -129,6 +130,7 @@ ngrams_settings:
 <a name="_models"/>
 
 ## Avaliable Models
+
 
 <a name="_models_seq"/>
 
@@ -2066,5 +2068,74 @@ slice_files = read_tree_slices(slice_files)
 ```
 
 
+<a name="_tools_entrez"/>
+
+### Function for downloading datasets from NCBI.
+
+```python
+from trseeker.tools.entrez_datanase import *
+```
+
+Download all proteins according to a given query into output file and then return these proteins as fasta text.
+
+```python
+fasta_data = download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_step=1000)
+```
+
+Download items from given database according to query, rettype, and retmode. Save output to output_file and return as text.
+
+```python
+data = download_items_from_ncbi(query, 
+                             database, 
+                             output_file, 
+                             email, 
+                             rettype="tasta", 
+                             retmode="text", 
+                             batch=500, 
+                             verbose_step=1000)
+
+```
+
+Get items from given database according to query, rettype, and retmode.
+
+```python
+items = get_items_from_ncbi(query, 
+                         database, 
+                         email, 
+                         rettype="tasta", 
+                         retmode="text", 
+                         batch=500, 
+                         verbose_step=1000)
+```
+
+Get RNA SRA datasets from NCBI according to taxid. 
+Output includes LIBRARY_SOURCE, STUDY_ABSTRACT, DESIGN_DESCRIPTION, PRIMARY_ID, DESCRIPTION, LINKS
+And the second part of the output contains full xml data.
+
+```python
+data, _ = get_rna_sra_datasets_by_taxid(taxid, email, batch=500, verbose_step=1)
+
+all_links = {}
+
+for *item, links in data.values():
+    links = dict([
+                   (url.split("/")[-1], url)
+                        for 
+                            url 
+                                in links])
+    all_links.append(links)
+```
+
+Download and unpack SRA filrs from NCBI according to taxid.
+
+```python
+download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, batch=500, verbose_step=1)
+```
+
+Download genomes and annotation from NCBI according to taxid.
+
+```python
+download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True)
+```
 
 
