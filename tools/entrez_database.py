@@ -21,11 +21,43 @@ from Bio import Entrez
 import re
 
 
+class NoToolException(Exception):
+    pass
+
+
 def _get_feature(feature, record):
     d = re.findall("<%s>(.*?)</%s>" % (feature, feature), record, re.M)
     if d:
         return d[0]
     return ""
+
+def _download_genomic_links(url):
+    '''
+    '''
+    if not url.endswith("/"):
+        url += "/"
+    url = url.replace("ftp://", " https://")
+    to_download = []
+    print(f"Parsing {url}...", end=" ")
+    with urllib.request.urlopen(url) as response:
+        html = response.read().decode("utf8")
+        links = re.findall("<a href=\"(.*?)\">(.*?)</a>", html, re.M|re.S)
+        for link in links:
+            if "_genomic.gff.gz" in link[0]:
+                to_download.append(url + link[0])
+            elif "_genomic.fna.gz" in link[0]:
+                to_download.append(url + link[0])
+            elif "_protein.faa.gz" in link[0]:
+                to_download.append(url + link[0])
+            elif "translated_cds.faa.gz" in link[0]:
+                to_download.append(url + link[0])
+    print(f" found {len(to_download)} links.")
+    return to_download
+
+def is_tool(program_name):
+    '''Check whether program_name is on PATH and executable.
+    '''
+    return shutil.which(program_name) is not None
 
 
 def download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_step=1000):
@@ -192,3 +224,52 @@ def get_rna_sra_datasets_by_taxid(taxid,
         ALL_RNA_DATASETS[seq_id] = [LIBRARY_SOURCE, STUDY_ABSTRACT, DESIGN_DESCRIPTION, PRIMARY_ID, DESCRIPTION, LINKS]
 
     return ALL_RNA_DATASETS, ALL_RNA_DATASETS_FULL
+
+
+def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True):
+    '''
+    '''
+    if not os.path.isdir(output_folder):
+        os.mkdir(output_folder)
+        
+    refseq_results = {}
+    genbank_results = {}
+    with tempfile.NamedTemporaryFile() as temp_output_file:
+        if not is_tool("esearch"):
+            raise NoToolException("Please, install 'mamba install -c bioconda entrez-direct'")
+        
+        command = f"esearch -db assembly -query '{taxid}[Organism:exp]' | efetch -format docsum > {temp_output_file.name}"
+        print(command)
+        os.system(command)
+        
+        temp_output_file.seek(0)
+        data = temp_output_file.read().decode("utf8")
+        genbank_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_GenBank>(.*?)</FtpPath_GenBank>', data, re.S)
+        refseq_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_RefSeq>(.*?)</FtpPath_RefSeq>', data, re.S)
+        
+        print(f"Found {len(refseq_paths)} RefSeq links and {len(genbank_paths)} GenBank links.")
+        
+        for organism, url in refseq_paths:
+            refseq_results[organism] = _download_genomic_links(url)
+        
+        if not only_refseq:
+            for organism, url in genbank_paths:
+                genbank_results[organism] = _download_genomic_links(url)
+            
+    file_with_link = os.path.join(output_folder, "to_download.list")
+    with open(file_with_link, "w") as fw:
+        for organism in refseq_results:
+            for url in refseq_results[organism]:
+                fw.write(f"{url}\n")
+                
+        if not only_refseq:
+            for organism in genbank_results:
+                if organism in refseq_results:
+                    continue
+                for url in genbank_results[organism]:
+                    fw.write(f"{url}\n")
+
+    os.chdir(output_folder)
+    command = f"less to_download.list | xargs -P {threads} -n 1 wget"
+    print(command)
+    os.system(command)
