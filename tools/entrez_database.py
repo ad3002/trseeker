@@ -332,7 +332,7 @@ def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, 
     os.system(command)
 
     os.chdir(output_folder)
-    command = f"less to_download.list | xargs -P {threads} -n 1 fastq-dump --split-files"
+    command = f"less to_download.list | rev | cut -f1 -d"/" | rev | xargs -P {threads} -n 1 fastq-dump --split-files"
     print(command)
     os.system(command)
 
