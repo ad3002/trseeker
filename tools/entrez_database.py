@@ -18,6 +18,10 @@ esearch -db assembly -query "txid3699[Organism:exp]" | efetch -format docsum | x
 '''
 
 from Bio import Entrez
+import os
+import tempfile
+import shutil
+import urllib.request
 import re
 
 
@@ -226,6 +230,38 @@ def get_rna_sra_datasets_by_taxid(taxid,
     return ALL_RNA_DATASETS, ALL_RNA_DATASETS_FULL
 
 
+def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, batch=500, verbose_step=1):
+    '''
+    '''
+    if not os.path.isdir(output_folder):
+        os.mkdir(output_folder)
+
+    if not is_tool("fastq-dump"):
+        raise NoToolException("Please, install 'mamba install -c bioconda sra-tools'")
+
+    data, _ = get_rna_sra_datasets_by_taxid(taxid, email, batch=500, verbose_step=1)
+    for *item, links in data.values():
+        links = dict([
+                       (url.split("/")[-1], url)
+                            for 
+                                url 
+                                    in links])
+    file_with_link = os.path.join(output_folder, "to_download.list")
+    with open(file_with_link, "w") as fw:
+        for dataset, url in links.items():
+            fw.write(f"{url}\n")
+
+    os.chdir(output_folder)
+    command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
+    print(command)
+    os.system(command)
+
+    os.chdir(output_folder)
+    command = f"less to_download.list | xargs -P {threads} -n 1 fastq-dump --split-files"
+    print(command)
+    os.system(command)
+
+
 def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True):
     '''
     '''
@@ -270,6 +306,6 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
                     fw.write(f"{url}\n")
 
     os.chdir(output_folder)
-    command = f"less to_download.list | xargs -P {threads} -n 1 wget"
+    command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
     print(command)
     os.system(command)
