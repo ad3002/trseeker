@@ -2070,7 +2070,7 @@ slice_files = read_tree_slices(slice_files)
 
 <a name="_tools_entrez"/>
 
-### Function for downloading datasets from NCBI.
+### Function for downloading datasets from NCBI
 
 ```python
 from trseeker.tools.entrez_datanase import *
@@ -2109,7 +2109,9 @@ items = get_items_from_ncbi(query,
 ```
 
 Get RNA SRA datasets from NCBI according to taxid. 
-Output includes LIBRARY_SOURCE, STUDY_ABSTRACT, DESIGN_DESCRIPTION, PRIMARY_ID, DESCRIPTION, LINKS
+
+Output includes LIBRARY_SOURCE, STUDY_ABSTRACT, DESIGN_DESCRIPTION, PRIMARY_ID, DESCRIPTION, LINKS.
+
 And the second part of the output contains full xml data.
 
 ```python

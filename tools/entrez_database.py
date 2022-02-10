@@ -5,7 +5,11 @@
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com
 '''
-### Function for downloading datasets from NCBI.
+### Function for downloading datasets from NCBI
+
+```python
+from trseeker.tools.entrez_datanase import *
+```
 
 Download all proteins according to a given query into output file and then return these proteins as fasta text.
 
@@ -40,7 +44,9 @@ items = get_items_from_ncbi(query,
 ```
 
 Get RNA SRA datasets from NCBI according to taxid. 
-Output includes LIBRARY_SOURCE, STUDY_ABSTRACT, DESIGN_DESCRIPTION, PRIMARY_ID, DESCRIPTION, LINKS
+
+Output includes LIBRARY_SOURCE, STUDY_ABSTRACT, DESIGN_DESCRIPTION, PRIMARY_ID, DESCRIPTION, LINKS.
+
 And the second part of the output contains full xml data.
 
 ```python
