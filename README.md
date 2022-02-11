@@ -2089,7 +2089,7 @@ data = download_items_from_ncbi(query,
                              database, 
                              output_file, 
                              email, 
-                             rettype="tasta", 
+                             rettype="fasta", 
                              retmode="text", 
                              batch=500, 
                              verbose_step=1000)
@@ -2102,7 +2102,7 @@ Get items from given database according to query, rettype, and retmode.
 items = get_items_from_ncbi(query, 
                          database, 
                          email, 
-                         rettype="tasta", 
+                         rettype="fasta", 
                          retmode="text", 
                          batch=500, 
                          verbose_step=1000)
@@ -2119,13 +2119,14 @@ data, _ = get_rna_sra_datasets_by_taxid(taxid, email, batch=500, verbose_step=1)
 
 all_links = {}
 
-for *item, links in data.values():
+for *item, links in datasets.values():
     links = dict([
                    (url.split("/")[-1], url)
                         for 
                             url 
                                 in links])
-    all_links.append(links)
+    for sra in links:
+        all_links[sra] = links[sra]
 ```
 
 Download and unpack SRA filrs from NCBI according to taxid.
