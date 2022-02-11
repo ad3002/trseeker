@@ -200,5 +200,5 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid,
                          verbose_step=1):
     '''
     '''
-    temp_output_file = tempfile.NamedTemporaryFile(
+    temp_output_file = tempfile.NamedTemporaryFile()
     command = f"esearch -db assembly -query '{taxid}[Organism:exp]' | efetch -format docsum > {temp_output_file}"
