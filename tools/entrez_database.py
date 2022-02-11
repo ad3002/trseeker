@@ -5,89 +5,21 @@
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com
 '''
-### Function for downloading datasets from NCBI
+Downloading datasets from NCBI
 
-```python
-from trseeker.tools.entrez_datanase import *
-```
 
-Download all proteins according to a given query into output file and then return these proteins as fasta text.
+- download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_step=1000)
 
-```python
-fasta_data = download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_step=1000)
-```
 
-Download items from given database according to query, rettype, and retmode. Save output to output_file and return as text.
+# https://www.ncbi.nlm.nih.gov/assembly/?term=txid3699[Organism:exp]
+# https://linsalrob.github.io/ComputationalGenomicsManual/Databases/NCBI_Edirect.html
 
-```python
-data = download_items_from_ncbi(query, 
-                             database, 
-                             output_file, 
-                             email, 
-                             rettype="tasta", 
-                             retmode="text", 
-                             batch=500, 
-                             verbose_step=1000)
-
-```
-
-Get items from given database according to query, rettype, and retmode.
-
-```python
-items = get_items_from_ncbi(query, 
-                         database, 
-                         email, 
-                         rettype="tasta", 
-                         retmode="text", 
-                         batch=500, 
-                         verbose_step=1000)
-```
-
-Get RNA SRA datasets from NCBI according to taxid. 
-
-Output includes LIBRARY_SOURCE, STUDY_ABSTRACT, DESIGN_DESCRIPTION, PRIMARY_ID, DESCRIPTION, LINKS.
-
-And the second part of the output contains full xml data.
-
-```python
-data, _ = get_rna_sra_datasets_by_taxid(taxid, email, batch=500, verbose_step=1)
-
-all_links = {}
-
-for *item, links in data.values():
-    links = dict([
-                   (url.split("/")[-1], url)
-                        for 
-                            url 
-                                in links])
-    all_links.append(links)
-```
-
-Download and unpack SRA filrs from NCBI according to taxid.
-
-```python
-download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, batch=500, verbose_step=1)
-```
-
-Download genomes and annotation from NCBI according to taxid.
-
-```python
-download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True)
-```
-
+esearch -db assembly -query "txid3699[Organism:exp]" | efetch -format docsum | xtract -pattern DocumentSummary -element FtpPath_RefSeq | awk -F"/" '{print "curl -o "$NF"_genomic.fna.gz " $0"/"$NF"_genomic.fna.gz"}'
 '''
 
 from Bio import Entrez
-import os
-import tempfile
-import shutil
-import urllib.request
 import re
-
-
-class NoToolException(Exception):
-    pass
-
+import tempfile
 
 def _get_feature(feature, record):
     d = re.findall("<%s>(.*?)</%s>" % (feature, feature), record, re.M)
@@ -96,39 +28,8 @@ def _get_feature(feature, record):
     return ""
 
 
-def _download_genomic_links(url):
-    '''
-    '''
-    if not url.endswith("/"):
-        url += "/"
-    url = url.replace("ftp://", " https://")
-    to_download = []
-    print(f"Parsing {url}...", end=" ")
-    with urllib.request.urlopen(url) as response:
-        html = response.read().decode("utf8")
-        links = re.findall("<a href=\"(.*?)\">(.*?)</a>", html, re.M|re.S)
-        for link in links:
-            if "_genomic.gff.gz" in link[0]:
-                to_download.append(url + link[0])
-            elif "_genomic.fna.gz" in link[0]:
-                to_download.append(url + link[0])
-            elif "_protein.faa.gz" in link[0]:
-                to_download.append(url + link[0])
-            elif "translated_cds.faa.gz" in link[0]:
-                to_download.append(url + link[0])
-    print(f" found {len(to_download)} links.")
-    return to_download
-
-
-def is_tool(program_name):
-    '''Check whether program_name is on PATH and executable.
-    '''
-    return shutil.which(program_name) is not None
-
-
 def download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_step=1000):
-    ''' Download all proteins according to a given query into output file 
-        and then return these proteins as fasta text.
+    '''
     '''
     Entrez.email = email
     
@@ -150,7 +51,7 @@ def download_proteins_from_ncbi(query, output_file, email, batch=500, verbose_st
     with open(output_file, "w") as fw:
         for i in range(0,len(proteins), batch):
             if i % verbose_step == 0:
-                print(len(i), end=" ")
+                print(i, end=" ")
             handle = Entrez.efetch(db="protein", 
                                    id=proteins[i:i+batch], 
                                    rettype="fasta", 
@@ -169,8 +70,7 @@ def download_items_from_ncbi(query,
                              retmode="text", 
                              batch=500, 
                              verbose_step=1000):
-    ''' Download items from given database according to query, rettype, and retmode. 
-        Save output to output_file and return as text.
+    '''
     '''
     Entrez.email = email
     
@@ -192,7 +92,7 @@ def download_items_from_ncbi(query,
     with open(output_file, "w") as fw:
         for i in range(0,len(items), batch):
             if i % verbose_step == 0:
-                print(len(i), end=" ")
+                print(i, end=" ")
             handle = Entrez.efetch(db=database, 
                                    id=items[i:i+batch], 
                                    rettype=rettype, 
@@ -232,7 +132,7 @@ def get_items_from_ncbi(query,
     resutls = []
     for i in range(0,len(items), batch):
         if i % verbose_step == 0:
-            print(len(i), end=" ")
+            print(i, end=" ")
         handle = Entrez.efetch(db=database, 
                                id=items[i:i+batch], 
                                rettype=rettype, 
@@ -242,19 +142,12 @@ def get_items_from_ncbi(query,
     return items, resutls
 
 
+
 def get_rna_sra_datasets_by_taxid(taxid, 
                          email, 
                          batch=500, 
                          verbose_step=1):
-    ''' Get RNA SRA datasets from NCBI. 
-    Output includes 
-        LIBRARY_SOURCE, 
-        STUDY_ABSTRACT, 
-        DESIGN_DESCRIPTION, 
-        PRIMARY_ID, 
-        DESCRIPTION, 
-        LINKS
-    And the second part of the output contains full xml data.
+    '''
     '''
     Entrez.email = email
     
@@ -301,86 +194,11 @@ def get_rna_sra_datasets_by_taxid(taxid,
     return ALL_RNA_DATASETS, ALL_RNA_DATASETS_FULL
 
 
-def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, batch=500, verbose_step=1):
-    ''' Download and unpack SRA filrs from NCBI according to taxid.
+def download_genome_assemblies_and_annotation_from_ncbi(taxid, 
+                         email, 
+                         batch=500, 
+                         verbose_step=1):
     '''
-    if not os.path.isdir(output_folder):
-        os.mkdir(output_folder)
-
-    if not is_tool("fastq-dump"):
-        raise NoToolException("Please, install 'mamba install -c bioconda sra-tools'")
-
-    data, _ = get_rna_sra_datasets_by_taxid(taxid, email, batch=500, verbose_step=1)
-    all_links = []
-    for *item, links in data.values():
-        links = dict([
-                       (url.split("/")[-1], url)
-                            for 
-                                url 
-                                    in links])
-        all_links.append(links)
-
-    file_with_link = os.path.join(output_folder, "to_download.list")
-    with open(file_with_link, "w") as fw:
-        for links in all_links:
-            for dataset, url in links.items():
-                fw.write(f"{url}\n")
-
-    os.chdir(output_folder)
-    command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
-    print(command)
-    os.system(command)
-
-    os.chdir(output_folder)
-    command = f"less to_download.list | rev | cut -f1 -d"/" | rev | xargs -P {threads} -n 1 fastq-dump --split-files"
-    print(command)
-    os.system(command)
-
-
-def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True):
-    ''' Download genomes and annotation from NCBI according to taxid.
     '''
-    if not os.path.isdir(output_folder):
-        os.mkdir(output_folder)
-        
-    refseq_results = {}
-    genbank_results = {}
-    with tempfile.NamedTemporaryFile() as temp_output_file:
-        if not is_tool("esearch"):
-            raise NoToolException("Please, install 'mamba install -c bioconda entrez-direct'")
-        
-        command = f"esearch -db assembly -query '{taxid}[Organism:exp]' | efetch -format docsum > {temp_output_file.name}"
-        print(command)
-        os.system(command)
-        
-        temp_output_file.seek(0)
-        data = temp_output_file.read().decode("utf8")
-        genbank_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_GenBank>(.*?)</FtpPath_GenBank>', data, re.S)
-        refseq_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_RefSeq>(.*?)</FtpPath_RefSeq>', data, re.S)
-        
-        print(f"Found {len(refseq_paths)} RefSeq links and {len(genbank_paths)} GenBank links.")
-        
-        for organism, url in refseq_paths:
-            refseq_results[organism] = _download_genomic_links(url)
-        
-        if not only_refseq:
-            for organism, url in genbank_paths:
-                genbank_results[organism] = _download_genomic_links(url)
-            
-    file_with_link = os.path.join(output_folder, "to_download.list")
-    with open(file_with_link, "w") as fw:
-        for organism in refseq_results:
-            for url in refseq_results[organism]:
-                fw.write(f"{url}\n")
-                
-        if not only_refseq:
-            for organism in genbank_results:
-                if organism in refseq_results:
-                    continue
-                for url in genbank_results[organism]:
-                    fw.write(f"{url}\n")
-
-    os.chdir(output_folder)
-    command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
-    print(command)
-    os.system(command)
+    temp_output_file = tempfile.NamedTemporaryFile(
+    command = f"esearch -db assembly -query '{taxid}[Organism:exp]' | efetch -format docsum > {temp_output_file}"
