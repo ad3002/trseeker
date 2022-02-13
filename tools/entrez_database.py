@@ -71,6 +71,7 @@ download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, batc
 ```
 
 Download genomes and annotation from NCBI according to taxid.
+Return refseq and genbank datasets.
 
 ```python
 download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True)
@@ -302,7 +303,7 @@ def get_rna_sra_datasets_by_taxid(taxid,
     return ALL_RNA_DATASETS, ALL_RNA_DATASETS_FULL
 
 
-def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, batch=500, verbose_step=1):
+def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, batch=500, verbose_step=1, quiet=True):
     ''' Download and unpack SRA filrs from NCBI according to taxid.
     '''
     if not os.path.isdir(output_folder):
@@ -328,7 +329,10 @@ def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, 
                 fw.write(f"{url}\n")
 
     os.chdir(output_folder)
-    command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
+    if quiet:
+        command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
+    else:
+        command = f"less to_download.list | xargs -P {threads} -n 1 wget"
     print(command)
     os.system(command)
 
@@ -340,6 +344,7 @@ def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, 
 
 def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True):
     ''' Download genomes and annotation from NCBI according to taxid.
+        Return refseq and genbank datasets.
     '''
     if not os.path.isdir(output_folder):
         os.mkdir(output_folder)
@@ -385,3 +390,5 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
     command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
     print(command)
     os.system(command)
+
+    return refseq_results, genbank_results
