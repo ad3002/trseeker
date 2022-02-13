@@ -342,7 +342,7 @@ def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, 
     os.system(command)
 
 
-def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True):
+def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True, quiet=True):
     ''' Download genomes and annotation from NCBI according to taxid.
         Return refseq and genbank datasets.
     '''
@@ -387,7 +387,10 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
                     fw.write(f"{url}\n")
 
     os.chdir(output_folder)
-    command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
+    if quiet:
+        command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
+    else:
+        command = f"less to_download.list | xargs -P {threads} -n 1 wget"
     print(command)
     os.system(command)
 
