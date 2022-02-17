@@ -342,7 +342,7 @@ def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, 
     os.system(command)
 
 
-def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True, quiet=True):
+def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True, quiet=True, mock=False):
     ''' Download genomes and annotation from NCBI according to taxid.
         Return refseq and genbank datasets.
     '''
@@ -385,6 +385,9 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
                     continue
                 for url in genbank_results[organism]:
                     fw.write(f"{url}\n")
+
+    if mock:
+        return refseq_results, genbank_results
 
     os.chdir(output_folder)
     if quiet:
