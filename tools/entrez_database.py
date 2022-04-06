@@ -347,7 +347,7 @@ def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, 
     os.system(command)
 
 
-def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True, quiet=True, mock=False):
+def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True, only_gff=False, quiet=True, mock=False):
     ''' Download genomes and annotation from NCBI according to taxid.
         Return refseq and genbank datasets.
     '''
@@ -372,11 +372,11 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
         print(f"Found {len(refseq_paths)} RefSeq links and {len(genbank_paths)} GenBank links.")
         
         for organism, url in refseq_paths:
-            refseq_results[organism] = _download_genomic_links(url)
+            refseq_results[organism] = _download_genomic_links(url, only_gff=only_gff)
         
         if not only_refseq:
             for organism, url in genbank_paths:
-                genbank_results[organism] = _download_genomic_links(url)
+                genbank_results[organism] = _download_genomic_links(url, only_gff=only_gff)
             
     file_with_link = os.path.join(output_folder, "to_download.list")
     with open(file_with_link, "w") as fw:
