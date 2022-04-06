@@ -98,7 +98,7 @@ def _get_feature(feature, record):
     return ""
 
 
-def _download_genomic_links(url):
+def _download_genomic_links(url, only_gff=False):
     '''
     '''
     if not url.endswith("/"):
@@ -110,6 +110,11 @@ def _download_genomic_links(url):
         html = response.read().decode("utf8")
         links = re.findall("<a href=\"(.*?)\">(.*?)</a>", html, re.M|re.S)
         for link in links:
+            if only_gff:
+                if "_genomic.gff.gz" in link[0]:
+                    to_download.append(url + link[0])    
+                else:
+                    continue
             if "_genomic.gff.gz" in link[0]:
                 to_download.append(url + link[0])
             elif "_genomic.fna.gz" in link[0]:
