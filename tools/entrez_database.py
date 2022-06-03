@@ -347,6 +347,19 @@ def download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, 
     os.system(command)
 
 
+def _is_file_exists(url, output_folder):
+    ''' Check file name existence.'''
+    file_name = url.split("/")[-1]
+    output_file = os.path.join(output_folder, file_name)
+    output_file_unpacked = output_file
+    if output_file.endswith(".gz"):
+        output_file_unpacked = output_file.replace(".gz", "")
+    if os.path.isfile(output_file) or os.path.isfile(output_file_unpacked):
+        print(f"File exists: {file_name}")
+        return True
+    return False
+
+
 def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True, only_gff=False, quiet=True, mock=False):
     ''' Download genomes and annotation from NCBI according to taxid.
         Return refseq and genbank datasets.
@@ -379,11 +392,13 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
             refseq_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_RefSeq>(.*?)</FtpPath_RefSeq>', document, re.S)
                         
             for organism, url in refseq_paths:
-                refseq_results[organism] = _download_genomic_links(url, only_gff=only_gff)
+                name = (organism, url.split("/")[-1])
+                refseq_results[name] = _download_genomic_links(url, only_gff=only_gff)
             
             if not only_refseq:
                 for organism, url in genbank_paths:
-                    genbank_results[organism] = _download_genomic_links(url, only_gff=only_gff)
+                    name = (organism, url.split("/")[-1])
+                    genbank_results[name] = _download_genomic_links(url, only_gff=only_gff)
         
         print(f"Found {len(refseq_results)} RefSeq links and {len(genbank_results)} GenBank links.")
 
@@ -391,13 +406,7 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
     with open(file_with_link, "w") as fw:
         for organism in refseq_results:
             for url in refseq_results[organism]:
-                file_name = url.split("/")[-1]
-                output_file = os.path.join(output_folder, file_name)
-                output_file_unpacked = output_file
-                if output_file.endswith(".gz"):
-                    output_file_unpacked = output_file.replace(".gz", "")
-                if os.path.isfile(output_file) or os.path.isfile(output_file_unpacked):
-                    print(f"File exists: {file_name}")
+                if _is_file_exists(url, output_folder):
                     continue
                 fw.write(f"{url}\n")
                 
@@ -406,6 +415,8 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
                 if organism in refseq_results:
                     continue
                 for url in genbank_results[organism]:
+                    if _is_file_exists(url, output_folder):
+                        continue
                     fw.write(f"{url}\n")
 
     if mock:
