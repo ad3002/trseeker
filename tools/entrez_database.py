@@ -384,7 +384,10 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
             for url in refseq_results[organism]:
                 file_name = url.split("/")[-1]
                 output_file = os.path.join(output_folder, file_name)
-                if os.path.isfile(output_file):
+                output_file_unpacked = output_file
+                if output_file.endswith(".gz"):
+                    output_file_unpacked = output_file.replace(".gz", "")
+                if os.path.isfile(output_file) or os.path.isfile(output_file_unpacked):
                     print(f"File exists: {file_name}")
                     continue
                 fw.write(f"{url}\n")
