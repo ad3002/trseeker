@@ -366,18 +366,27 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
         
         temp_output_file.seek(0)
         data = temp_output_file.read().decode("utf8")
-        genbank_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_GenBank>(.*?)</FtpPath_GenBank>', data, re.S)
-        refseq_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_RefSeq>(.*?)</FtpPath_RefSeq>', data, re.S)
-        
-        print(f"Found {len(refseq_paths)} RefSeq links and {len(genbank_paths)} GenBank links.")
-        
-        for organism, url in refseq_paths:
-            refseq_results[organism] = _download_genomic_links(url, only_gff=only_gff)
-        
-        if not only_refseq:
-            for organism, url in genbank_paths:
-                genbank_results[organism] = _download_genomic_links(url, only_gff=only_gff)
+
+        documents = re.findall("<DocumentSummary>(.*?)</DocumentSummary>", data, re.S)
+
+        print(f"Found {len(documents)} items...")
+
+        for i, document in enumerate(documents):
+
+            print(f"Progress {i}/{len(documents)}")
+
+            genbank_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_GenBank>(.*?)</FtpPath_GenBank>', document, re.S)
+            refseq_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_RefSeq>(.*?)</FtpPath_RefSeq>', document, re.S)
+                        
+            for organism, url in refseq_paths:
+                refseq_results[organism] = _download_genomic_links(url, only_gff=only_gff)
             
+            if not only_refseq:
+                for organism, url in genbank_paths:
+                    genbank_results[organism] = _download_genomic_links(url, only_gff=only_gff)
+        
+        print(f"Found {len(refseq_results)} RefSeq links and {len(genbank_results)} GenBank links.")
+
     file_with_link = os.path.join(output_folder, "to_download.list")
     with open(file_with_link, "w") as fw:
         for organism in refseq_results:
