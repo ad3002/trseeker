@@ -403,12 +403,14 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
         print(f"Found {len(refseq_results)} RefSeq links and {len(genbank_results)} GenBank links.")
 
     file_with_link = os.path.join(output_folder, "to_download.list")
+    links_to_download = 0
     with open(file_with_link, "w") as fw:
         for organism in refseq_results:
             for url in refseq_results[organism]:
                 if _is_file_exists(url, output_folder):
                     continue
                 fw.write(f"{url}\n")
+                links_to_download += 1
                 
         if not only_refseq:
             for organism in genbank_results:
@@ -418,10 +420,11 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
                     if _is_file_exists(url, output_folder):
                         continue
                     fw.write(f"{url}\n")
+                    links_to_download += 1
 
-    if mock:
+    if mock or links_to_download == 0:
         return refseq_results, genbank_results
-
+    print(f"Downloading {len(links_to_download)} links")
     os.chdir(output_folder)
     if quiet:
         command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
