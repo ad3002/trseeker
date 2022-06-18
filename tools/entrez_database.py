@@ -360,7 +360,7 @@ def _is_file_exists(url, output_folder):
     return False
 
 
-def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True, only_gff=False, quiet=True, mock=False):
+def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True, only_gff=False, quiet=True, mock=False, assemblies_to_use=None):
     ''' Download genomes and annotation from NCBI according to taxid.
         Return refseq and genbank datasets.
     '''
@@ -392,12 +392,18 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
             refseq_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_RefSeq>(.*?)</FtpPath_RefSeq>', document, re.S)
                         
             for organism, url in refseq_paths:
-                name = (organism, url.split("/")[-1])
+                assembly = url.split("/")[-1]
+                if assemblies_to_use and not assembly in assemblies_to_use:
+                    continue
+                name = (organism, assembly)
                 refseq_results[name] = _download_genomic_links(url, only_gff=only_gff)
             
             if not only_refseq:
                 for organism, url in genbank_paths:
-                    name = (organism, url.split("/")[-1])
+                    assembly = url.split("/")[-1]
+                    if assemblies_to_use and not assembly in assemblies_to_use:
+                        continue
+                    name = (organism, assembly)
                     genbank_results[name] = _download_genomic_links(url, only_gff=only_gff)
         
         print(f"Found {len(refseq_results)} RefSeq links and {len(genbank_results)} GenBank links.")
@@ -424,7 +430,7 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
 
     if mock or links_to_download == 0:
         return refseq_results, genbank_results
-    print(f"Downloading {len(links_to_download)} links")
+    print(f"Downloading {links_to_download} links")
     os.chdir(output_folder)
     if quiet:
         command = f"less to_download.list | xargs -P {threads} -n 1 wget -q"
