@@ -190,7 +190,7 @@ def update_with_self_blast_result(trs_dataset, annotation_self_folder, filters_o
     ''' Add vs_self blast result to trs_dataset.'''
     n = len(trs_dataset)
     for i, trf_obj in enumerate(trs_dataset):
-        print i, n, "\r",
+        print(i, n, end=" ")
         blast_output_file = os.path.join(annotation_self_folder, "%s.blast" % trf_obj.trf_id)
         with open(blast_output_file) as fh:
             data = fh.read()
@@ -209,14 +209,14 @@ def update_with_self_blast_result(trs_dataset, annotation_self_folder, filters_o
                                   min_score=filters["min_blast_score"]
                                   )
         trs_dataset[i].trf_family_self = result
-    print
+    print()
     return trs_dataset
 
 def update_with_ref_blast_result(trs_dataset, annotation_self_folder, filters):
     ''' Add vs_reference blast result to trs_dataset.'''
     n = len(trs_dataset)
     for i, trf_obj in enumerate(trs_dataset):
-        print i, n, "\r",
+        print(i, n, end=" ")
 
         blast_output_file = os.path.join(annotation_self_folder, "%s.blast" % trf_obj.trf_id)
         result = get_blast_result(blast_output_file,
@@ -251,7 +251,6 @@ def parse_blast_tsv_file_wo_taxonomy(file_name, ref2length=None, add_func=None):
 
     hits = defaultdict(list)
     for i, tab_obj in enumerate(sc_iter_tab_file(file_name, BlastData, remove_starts_with="#", check_function=check_consistency)):
-        print i, "\r",
         hit = {
             "hid": tab_obj.subject_id,
             "full_hid": tab_obj.subject_id,
@@ -280,11 +279,8 @@ def parse_blast_tsv_file_wo_taxonomy(file_name, ref2length=None, add_func=None):
             hit = add_func(hit, tab_obj)
 
         hits[tab_obj.query_id].append(hit)
-    print
     return hits
 
-def check_consistency(x):
-    return len(x.split("\t")) == len(fields)
 
 def iter_blast_tsv_file_wo_taxonomy(file_name, ref2length=None, add_func=None, check_consistency=None):
     ''' Parse blast tsv-file w/o or without taxonomy data.
