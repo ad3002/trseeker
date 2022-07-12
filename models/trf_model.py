@@ -274,7 +274,6 @@ class TRModel(AbstractModel):
     def fasta(self):
       return self.get_fasta_repr()
 
-    
     def get_gff3_string(self, 
                         chromosome=True, 
                         trs_type="complex_tandem_repeat", 
@@ -285,7 +284,7 @@ class TRModel(AbstractModel):
                         force_header=False):
       '''Return TR in gff format.
       '''
-      if chromosome and self.trf_chr and chromosome != "?":
+      if chromosome and self.trf_chr and self.trf_chr != "?":
           seqid = self.trf_chr
       elif self.trf_gi and self.trf_gi != "Unknown":
           seqid = self.trf_gi

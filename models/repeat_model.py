@@ -24,5 +24,3 @@ class RepeatModel(AbstractModel):
 
     float_attributes = [
     ]
-
-    

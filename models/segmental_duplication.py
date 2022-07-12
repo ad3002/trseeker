@@ -48,6 +48,6 @@ class LastzModel(AbstractModel):
     ]
 
     def preprocess_pair(self, key, value):
-    	if key == "identityp":
-    		value = value[:-1]
-    	return key, value
+        if key == "identityp":
+            value = value[:-1]
+        return key, value

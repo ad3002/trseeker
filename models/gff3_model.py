@@ -148,4 +148,3 @@ def sc_gff3_reader(gff3_file):
     reader = Gff3FileIO()
     for gff3_obj in reader.read_online(gff3_file):
         yield gff3_obj
-

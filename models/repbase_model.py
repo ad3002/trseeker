@@ -58,4 +58,3 @@ class RepbaseModel(AbstractModel):
         return None
       sequence = genome[self.query][self.qstart:self.qend]
       return sequence
-

@@ -12,7 +12,7 @@ from trseeker.tools.parsers import parse_fasta_head, parse_chromosome_name
 from Bio import Entrez
 import os
 import re
-import pickle
+
 
 Entrez.email = "aleksey.komissarov@gmail.com"
 

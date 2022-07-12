@@ -75,4 +75,3 @@ class SAMModel(AbstractModel):
 
     def as_fastq(self):
         return "@%s\n%s\n+\n%s\n" % (self.QNAME, self.SEQ, self.QUAL)
-
