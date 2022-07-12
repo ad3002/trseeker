@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#@created: 06.03.2021
-#@author: Aleksey Komissarov
-#@contact: ad3002@gmail.com
+#@created: 
+#@author:
+#@contact:
 
 from PyExp import AbstractModel
 
@@ -16,6 +16,7 @@ class GenbankData(AbstractModel):
         "gb_divison",
         "gb_moltype",
         "gb_moddata",
+        "gb_length",
         "gb_definition",
         "gb_accessions",
         "gb_versions",
