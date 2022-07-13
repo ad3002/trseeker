@@ -56,6 +56,17 @@ class GbffFileIO(AbstractBlockFileIO):
         super(GbffFileIO, self).__init__(token)
 
 
+def get_section(fh, line, keyword):
+    text = line.replace(keyword, "").strip()
+    while True:
+        line = fh.readline()
+        if line.startswith(" "):
+            text += " " + line.strip()
+        else:
+            break
+    return text, line
+
+
 def sc_iter_gbff(file_name):
     """ Iter over gbff file."""
 
@@ -82,94 +93,41 @@ def sc_iter_gbff(file_name):
                 seq_obj.parse_locus(line)
                 line = fh.readline()
                 continue
+            if line.startswith("DBSOURCE"):
+                text, line = get_section(fh, line, "DBSOURCE")
+                seq_obj.gb_references.append("DBSOURCE:%s" % text)
+                continue
             if line.startswith("DEFINITION"):
-                text = line.replace("DEFINITION", "").strip()
-                while True:
-                    line = fh.readline()
-                    if line.startswith(" "):
-                        text += " " + line.strip()
-                    else:
-                        break
-                seq_obj.gb_definition = text
+                seq_obj.gb_definition, line = get_section(fh, line, "DEFINITION")
                 continue
             if line.startswith("ACCESSION"):
-                text = line.replace("ACCESSION", "").strip()
-                while True:
-                    line = fh.readline()
-                    if line.startswith(" "):
-                        text += " " + line.strip()
-                    else:
-                        break
+                text, line = get_section(fh, line, "ACCESSION")
                 seq_obj.gb_accessions = [x for x in text.split() if x]
                 continue
             if line.startswith("VERSION"):
-                text = line.replace("VERSION", "").strip()
-                while True:
-                    line = fh.readline()
-                    if line.startswith(" "):
-                        text += " " + line.strip()
-                    else:
-                        break
+                text, line = get_section(fh, line, "VERSION")
                 seq_obj.gb_versions = [x for x in text.split() if x]
                 continue
             if line.startswith("KEYWORDS"):
-                text = line.replace("KEYWORDS", "").strip()
-                while True:
-                    line = fh.readline()
-                    if line.startswith(" "):
-                        text += " " + line.strip()
-                    else:
-                        break
+                text, line = get_section(fh, line, "KEYWORDS")
                 seq_obj.gb_keywords = [x for x in text.split() if x]
                 continue
             if line.startswith("SOURCE"):
-                text = line.replace("SOURCE", "").strip()
-                while True:
-                    line = fh.readline()
-                    if line.startswith(" "):
-                        text += " " + line.strip()
-                    else:
-                        break
-                seq_obj.gb_source = text
+                seq_obj.gb_source, line = get_section(fh, line, "SOURCE")
                 continue
             if line.startswith("ORGANISM"):
-                text = line.replace("ORGANISM", "").strip()
-                while True:
-                    line = fh.readline()
-                    if line.startswith(" "):
-                        text += " " + line.strip()
-                    else:
-                        break
-                seq_obj.gb_organism = text
+                seq_obj.gb_organism, line = get_section(fh, line, "ORGANISM")
                 continue
             if line.startswith("DBLINK"):
-                text = line.replace("DBLINK", "").strip()
-                while True:
-                    line = fh.readline()
-                    if line.startswith(" "):
-                        text += " " + line.strip()
-                    else:
-                        break
+                text, line = get_section(fh, line, "DBLINK")
                 seq_obj.gb_dblink.append(text)
                 continue
             if line.startswith("REFERENCE"):
-                text = line.replace("REFERENCE", "").strip()
-                while True:
-                    line = fh.readline()
-                    if line.startswith(" "):
-                        text += " " + line.strip()
-                    else:
-                        break
+                text, line = get_section(fh, line, "REFERENCE")
                 seq_obj.gb_references.append(text)
                 continue        
             if line.startswith("COMMENT"):
-                text = line.replace("COMMENT", "").strip()
-                while True:
-                    line = fh.readline()
-                    if line.startswith(" "):
-                        text += " " + line.strip()
-                    else:
-                        break
+                text, line = get_section(fh, line, "COMMENT")
                 seq_obj.gb_references.append(text)
                 continue
             if line.startswith("FEATURES"):
@@ -177,20 +135,18 @@ def sc_iter_gbff(file_name):
                 while True:
                     line = fh.readline()
                     if line.strip().startswith("CONTIG"):
-                        seq_obj.gb_contig = line.replace("CONTIG", "").strip()
-                        line = fh.readline()
+                        text, line = get_section(fh, line, "CONTIG")
+                        seq_obj.gb_contig = text
                         break
                     if line.startswith("//") or line.startswith("ORIGIN"):
                         break
                     feature_text.append(line)
                 features = "".join(feature_text)
-                
                 features = features.replace("\n", "^")
                 features = re.sub("\^ {21}[^/]", "", features)
                 features = re.sub("\^ {21}/", "\t", features)
                 features = re.sub("\^\s{5}", "\n", features)
                 # ['CDS             complement(240314..241414)', 'gene="dnaN"', 'locus_tag="PI91_RS21880"', 'old_locus_tag="PI91_21630"', 'EC_number="2.7.7.7"', 'inference="COORDINATES: similar to AAequence:RefSeq:WP_006177590.1"', 'note="Derived by automated computational analysis usingene prediction method: Protein Homology."', 'codon_start=1', 'transl_table=11', 'product="DNA polymerase III subunit beta"', 'protein_id="WP_008500170.1"', 'translation="MKFTVEREHLLKPLQQVSGPLGGRPTLPILGNLLLQVADGTLSLGTDLEMEMIARVTLTQPHDAGATTVPARKFFDICRGLPEGAEIAVQLEGDRMLVRSGSRFSLSTLPAADFPNLDDWQSEVEFTLPQATMKRLIEATQFSMAHQDVRYYLNGMLFTEGEELRTVATDGHRLAVCSMPIGDSLPNHSVIVPRKGVIELMRMLDGGDTPLRVQISNNIRAHVGDFVFTSKLVDGRFPDYRRVLPKNPDKTLEAGCDSLKQAFARAAILSNEFRGVRLYVSENQIKITANNPEQEEAEEILDVTYAGAEMEIGFNVSYVLDVLNALKCEVRILLTDSVSSVQIEDAASQSAAYVVMPMRL"']
-                
                 for feature in features.split("\n"):
                     F = {}
                     feature = feature.strip()
@@ -229,7 +185,6 @@ def sc_iter_gbff(file_name):
                             name = f[0]
                             value = 1
                         F[name] = value
-    
                     seq_obj.gb_features.append(F)
                 continue
             if line.startswith("ORIGIN"):
@@ -239,8 +194,9 @@ def sc_iter_gbff(file_name):
                         break
                 continue
             print("Unexpected line:")   
+            print(file_name)
             print(line)
-
+            input("?")
     yield seq_obj
 
 def sc_iter_gbff_simple(file_name):
@@ -251,8 +207,8 @@ def sc_iter_gbff_simple(file_name):
         yield seq_obj.seq_gi, seq_obj.sequence
 
 
-def sc_parse_gbff_in_folder(gbbf_folder, fasta_folder, fasta_postfix, mask):
-    ''' Parse all gbff files in given gbbf_folder according to mask, write result
+def sc_covert_gbff_in_folder_to_fasta(gbbf_folder, fasta_folder, fasta_postfix, mask):
+    ''' Convert all gbff files in given gbbf_folder according to mask, write result
     to fasta_folder with corresponding fasta_postfix.
     '''
     for file_name in sc_iter_filename_folder(gbbf_folder, mask):

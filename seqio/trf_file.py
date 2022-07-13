@@ -15,7 +15,6 @@ import re, os
 from trseeker.models.trf_model import TRModel
 from trseeker.seqio.block_file import AbstractBlockFileIO
 from trseeker.tools.sequence_tools import get_gc, remove_consensus_redundancy
-from trseeker.seqio.mongodb_reader import MongoDBReader
 from PyExp import sc_iter_filepath_folder, WiseOpener
 from trseeker.settings import load_settings
 from trseeker.seqio.tab_file import sc_iter_tab_file
@@ -80,14 +79,14 @@ class TRFFileIO(AbstractBlockFileIO):
         for head, body, start, next in self.read_online(trf_file):
             head = head.replace("\t", " ")
             obj_set = []
-            print " processing:", head
+            print(" processing:", head)
             n = body.count("\n")
             for i, line in enumerate(self._gen_data_line(body)):
-                print "   %s/%s" % (i,n), "\r",
+                print("   %s/%s" % (i,n), "\r", end=" ")
                 trf_obj = TRModel()
                 trf_obj.set_raw_trf(head, None, line)
                 obj_set.append(trf_obj)
-            print " filtering..."
+            print(" filtering...")
             if filter:
                 # Filter object set
                 trf_obj_set = self._filter_obj_set(obj_set)
@@ -96,7 +95,7 @@ class TRFFileIO(AbstractBlockFileIO):
             for trf_obj in obj_set:
                 trf_obj.trf_id = trf_id
                 trf_id += 1
-            print " fixing monomers..."
+            print(" fixing monomers...")
             obj_set, variants2df = remove_consensus_redundancy(obj_set)
             yield obj_set
 
@@ -139,7 +138,7 @@ class TRFFileIO(AbstractBlockFileIO):
 
         obj_set.sort(key=lambda x: (x.trf_l_ind, x.trf_r_ind))
         for a in range(0, n):
-            print "\t%s\%s" % (a,n), "\r",
+            print("\t%s\%s" % (a,n), "\r", end=" ")
 
             obj1 = obj_set[a]
             if not obj1:
@@ -220,8 +219,8 @@ class TRFFileIO(AbstractBlockFileIO):
                             is_overlapping = True
                             obj1 = self._join_overlapped(obj1, obj2)
                             obj2 = None
-                            print "overlap: ", overlap, "min_length:", min_length, "overlap_proc_diff:", overlap_proc_diff, "gc_dif:", gc_dif
-                            print "JOINED"
+                            print("overlap: ", overlap, "min_length:", min_length, "overlap_proc_diff:", overlap_proc_diff, "gc_dif:", gc_dif)
+                            print("JOINED")
                         continue
                     # a ------ 
                     # b ------
@@ -290,7 +289,7 @@ def sc_parse_raw_trf_folder(trf_raw_folder, output_trf_file, project=None):
     if os.path.isfile(output_trf_file):
         os.remove(output_trf_file)
     for file_path in sc_iter_filepath_folder(trf_raw_folder, mask="dat"):
-        print "Start parse file %s..." % file_path
+        print("Start parse file %s..." % file_path)
         trf_id = reader.parse_to_file(file_path, output_trf_file, trf_id=trf_id, project=project)
 
 def sc_trf_to_fasta(trf_file, fasta_file):

@@ -56,24 +56,24 @@ class NCBIFtpIO(AbstractFtpIO):
             wgs_list = [wgs_list]
         for j, wgs_item in enumerate(wgs_list):
             if len(wgs_item) > 4:
-                print "Too long WGS ID:", wgs_item
+                print("Too long WGS ID:", wgs_item)
                 wgs_list[j] = wgs_item[:4]
-                print "\tnew WGS ID:", wgs_list[j]
+                print("\tnew WGS ID:", wgs_list[j])
 
-        print "WGS list: ", wgs_list
-        print "File suffix: ", file_suffix
+        print("WGS list: ", wgs_list)
+        print("File suffix: ", file_suffix)
 
-        print "Read NCBI's ftp..."
+        print("Read NCBI's ftp...")
         path = ["genbank", "wgs"]
         self.connect()
-        print "Connected."
+        print("Connected.")
         self.cd(path)
-        print "Reading directory..."
+        print("Reading directory...")
         files = self.ls()
         files = [ item for item in files if [True for project in wgs_list if project in item] ]
         files = [ item for item in files if file_suffix in item ]
 
-        print "Files to download: ", files
+        print("Files to download: ", files)
 
         total_length = len(files)
 
@@ -83,41 +83,41 @@ class NCBIFtpIO(AbstractFtpIO):
                 ftp_address = self.ftp_address + "/genbank/wgs/" + file_name
                 self.download_with_aspera(output_folder, "NCBI", ftp_address)
                 if not os.path.isfile(output_file):
-                    print "Can't find file: %s" % output_file
-                    print "Trying download with wget"
-                    print "Start download: %s ..." % file_name,
-                    print " to %s" % output_file
+                    print("Can't find file: %s" % output_file)
+                    print("Trying download with wget")
+                    print("Start download: %s ..." % file_name)
+                    print(" to %s" % output_file)
                     self.get(file_name, output_file)
                     if not os.path.isfile(output_file):
                         raise Exception("Can't find file: %s" % output_file)
                     if unzip:
-                        print "Unzip..."
+                        print("Unzip...")
                         self.unzip(output_file)
                         os.unlink(output_file)
             else:
-                print "Start download: %s ..." % file_name,
-                print " to %s" % output_file
+                print("Start download: %s ..." % file_name)
+                print(" to %s" % output_file)
                 self.get(file_name, output_file)
                 if unzip:
-                    print "Unzip..."
+                    print("Unzip...")
                     self.unzip(output_file)
                     os.unlink(output_file)
 
     def download_from_ncbi_by_mask(self, file_name, output_folder, unzip=False):
         """ 
         """        
-        print "Read NCBI's ftp..."
+        print("Read NCBI's ftp...")
         path = file_name.split("/")[1:]
         file_name = path.pop()
-        print path, file_name
+        print(path, file_name)
         self.connect()
         self.cd(path)
         files = self.ls()
         files = [ item for item in files if re.match(file_name, item) ]
         if not files:
-            print "Wrong mask. Available files:", files
+            print("Wrong mask. Available files:", files)
             raise Exception("Wrong mask.")
-        print "Files to download: ", files
+        print("Files to download: ", files)
 
         for file_name in files:
             output_file = os.path.join(output_folder, file_name)
@@ -126,23 +126,22 @@ class NCBIFtpIO(AbstractFtpIO):
                 ftp_address = "/".join(actual_path)
                 self.download_with_aspera(output_folder, "NCBI", ftp_address)
                 if not os.path.isfile(output_file):
-                    print "Can't find file: %s" % output_file
-                    print "Trying download with wget"
-                    print "Start download: %s ..." % file_name,
-                    print " to %s" % output_file
+                    print("Can't find file: %s" % output_file)
+                    print("Trying download with wget")
+                    print("Start download: %s ..." % file_name)
+                    print(" to %s" % output_file)
                     self.get(file_name, output_file)
                     if not os.path.isfile(output_file):
                         raise Exception("Can't find file: %s" % output_file)
                     if unzip:
-                        print "Unzip..."
+                        print("Unzip...")
                         self.unzip(output_file)
                         os.unlink(output_file)
             else:
-                print "Start download: %s ..." % file_name,
-                print " to %s" % output_file
+                print("Start download: %s ..." % file_name, " to %s" % output_file)
                 self.get(file_name, output_file)
                 if unzip:
-                    print "Unzip..."
+                    print("Unzip...")
                     self.unzip(output_file)
                     os.unlink(output_file)
 
@@ -159,25 +158,24 @@ class NCBIFtpIO(AbstractFtpIO):
         for i, file in enumerate(files):
             if get_size:
                 total_size += self.size(file)
-            print i, total_size / 8589934592, "\r"
+            print(i, total_size / 8589934592)
             output_file = os.path.join(output_folder, file)
             if self.aspera:
                 ftp_address = self.ftp_address + "/genbank/wgs/" + file
                 self.download_with_aspera(output_folder, "NCBI", ftp_address)
             else:
-                print "Start download: %s ..." % file,
-                print " to %s" % output_file
+                print("Start download: %s ..." % file, " to %s" % output_file)
                 if os.path.isfile(output_file):
-                    print "--> was downloaded early"
+                    print("--> was downloaded early")
                     continue
                 if aspera:
                     download_with_aspera_from_ncbi("/genbank/wgs/"+file, output_file)
                 else:
                     self.get(file, output_file)
                 if unzip:
-                    print "Unzip..."
+                    print("Unzip...")
                     self.unzip(output_file)
-                    print "Done %i from %s" % (i, n)
+                    print("Done %i from %s" % (i, n))
 
     def download_chromosomes_in_fasta(self, ftp_address, name, output_folder, unzip=False):
         """ Download all WGS files from NCBI in fasta format."""
@@ -199,17 +197,16 @@ class NCBIFtpIO(AbstractFtpIO):
         n = len(files)
         for i, file in enumerate(files):
             output_file = os.path.join(output_folder, file)
-            print "Start download: %s ..." % file,
-            print " to %s" % output_file
+            print("Start download: %s ..." % file, " to %s" % output_file)
 
             if os.path.isfile(output_file):
-                print "--> was downloaded early"
+                print("--> was downloaded early")
                 continue
             self.get(file, output_file)
             if unzip:
-                print "Unzip..."
+                print("Unzip...")
                 self.unzip(output_file)
-            print "Done %i from %s" % (i, n)
+            print("Done %i from %s" % (i, n))
 
     def download_all_wgs_in_gbff(self, output_folder, unzip=False):
         """ Download all WGS files from NCBI in genbank format."""
@@ -221,11 +218,10 @@ class NCBIFtpIO(AbstractFtpIO):
         files = [ item for item in files if file_suffix in item ]
         for file in files:
             output_file = os.path.join(output_folder, file)
-            print "Start download: %s ..." % file,
-            print " to %s" % output_file
+            print("Start download: %s ..." % file, " to %s" % output_file)
             self.get(file, output_file)
             if unzip:
-                print "Unzip..."
+                print("Unzip...")
                 self.unzip(output_file)
 
     def download_trace_data(self, trace_folder, output_folder, unzip=False):
@@ -242,11 +238,12 @@ class NCBIFtpIO(AbstractFtpIO):
                 ftp_address = self.ftp_address + "/pub/TraceDB/%s/%s" % (trace_folder, file_name)
                 self.download_with_aspera(output_folder, "NCBI", ftp_address)
             else:
-                print "Start download: %s ..." % file_name,
-                print " to %s" % output_file
+                output_file = os.path.join(output_folder, file_name)
+                print("Start download: %s ..." % file_name)
+                print(" to %s" % output_file)
                 self.get(file_name, output_file)
                 if unzip:
-                    print "Unzip..."
+                    print("Unzip...")
                     self.unzip(output_file)
                 index.add(file_name.split(".")[-2])
         return index
@@ -269,8 +266,8 @@ class NCBIFtpIO(AbstractFtpIO):
             self.ftp_address, folders = paths[0], paths[1:]
             self.connect()
             self.cd(folders)
-            print "Start download as is: %s ..." % file_name,
-            print " to %s" % output_file
+            print("Start download as is: %s ..." % file_name)
+            print(" to %s" % output_file)
             self.get(file_name, output_file)
 
     def download_with_aspera(self, local_path, remote_server, remote_path):
@@ -298,5 +295,5 @@ class NCBIFtpIO(AbstractFtpIO):
             "local_path": local_path,
         }
         command = _command % params
-        print command
+        print(command)
         os.system(command)

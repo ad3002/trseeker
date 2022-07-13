@@ -36,6 +36,8 @@ Cov file assembly stack:
     
 """
 import os
+from AriadnaPy.tools.patches import get_patches_from_debrijin_simple
+from AriadnaPy.tools.unitigs import extend_to_right, extend_to_right_from_seed, extend_to_left_from_seed
 
 
 
@@ -97,8 +99,6 @@ def get_seq_dashes(file_name, verbose=False):
         else:
             end = last_pos
             result.append((start, end, start_ext_cov, end_ext_cov, seq))
-            if verbose:
-                print len(result), start, end, len(seq)
             last_pos = None
             last_pos = x.pos
             start_ext_cov = x.pS
@@ -108,23 +108,16 @@ def get_seq_dashes(file_name, verbose=False):
     if last_pos is not None:
         end = last_pos
         result.append((start, end, start_ext_cov, end_ext_cov, seq))
-        if verbose:
-            print len(result), start, end, len(seq)
     return result
 
 
-if __name__ == '__main__':
+def main_cov_file(file_name, kmer2tf):
     
-    import jellyfish
-    from trseeker.tools.jellyfish_tools import Kmer2tfAPI
-    from AriadnaPy.tools.patches import get_patches_from_debrijin_simple
-    from AriadnaPy.tools.unitigs import extend_to_right, extend_to_right_from_seed, extend_to_left_from_seed
-
     total_file = "/home/akomissarov/Dropbox/PySatDNA/all.seq"
     with open(total_file, "w") as fh:
         pass
 
-    for sid in xrange(1,47):
+    for sid in range(1,47):
 
         file_name = "/mnt/GNDRbackup/akomissarov/antilopa/ref.%s.cov" % sid
         jf_path = "/mnt/GNDRbackup/akomissarov/antilopa/trim.%s" % sid
@@ -133,24 +126,18 @@ if __name__ == '__main__':
         result = get_seq_dashes(file_name, verbose=True)
         k = 23
 
-        jf_api = jellyfish.QueryMerFile(jf_path)
-        kmer2tf = Kmer2tfAPI(jf_api)
-
         sequences = ""
         pE1 = None
         end1 = None
 
-        for x in result:
-            print x[:4]
-
         
 
-        for i in xrange(len(result)):
+        for i in range(len(result)):
 
             start2, end2, pS2, pE2, seq2 = result[i]
 
-            print sequences, end1, pE1
-            print start2, end2, pS2, pE2, seq2
+            print(sequences, end1, pE1)
+            print(start2, end2, pS2, pE2, seq2)
             # raw_input("?")
 
             ### Case 1. The first round.
@@ -183,7 +170,7 @@ if __name__ == '__main__':
             if pE1 > 0 and pS2 == 0:
                 
                 kmer = sequences[-k:]
-                print sequences
+                print(sequences)
                 seq, cov, R = extend_to_right_from_seed(kmer, kmer2tf, error_cutoff=0, return_r=True)
                 patch = seq[k:]
                 sequences += patch
@@ -198,7 +185,6 @@ if __name__ == '__main__':
             ### Case 2c. The first round.
             if pE1 == 0 and pS2 > 0:
                 kmer = seq2[:k]
-                print seq2
                 seq, cov, R = extend_to_left_from_seed(kmer, kmer2tf, error_cutoff=0, return_r=True)
                 patch = seq[:-k]
                 
@@ -245,14 +231,10 @@ if __name__ == '__main__':
 
                     if n_patch <= 0:
 
-                        print n_patch,start2 ,end1, start2-end1
-                        print left_patch
-                        print right_patch
-
                         sequences += "N"*(start2 - end1)
                         sequences += seq2
 
-                        print "Error with insert length"
+                        print("Error with insert length")
                         # raw_input("???")
 
                     else:
@@ -284,11 +266,3 @@ if __name__ == '__main__':
 
         with open(total_file, "a") as fh:
             fh.write(">%s\n%s\n" % (sid, sequences))
-            
-        
-        
-        
-            
-
-
-

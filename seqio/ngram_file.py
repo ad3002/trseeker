@@ -60,11 +60,11 @@ def save_ngram_pos_index(ngram_trids_file, id2trids, id2trid2tf):
 def save_distance_data(dist_file, distances):
     ''' Save distance data: a b dist'''
 
-    print "Sort distances"
+    print("Sort distances")
     distances = [(key, d) for key, d in distances.items()]
     distances.sort(reverse=True, key=lambda x: x[1])
 
-    print "Save result"
+    print("Save result")
     with open(dist_file, "w") as fh:
         for key, value in distances:
             fh.write("%s\t%s\n" % (key, value))

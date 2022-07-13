@@ -10,8 +10,7 @@ TODO: implement this.
 TODO: separate model from reader
 '''
 
-from trseeker.tools.sequence_tools import get_revcomp, get_gc
-from trseeker.tools.sequence_tools import clear_sequence
+from trseeker.tools.sequence_tools import get_gc
 import re
 try:
     from Bio import pairwise2

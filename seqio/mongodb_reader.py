@@ -14,11 +14,11 @@ try:
     import pymongo
     from pymongo import Connection
 except:
-    print "WARNING: Install pymongo"
+    print("WARNING: Install pymongo")
 try:
     from bson.code import Code
 except:
-    print "WARNING: Install bson"
+    print("WARNING: Install bson")
 
 
 class MongoDBReader(object):

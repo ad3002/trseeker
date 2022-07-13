@@ -57,13 +57,13 @@ class AbstractBlockFileIO(AbstractFileIO):
 
     def read_from_file(self, input_file):
         """ Overrided. Read data from given input_file."""
-        with self.wise_opener(input_file, "rb") as fh:
+        with self.wise_opener(input_file, "r") as fh:
             for head, body, start, next in self.gen_block_sequences(self.token, fh):
                 self.data.append((head, body, start, next))
 
     def read_online(self, input_file):
         """ Overrided. Yield items from data online from input_file."""
-        with self.wise_opener(input_file, "rb") as fh:
+        with self.wise_opener(input_file, "r") as fh:
             for head, body, start, next in self.gen_block_sequences(self.token, fh):
                 yield (head, body, start, next)
 

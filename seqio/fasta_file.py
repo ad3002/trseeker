@@ -102,7 +102,7 @@ def sc_iter_fasta_brute(file_name, inmem=False, lower=False):
             data = fh
         for line in data:
             if line.startswith(">"):
-                if seq:
+                if seq or header:
                     sequence = "".join(seq)
                     if lower:
                         sequence = sequence.lower()
@@ -170,7 +170,7 @@ def save_all_seq_with_exact_substring(fasta_file, substring, output_file):
                 fh.write(seq_obj.fasta)
 
 
-def sort_fasta_file_by_length(file_name):
+def sort_fasta_file_by_length(fasta_file):
     """ Sort by length and save fasta file
     """
     objs = []
@@ -226,7 +226,7 @@ def sc_chr2seq_from_fasta(file_name):
 def sc_add_prefix_to_fasta_header(fasta_file, output_file, prefix, clean=False):
     '''Add custom prefix to each header in multifasta.
     '''
-    with open(output_name, "w") as fw:
+    with open(output_file, "w") as fw:
         for header, seq in sc_iter_fasta_brute(fasta_file):
             if clean:
                 name = header[1:].split()[0]

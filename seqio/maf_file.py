@@ -70,7 +70,7 @@ class MafSection(AbstractModel):
         for i, block in enumerate(self.blocks):
             if "Anc" in block.taxon:
                 continue
-            print i, block.sequence, block.full_name, block.start, block.end, block.strand
+            print(i, block.sequence, block.full_name, block.start, block.end, block.strand)
 
 
 def iter_maf_file(file_name):
@@ -124,7 +124,7 @@ if __name__ == '__main__':
                     sequences[last_name].append("N"*(dstart-1))
                 sequences[last_name].append(block.sequence)
 
-                print block.name, "%s -> %s-%s [%s]" % (last_end[last_name], block.start, block.end, dstart)
+                print(block.name, "%s -> %s-%s [%s]" % (last_end[last_name], block.start, block.end, dstart))
 
                 # if dstart < 1 or dstart > 1000:
                 #     print block.sequence, "%s -> %s-%s [%s]" % (last_end, block.start, block.end, dstart)
@@ -136,8 +136,8 @@ if __name__ == '__main__':
     for name, seqs in sequences.items():
         with open("/home/akomissarov/Dropbox/PySatDNA/maf_cheetah_%s.seq" % name, "w") as fw:
             fw.write(">%s\n%s" % (name, "".join(seqs)))
-        print seqs, name
-        raw_input("n?")
+        print(seqs, name)
+        input("n?")
     # print block.sequence, "%s -> %s-%s [%s]" % (last_end, block.start, block.end, dstart)
 
         # raw_input("Next?")

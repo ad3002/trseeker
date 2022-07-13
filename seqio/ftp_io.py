@@ -40,7 +40,7 @@ class AbstractFtpIO(object):
 
     def connect(self):
         """ Connect anonymously to server."""
-        print "Connect to", self.ftp_address
+        print("Connect to", self.ftp_address)
         self.ftp = ftplib.FTP(self.ftp_address)
         self.ftp.login()
 
@@ -75,9 +75,10 @@ class AbstractFtpIO(object):
         if not file_name.endswith(".gz"):
             return
         fh = gzip.GzipFile(fileobj=open(file_name, 'rb'))
-        fw = file(file_name.replace('.gz', ''), 'wb')
-        for line in fh:
-            fw.write(line)
+        output_file = file_name.replace('.gz', '')
+        with open(output_file, 'wb') as fw:
+            for line in fh:
+                fw.write(line)
         fh.close()
         fw.close()
 
@@ -92,7 +93,7 @@ def download_with_aspera_from_ncbi(source, destination):
 
     }
     command = "~/.aspera/connect/bin/ascp -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh -k1 -Tr -l100m anonftp@ftp-private.ncbi.nlm.nih.gov:%(source)s %(dest)s" % data
-    print command
+    print(command)
     os.system(command)
 
 
