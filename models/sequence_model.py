@@ -99,7 +99,7 @@ class SequenceModel(AbstractModel):
           self.seq_head = ">%s" % self.seq_ref
         seq = self.seq_sequence.strip()
         s = []
-        for i in xrange(0, len(seq), 60):
+        for i in range(0, len(seq), 60):
           s.append(seq[i:i+60])
         seq = "\n".join(s)
         return "%s\n%s\n" % (self.seq_head.strip(), seq.strip())

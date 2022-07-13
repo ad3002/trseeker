@@ -115,7 +115,7 @@ def read_blast_file(blast_file, length):
     # parser data
     for blast_obj in sc_iter_tab_file(blast_file, BlastResultModel):
         if blast_obj.query_end is None or blast_obj.query_end is None:
-            print "Error parsing blast results:", blast_obj
+            print("Error parsing blast results:", blast_obj)
             continue
         if length:
           blast_obj.fraction_of_query = abs(blast_obj.query_start - blast_obj.query_end) / float(length)

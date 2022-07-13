@@ -59,7 +59,7 @@ class KmerSliceModel(AbstractModel):
       super(KmerSliceModel, self).__init__()
       data = data.split(":")
       if len(data) < len(self.dumpable_attributes):
-        for i in xrange(len(self.dumpable_attributes) - len(data)):
+        for i in range(len(self.dumpable_attributes) - len(data)):
           data.append("-1")
       for i, attr in enumerate(self.dumpable_attributes):
         setattr(self, attr, data[i])
@@ -129,7 +129,7 @@ def sc_ngram_trid_reader(file_name):
         tfs = tf_list.split(",")
 
         result = []
-        for i in xrange(0, len(sids)):
+        for i in range(0, len(sids)):
             result.append((int(sids[i]), float(tfs[i])))
         yield int(nid), result
 
@@ -138,7 +138,6 @@ def read_kmer_index(ngram_index_file, micro_kmers, cutoff=1, dust=0):
     '''
     data = []
     for index_obj in sc_iter_tab_file(ngram_index_file, KmerIndexModel):
-        print index_obj.df, "\r",
         if micro_kmers:
             if index_obj.kmer in micro_kmers:
                 if index_obj.tf < micro_kmers[index_obj.kmer]:
@@ -148,6 +147,5 @@ def read_kmer_index(ngram_index_file, micro_kmers, cutoff=1, dust=0):
             continue
         if index_obj.df == cutoff:
             break
-        data.append(index_obj)
-    print 
+        data.append(index_obj) 
     return data
