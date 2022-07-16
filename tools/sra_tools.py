@@ -63,7 +63,7 @@ def fastaq_to_fasta(file_name, output_file):
             s = ">%s\n%s\n" % (title, seq)
             fh.write(s)
             n += 1
-    print n
+    print(n)
 
 def write_fastaq_repeats(input_file, output_file, min_tf=1000):
     ''' Write file with fastaq repeated reads with exact match.'''
@@ -116,7 +116,7 @@ def write_reduced_fasta(input_file, output_reduced):
     '''
     seen = {}
     n = 0
-    print "Reading..."
+    print("Reading...")
     skipped = 0
     for title, seq in sra_fasta_reader(input_file):
         if 'N' in seq:
@@ -127,16 +127,16 @@ def write_reduced_fasta(input_file, output_reduced):
         seen.setdefault(seq, 0)
         seen[seq] += 1
         n += 1
-    print "Sorting..."
+    print("Sorting...")
     seen = sort_dictionary_by_value(seen, reverse=True)
-    print "Formating..."
+    print("Formating...")
     seen = ["%s\t%s\n" % (k, v) for v, k in seen]
-    print "Saving..."
+    print("Saving...")
     with open(output_reduced, "w") as fh:
         for line in seen:
             fh.write(line)
-    print "Done."
-    print "Skipped: ", skipped
+    print("Done.")
+    print("Skipped: ", skipped)
 
     return skipped
 
@@ -147,7 +147,7 @@ def write_ngrams(input_file, output_ngram, NGRAM_N):
     '''
     seen = {}
     n = 0
-    print "Reading..."
+    print("Reading...")
     skipped = 0
     for title, seq in sra_fasta_reader(input_file):
         for i, ngram in generate_ngrams(seq, n=NGRAM_N):
@@ -158,14 +158,14 @@ def write_ngrams(input_file, output_ngram, NGRAM_N):
             seen.setdefault(ngram, 0)
             seen[ngram] += 1
             n += 1
-    print "Sorting..."
+    print("Sorting...")
     seen = sort_dictionary_by_value(seen, reverse=True)
-    print "Formating..."
+    print("Formating...")
     seen = ["%s\t%s\n" % (bin_to_seq(k), v) for v, k in seen]
-    print "Saving..."
+    print("Saving...")
     with open(output_ngram, "w") as fh:
         for line in seen:
             fh.write(line)
-    print "Done."
-    print "ngrams, skipped: ", n, skipped
+    print("Done.")
+    print("ngrams, skipped: ", n, skipped)
     return n, skipped

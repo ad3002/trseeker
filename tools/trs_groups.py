@@ -58,17 +58,17 @@ def get_family_name(trf_objs, seen_units):
 def join_families_with_common(families):
     ''' Join families with common members.'''
     n = len(families)
-    for i in xrange(0, n):
+    for i in range(0, n):
         if not families[i]:
             continue
-        for j in xrange(i + 1, n):
+        for j in range(i + 1, n):
             if not families[j]:
                 continue
             if families[i].intersection(families[j]):
                 families[i] = families[i].union(families[j])
                 families[j] = None
     families = [x for x in families if x]
-    for i in xrange(len(families)):
+    for i in range(len(families)):
         families[i] = list(families[i])
     families.sort(key=lambda x: len(x), reverse=True)
     return families

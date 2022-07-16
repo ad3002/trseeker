@@ -18,7 +18,7 @@ import os
 try:
     import psutil
 except:
-    print "Not psutil installed"
+    print("Not psutil installed")
 
 from trseeker.settings import load_settings
 from PyExp import sc_iter_filepath_folder
@@ -149,7 +149,7 @@ def count_kmers(input_file, output_prefix, k, mintf=None, strand=False):
     if mintf:
         params["mintf"] = "--lower-count=%s" % mintf
     command = "%(location)s count %(mintf)s -m %(k)s -o %(output_prefix)s -c %(hash_bits)s -s %(hash_size)s %(both_strands)s -t %(threads)s %(input_fasta)s" % params
-    print "Execute:", command
+    print("Execute:", command)
     os.system(command)
 
 
@@ -182,7 +182,7 @@ def count_kmers_new(input_file, output_prefix, k, mintf=None, strand=False):
     if mintf:
         params["mintf"] = "--lower-count=%s" % mintf
     command = "%(location)s count %(mintf)s -m %(k)s -o %(output_prefix)s -c %(hash_bits)s -s %(hash_size)s %(both_strands)s -t %(threads)s %(input_fasta)s" % params
-    print "Execute:", command
+    print("Execute:", command)
     os.system(command)
 
 def merge_kmers(folder, output_prefix, output_file):
@@ -210,10 +210,10 @@ def merge_kmers(folder, output_prefix, output_file):
         command = "cp %(output_prefix)s_0 %(output_file)s" % params
     else:
         command = "%(location)s merge -o %(output_file)s %(output_prefix)s\_*" % params
-    print "Execute:", command
+    print("Execute:", command)
     os.system(command)
     command = "rm %(output_prefix)s_*" % params
-    print command
+    print(command)
     os.system(command)
 
 
@@ -232,7 +232,7 @@ def stats_kmers(db_file, stats_file, new=True):
     if new:
         params["location"] = location_new
     command = "%(location)s stats --verbose -o %(stats_file)s %(db_file)s" % params
-    print "Execute:", command
+    print("Execute:", command)
     os.system(command)
 
 
@@ -251,7 +251,7 @@ def histo_kmers(db_file, histo_file, new=True):
     if new:
         params["location"] = location_new
     command = "%(location)s histo --verbose -o %(histo_file)s -h 1000000000 %(db_file)s" % params
-    print "Execute:", command
+    print("Execute:", command)
     os.system(command)
 
 
@@ -272,7 +272,7 @@ def dump_kmers(db_file, kmers_file, dumpmintf, new=False):
     if new:
         params["location"] = location_new
     command = "%(location)s dump --column -L %(dumpmintf)s --tab -o %(kmers_file)s %(db_file)s" % params
-    print "Execute:", command
+    print("Execute:", command)
     os.system(command)
     if os.path.getsize(kmers_file)/1000000000 <10:
         sort_file_by_int_field(kmers_file, 1)
@@ -299,13 +299,13 @@ def query_kmers(db_file, query_hashes, both_strands=True, verbose=False, new=Fal
         params["both_strands"] = "-C"
     command = "%(location)s query %(both_strands)s %(db_file)s" % params
     if verbose > 1:
-        print command
+        print(command)
     final_result = defaultdict(int)
     n = len(query_hashes)
     step = batch_size
     for k in xrange(0,n,step):
         if verbose > 1:
-            print k, n
+            print(k, n)
         pp = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, universal_newlines=True)
         # query = " ".join(query_hashes[k:k+100]).upper()
         for i, query in enumerate(query_hashes[k:k+step]):
@@ -316,19 +316,19 @@ def query_kmers(db_file, query_hashes, both_strands=True, verbose=False, new=Fal
         if "Can't open file" in error:
             return None
         if verbose > 1:
-            print "Data size", len(data[0])
+            print("Data size", len(data[0]))
         for item in data[0].strip().split("\n"):
             if item:
                 if verbose > 2:
-                    print item
+                    print(item)
                 key, value = item.upper().strip().split()
                 final_result[key] = int(value)
             else:
                 if verbose > 2:
-                    print data
+                    print(data)
                 final_result[-1] = data[1]
         
-    return final_result
+    return(final_result)
 
 def query_kmers_new(db_file, query_hashes, both_strands=True, verbose=False):
     """
@@ -349,14 +349,14 @@ def query_kmers_new(db_file, query_hashes, both_strands=True, verbose=False):
     #     params["both_strands"] = "-C"
     command = "%(location)s query -i %(both_strands)s %(db_file)s" % params
     if verbose:
-        print command
+        print(command)
     final_result = defaultdict(int)
     n = len(query_hashes)
 
     step = 1000
     for k in xrange(0,n,step):
         if verbose > 1:
-            print k, n
+            print(k, n)
         pp = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, universal_newlines=True)
         # query = " ".join(query_hashes[k:k+100]).upper()
         for i, query in enumerate(query_hashes[k:k+step]):
@@ -365,15 +365,14 @@ def query_kmers_new(db_file, query_hashes, both_strands=True, verbose=False):
         error = data[1]
         if "Can't open file" in error:
             return None
-        # print data
         for item in data[0].strip().split("\n"):
             if item.strip():
                 if verbose:
-                    print k, n, item
+                    print(k, n, item)
                 final_result[query] = int(item.strip().split()[0])
             else:
                 if verbose:
-                    print k, n, data
+                    print(k, n, data)
                 final_result[-1] = data[1]
     return final_result
 
@@ -488,35 +487,35 @@ def sc_count_and_dump_kmers_for_file(fasta_file, jellyfish_data_folder, jf_db, j
     if strand or dumpmintf < 0:
         return
 
-    print "Sort data..."
+    print("Sort data...")
     temp_file = jf_dat+".temp"
     data = {
         "in": jf_dat,
         "out": temp_file,
     }
     command = "sort -k2nr %(in)s > %(out)s" % data
-    print command
+    print(command)
     os.system(command)
     command = "mv %(out)s %(in)s" % data
-    print command
+    print(command)
     os.system(command)
     for file_path in sc_iter_filepath_folder(jellyfish_data_folder):
         if "%s___" % jf_db in file_path:
-            print "Removing", file_path
+            print("Removing", file_path)
             os.unlink(file_path)
 
 def load_kmer2tf(jf_data_file):
     """ Load kmer2tf file from jellyfish dat file
     """
-    print "Read file %s..." % jf_data_file
+    print("Read file %s..." % jf_data_file)
     kmer2tf = {}
     with open(jf_data_file) as fh:
-        print "Read data..."
+        print("Read data...")
         kmer2tf = fh.readlines()
-        print "Format data..."
+        print("Format data...")
         kmer2tf = [x.split("\t") for x in kmer2tf]
-        print "Convert to dict.."
+        print("Convert to dict..")
         kmer2tf = dict(kmer2tf)
-    print "Done."
+    print("Done.")
     return kmer2tf
 

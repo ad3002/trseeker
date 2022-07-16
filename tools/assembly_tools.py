@@ -52,22 +52,22 @@ def get_ng50(lengths, genome_size, verbose=False):
         if n50 >= genome_size/2:
             if ng50 is None:
                 if verbose:
-                    print "NG50: %s (%s%%)" % (x, round(100.*x/genome_size, 2))
+                    print("NG50: %s (%s%%)" % (x, round(100.*x/genome_size, 2)))
                     if len(lengths) > 1:
-                        print "LG50: %s (%s%%)" % (l50, round(100.*(1 - float(l50-1)/(len(lengths)-1)), 2))
+                        print("LG50: %s (%s%%)" % (l50, round(100.*(1 - float(l50-1)/(len(lengths)-1)), 2)))
                     else:
-                        print "LG50: %s (%s%%)" % (l50, 100.00)
+                        print("LG50: %s (%s%%)" % (l50, 100.00))
                 ng50 = x
                 lg50 = l50
         if n50 >= total/2:
             if verbose:
-                print "N50: %s (%s%%)" % (x, round(100.*x/genome_size, 2))
+                print("N50: %s (%s%%)" % (x, round(100.*x/genome_size, 2)))
                 if len(lengths) > 1:
-                    print "L50: %s (%s%%)" % (l50, round(100.*(1 - float(l50-1)/(len(lengths)-1)), 2))
+                    print("L50: %s (%s%%)" % (l50, round(100.*(1 - float(l50-1)/(len(lengths)-1)), 2)))
                 else:
-                    print "LG50: %s (%s%%)" % (l50, 100.00)
-                print "Contigs: ", len(lengths)
-                print "Shortest:", shortest_seq
-                print "Longest: %s (%s%%)" % (longest_seq, round(100.*longest_seq/genome_size, 2))
-                print "Total length: %s (x%s)" % (sum(lengths), round(1.*sum(lengths)/genome_size, 2))
+                    print("LG50: %s (%s%%)" % (l50, 100.00))
+                print("Contigs: ", len(lengths))
+                print("Shortest:", shortest_seq)
+                print("Longest: %s (%s%%)" % (longest_seq, round(100.*longest_seq/genome_size, 2)))
+                print("Total length: %s (x%s)" % (sum(lengths), round(1.*sum(lengths)/genome_size, 2)))
             return x, l50, shortest_seq, longest_seq, ng50, lg50

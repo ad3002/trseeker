@@ -9,7 +9,6 @@ Functions related to TRs annotation.
 '''
 
 import os
-from trseeker.models.trf_model import TRModel
 from trseeker.seqio.tab_file import sc_iter_tab_file
 
 BUBBLE_CHART_TEMPLATE = "BubbleChart3D[{%s}]"
@@ -278,5 +277,5 @@ def create_mathematice_dataset_by_family(trs_dataset, path_to_mathematica_folder
           family = "OTHER"
 
     math_string = BUBBLE_CHART_TEMPLATE % join_legends(legends)
-    print math_string
+    print(math_string)
     return math_string

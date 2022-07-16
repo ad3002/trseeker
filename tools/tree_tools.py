@@ -14,6 +14,9 @@
 Functions related to tree datastructure.
 '''
 
+from PyExp import sc_iter_filepath_folder
+from trseeker.seqio.tab_file import sc_iter_tab_file
+from trseeker.models.trf_model import NetworkSliceModel
 import types
 
 class ChainException(Exception):
@@ -567,10 +570,9 @@ def get_slice_files(folder):
 def read_tree_slices(slice_files):
     ''' Read all slice files.'''
     for i, (id, file_path) in enumerate(slice_files):
-        print i, "\r",
         result = []
         for slice_obj in sc_iter_tab_file(file_path, NetworkSliceModel):
             result.append((slice_obj.gid, slice_obj.trf_id))
         slice_files[i] = result
-    print "Done"
+    print("Done")
     return slice_files

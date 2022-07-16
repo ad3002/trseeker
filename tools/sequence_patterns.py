@@ -25,6 +25,7 @@ Function collection for work with sequence pattrens.
 import re
 from trseeker.tools.sequence_tools import get_revcomp
 from trseeker.tools.other_tools import remove_redundancy
+from trseeker.tools.sequence_patterns import re_get_mutation
 
 __dna = {'A':'[AN]',
          'C':'[CN]',

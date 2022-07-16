@@ -23,7 +23,7 @@ def raw_reads_load_fastq_reads(fastq_file, limit=1000000):
     '''
     result = []
     for i, read in enumerate(fastq_reader(fastq_file)):
-        print i, "\r",
+        print(i, "\r", end=" ")
         result.append(read.sequence)
         if i > limit:
             break

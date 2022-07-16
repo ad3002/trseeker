@@ -85,6 +85,8 @@ import tempfile
 import shutil
 import urllib.request
 import re
+import time
+from urllib.error import HTTPError
 
 
 class NoToolException(Exception):
@@ -98,14 +100,14 @@ def _get_feature(feature, record):
     return ""
 
 
-def _download_genomic_links(url, only_gff=False):
+def _download_genomic_links(url, only_gff=False, add_fasta=True):
     '''
     '''
     if not url.endswith("/"):
         url += "/"
     url = url.replace("ftp://", " https://")
     to_download = []
-    print(f"Parsing {url}...", end=" ")
+    print(f"Parsing {url} ...", end=" ")
     with urllib.request.urlopen(url) as response:
         html = response.read().decode("utf8")
         links = re.findall("<a href=\"(.*?)\">(.*?)</a>", html, re.M|re.S)
@@ -113,6 +115,8 @@ def _download_genomic_links(url, only_gff=False):
             if only_gff:
                 if "_genomic.gff.gz" in link[0]:
                     to_download.append(url + link[0])    
+                elif add_fasta and  "_genomic.fna.gz" in link[0]:
+                    to_download.append(url + link[0])
                 else:
                     continue
             if "_genomic.gff.gz" in link[0]:
@@ -360,7 +364,7 @@ def _is_file_exists(url, output_folder):
     return False
 
 
-def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True, only_gff=False, quiet=True, mock=False, assemblies_to_use=None):
+def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True, only_gff=False, add_fasta=False, quiet=True, mock=False, assemblies_to_use=None):
     ''' Download genomes and annotation from NCBI according to taxid.
         Return refseq and genbank datasets.
     '''
@@ -369,6 +373,7 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
         
     refseq_results = {}
     genbank_results = {}
+    errors = []
     with tempfile.NamedTemporaryFile() as temp_output_file:
         if not is_tool("esearch"):
             raise NoToolException("Please, install 'mamba install -c bioconda entrez-direct'")
@@ -383,28 +388,54 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
         documents = re.findall("<DocumentSummary>(.*?)</DocumentSummary>", data, re.S)
 
         print(f"Found {len(documents)} items...")
-
+        
         for i, document in enumerate(documents):
+            print(f"Progress {i}/{len(documents)} found {len(refseq_results)} RefSeq links and {len(genbank_results)} GenBank links and {len(errors)} errors.")
 
-            print(f"Progress {i}/{len(documents)}")
-
-            genbank_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_GenBank>(.*?)</FtpPath_GenBank>', document, re.S)
-            refseq_paths = re.findall('<Organism>(.*?)</Organism>.*?<FtpPath_RefSeq>(.*?)</FtpPath_RefSeq>', document, re.S)
+            
+            genbank_paths = re.findall('<Taxid>(\d+)</Taxid>.*?<Organism>(.*?)</Organism>.*?<FtpPath_GenBank>(.*?)</FtpPath_GenBank>', document, re.S)
+            refseq_paths = re.findall('<Taxid>(\d+)</Taxid>.*?<Organism>(.*?)</Organism>.*?<FtpPath_RefSeq>(.*?)</FtpPath_RefSeq>', document, re.S)
                         
-            for organism, url in refseq_paths:
+            for taxid, organism, url in refseq_paths:
                 assembly = url.split("/")[-1]
                 if assemblies_to_use and not assembly in assemblies_to_use:
                     continue
-                name = (organism, assembly)
-                refseq_results[name] = _download_genomic_links(url, only_gff=only_gff)
-            
+                name = (taxid, organism, assembly)
+                while True:
+                    try:
+                        refseq_results[name] = _download_genomic_links(url, only_gff=only_gff, add_fasta=add_fasta)
+                        break
+                    except HTTPError as err:
+                        if err.code == 404:
+                           errors.append(url)
+                           break
+                        else:
+                           raise err
+                    except:
+                        print("Retry...")
+                        time.sleep(5)
+                
+                
             if not only_refseq:
-                for organism, url in genbank_paths:
+                for taxid, organism, url in genbank_paths:
                     assembly = url.split("/")[-1]
                     if assemblies_to_use and not assembly in assemblies_to_use:
                         continue
-                    name = (organism, assembly)
-                    genbank_results[name] = _download_genomic_links(url, only_gff=only_gff)
+                    name = (taxid, organism, assembly)
+                    while True:
+                        try:
+                            genbank_results[name] = _download_genomic_links(url, only_gff=only_gff, add_fasta=add_fasta)
+                            break
+                        except HTTPError as err:
+                            if err.code == 404:
+                               errors.append(url)
+                               break
+                            else:
+                               raise err
+                        except:
+                            print("Retry...")
+                            time.sleep(5)
+
         
         print(f"Found {len(refseq_results)} RefSeq links and {len(genbank_results)} GenBank links.")
 
@@ -438,5 +469,9 @@ def download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, th
         command = f"less to_download.list | xargs -P {threads} -n 1 wget"
     print(command)
     os.system(command)
+    
+    print("errors:")
+    for error in errors:
+        print(error)
 
     return refseq_results, genbank_results

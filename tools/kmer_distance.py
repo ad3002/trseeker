@@ -55,7 +55,7 @@ class KmerBasedDistance(object):
         self.local_tf = defaultdict(int)
         local_seen = {}
         n = float(len(sequence))
-        for i in xrange(0, len(sequence) - self.k + 1):
+        for i in range(0, len(sequence) - self.k + 1):
             kmer = sequence[i:i + self.k]
             if self.SKIP_N and 'n' in kmer:
                 continue
@@ -204,7 +204,7 @@ def get_dust_score(sequence, k=4):
     ''' Return DUST score for given sequence and kmer length.
     '''
     d = defaultdict(int)
-    for i in xrange(0, len(sequence)-k+1):
+    for i in range(0, len(sequence)-k+1):
         d[sequence[i:i+k]] += 1
     score = 0.
     total = 0.
@@ -243,7 +243,7 @@ def _process_index_data_to_file(ngram_index_file, index_data, k, dust=False, trf
             new_doc_ids.append(trf_index[j].trf_id)
         # sort docsis by freqs
         items = []
-        for pos in xrange(len(new_doc_ids)):
+        for pos in range(len(new_doc_ids)):
             all_items = trf_index[pos].trf_array_length - k + 1
             if all_items <= 0:
                 continue

@@ -25,7 +25,9 @@ from trseeker.models.trf_model import TRModel
 from trseeker.seqio.trf_file import TRFFileIO
 
 settings = load_settings()
- 
+
+trf_reader = TRFFileIO().iter_parse
+
 
 def trf_search(file_name, pacbio=False):
     """ TRF search in fasta file."""
@@ -40,7 +42,7 @@ def trf_search(file_name, pacbio=False):
                                        settings["trf_settings"]["trf_length"],
                                        )
     if pacbio:
-        params = "2 3 5 80 10 50 2000 -l 6"
+        params = "2 3 5 80 10 50 2000 -l 20"
     if settings["trf_settings"]["trf_masked_file"]:
         params += " -m"
     if settings["trf_settings"]["trf_flanked_data"]:
@@ -59,7 +61,7 @@ def trf_search(file_name, pacbio=False):
                 string = settings["trf_settings"]["trf_location"] +" %s %s" % (file_name, params)
             else:
                 string = settings["trf_settings"]["trf_location_mac"] +" %s %s" % (file_name, params)
-    print string
+    print(string)
     os.system(string)
 
 def trf_search_in_dir(folder, verbose=True, file_suffix=".fa", output_folder=None):
@@ -76,7 +78,7 @@ def trf_search_in_dir(folder, verbose=True, file_suffix=".fa", output_folder=Non
         if file_name.endswith(".gz"):
             fh = gzip.open(file_name, "r")
             temp_file_name = file_name[:-3]
-            print "Unzip file:", file_name, "to", temp_file_name
+            print("Unzip file:", file_name, "to", temp_file_name)
             data = fh.read()
             with open(temp_file_name, "w") as fw:
                 fw.write(data)
@@ -93,16 +95,16 @@ def trf_search_in_dir(folder, verbose=True, file_suffix=".fa", output_folder=Non
             if os.path.isfile(result_file):
                 os.unlink(result_file)
             if os.path.isfile(dist_file):
-                print "Found result file:", dist_file
+                print("Found result file:", dist_file)
                 continue
         
         if verbose:
-            print "Start trf search in %s" % file_name
+            print("Start trf search in %s" % file_name)
         
         trf_search(file_name)
 
         if temp_file_name:
-            print "Remove file:", temp_file_name
+            print("Remove file:", temp_file_name)
             os.unlink(temp_file_name)
  
 
@@ -110,7 +112,7 @@ def trf_search_in_dir(folder, verbose=True, file_suffix=".fa", output_folder=Non
             dist_file = os.path.join(output_folder, result_name)
             if not os.path.isfile(result_file):
                 raise Exception("TRF search for file %s is failed" % result_file)
-            print "Copy: ", result_file, dist_file
+            print("Copy: ", result_file, dist_file)
             if os.path.isfile(dist_file):
                 os.unlink(dist_file)
             shutil.copyfile(result_file, dist_file)
@@ -129,7 +131,7 @@ def trf_worker(args):
     if file_name.endswith(".gz"):
         fh = gzip.open(file_name, "r")
         temp_file_name = file_name[:-3]
-        print "Unzip file:", file_name, "to", temp_file_name
+        print("Unzip file:", file_name, "to", temp_file_name)
         data = fh.read()
         with open(temp_file_name, "w") as fw:
             fw.write(data)
@@ -146,23 +148,23 @@ def trf_worker(args):
         if os.path.isfile(result_file):
             os.unlink(result_file)
         if os.path.isfile(dist_file):
-            print "Found result file:", dist_file
+            print("Found result file:", dist_file)
             return
     
     if verbose:
-        print "Start trf search in %s" % file_name
+        print("Start trf search in %s" % file_name)
     
     trf_search(file_name, pacbio=pacbio)
 
     if temp_file_name:
-        print "Remove file:", temp_file_name
+        print("Remove file:", temp_file_name)
         os.unlink(temp_file_name)
 
     if output_folder:
         dist_file = os.path.join(output_folder, result_name)
         if not os.path.isfile(result_file):
             raise Exception("TRF search for file %s is failed" % result_file)
-        print "Copy: ", result_file, dist_file
+        print("Copy: ", result_file, dist_file)
         shutil.copyfile(result_file, dist_file)
         os.unlink(result_file)
 
@@ -194,7 +196,7 @@ def trf_search_by_splitting(fasta_file, threads=30, wdir=".", project="NaN"):
     total_length = 0
     next_file = 0
     for i, seq_obj in enumerate(sc_iter_fasta(fasta_file)):
-        print seq_obj.header
+        print(seq_obj.header)
         file_path = os.path.join(folder_path, "%s.fa" % next_file)
         with open(file_path, "a") as fw:
             fw.write(">%s\n%s\n" % (seq_obj.header, seq_obj.sequence))
@@ -212,28 +214,28 @@ def trf_search_by_splitting(fasta_file, threads=30, wdir=".", project="NaN"):
 
     os.chdir(folder_path)
     
-    command = "ls %s | grep fa | xargs -P %s -I {} /home/akomissarov/libs/trf {} 2 5 7 80 10 50 2000 -l 6 -d -h" % (folder_path, threads)
-    print command
+    command = "ls %s | grep fa | xargs -P %s -I {} /home/akomissarov/libs/trf {} 2 5 7 80 10 50 2000 -l 20 -d -h" % (folder_path, threads)
+    print(command)
     os.system(command)
 
     ### 3. Parse TRF
 
-    parser_programm = "/home/akomissarov/Dropbox/workspace/PyBioSnippets/hiseq/trf_parse_raw.py"
+    parser_programm = "trf_parse_raw.py"
 
     command = "ls %s | grep dat | xargs -P %s -I {} %s -i {} -o {}.trf -p %s" % (folder_path, threads, parser_programm, project)
-    print command
+    print(command)
     os.system(command)
 
     ### 3. Aggregate data
 
     command = "cat %s/*.trf > %s" % (folder_path, output_file)
-    print command
+    print(command)
     os.system(command)
 
     os.chdir(current_dir)
 
     ### 4. Remove temp folder
-    raw_input("Remove: %s ?" % folder_path)
+    input("Remove: %s ?" % folder_path)
     shutil.rmtree(folder_path)
 
 
@@ -256,7 +258,6 @@ def trf_search_for_file_list_parallel(file_list, verbose=True, output_folder=Non
         
         args = folder, verbose, file_suffix, output_folder, threads, file_name, pacbio
         map_data.append(args)
-    # print map_data
     p.map(trf_worker, map_data)
         
 
@@ -282,7 +283,7 @@ def trf_filter_by_array_length(trf_file, output_file, cutoff):
             if _filter_by_bottom_array_length(obj, cutoff):
                 i += 1
                 fw.write(obj.get_string_repr())
-    print i
+    print(i)
     return i
 
 def trf_filter_by_monomer_length(trf_file, output_file, cutoff):
@@ -295,7 +296,7 @@ def trf_filter_by_monomer_length(trf_file, output_file, cutoff):
             if _filter_by_bottom_unit_length(obj, cutoff):
                 i += 1
                 fw.write(obj.get_string_repr())
-    print i
+    print(i)
     return i
 
 def trf_filter_exclude_by_gi_list(trf_file, output_file, gi_list_to_exclude):
@@ -379,7 +380,7 @@ def count_trs_per_chrs(all_trf_file):
         if trf_obj.trf_array_length > 10000:
             chr2n_xlarge[chr] += 1
     for chr in chr2n:
-        print chr, chr2n[chr], chr2n_large[chr], chr2n_xlarge[chr]
+        print(chr, chr2n[chr], chr2n_large[chr], chr2n_xlarge[chr])
 
 def count_trf_subset_by_head(trf_file, head_value):
     """ Function prints number of items with given fasta head fragment

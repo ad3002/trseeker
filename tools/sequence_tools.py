@@ -33,7 +33,7 @@ def get_dust_score(sequence, k=4):
     ''' Compute dust score for givent score with given window size.
     '''
     d = defaultdict(int)
-    for i in xrange(0, len(sequence)-k+1):
+    for i in range(0, len(sequence)-k+1):
         d[sequence[i:i+k]] += 1
     score = 0.
     total = 0.
@@ -47,10 +47,13 @@ def get_shifts_variants(sequence):
     '''
     '''
     shifts = set()
-    for i in xrange(len(sequence)):
+    for i in range(len(sequence)):
         shifts.add(sequence[i:]+sequence[:i])
     return list(shifts)
     
+
+REVCOMP_DICTIONARY = dict(zip('ATCGNatcgn~[]', 'TAGCNtagcn~]['))
+
 def get_revcomp(sequence):
     '''Return reverse complementary sequence.
 
@@ -58,8 +61,14 @@ def get_revcomp(sequence):
     'CGAT'
 
     '''
-    c = dict(zip('ATCGNatcgn~[]', 'TAGCNtagcn~]['))
-    return ''.join(c.get(nucleotide, '') for nucleotide in reversed(sequence))
+    return ''.join(REVCOMP_DICTIONARY.get(nucleotide, '') for nucleotide in reversed(sequence))
+
+def get_translation(sequence, from_string, to_string):
+    '''Translate sequence from one alphabet to another.
+
+    '''
+    c = dict(zip(from_string, to_string))
+    return ''.join(c.get(nucleotide, '') for nucleotide in sequence)
 
 def get_comp(sequence):
     '''Return complementary sequence.
@@ -200,13 +209,14 @@ def get_consensus(strs):
     ''' Return consensus string for given list of strings.'''
     n = len(strs[0])
     for s in strs:
-        assert len(s) == n
+        if len(s) != n:
+            raise Exception("len(s) != n")
     result = {}
     result['A'] = [0]*n
     result['C'] = [0]*n
     result['T'] = [0]*n
     result['G'] = [0]*n
-    for i in xrange(n):
+    for i in range(n):
         for s in strs:
             result[s[i]][i] += 1
     return result
@@ -255,9 +265,9 @@ def remove_consensus_redundancy(trf_objs):
                     monomer_b = consensuses[k]
                     if monomer_b in result_rules:
                         continue
-                    s = n/base
+                    s = n // base
                     v = set()
-                    for p in xrange(s):
+                    for p in range(s):
                         v.add(monomer_b[p*base:(p+1)*base])            
                     if len(v) > 1:
                         continue

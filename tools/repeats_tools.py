@@ -244,11 +244,11 @@ def run_ltr_harvest(input_fasta, output_dir):
         os.makedirs(output_dir)
     if not os.path.isfile(data["pred_out_file"]):
         command = "/home/akomissarov/libs/genometools-unstable/bin/gt suffixerator -db %(input_fasta)s -indexname %(index_name)s -tis -suf -lcp -des -ssp -sds -dna" % data
-        print command
+        print(command)
         os.system(command)
         # command = "/home/akomissarov/libs/genometools-unstable/bin/gt ltrharvest -index %(index_name)s -v -out %(pred_out_file)s -outinner %(pred_out_inner_file)s -seed 30 -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3 -minlenltr 100 -maxlenltr 1000 -mindistltr 1000 -maxdistltr 15000 -similar 90.0 -overlaps all -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60 -longoutput" % data
         command = "/home/akomissarov/libs/genometools-unstable/bin/gt ltrharvest -index %(index_name)s -v -out %(pred_out_file)s -outinner %(pred_out_inner_file)s -gff3 %(gff3_out_file)s -minlenltr 100 -maxlenltr 6000 -mindistltr 1500 -maxdistltr 25000 -mintsd 5 -maxtsd 5 -motif tgca -similar 99 -vic 10  > %(out_out_file)s" % data
-        print command
+        print(command)
         os.system(command)
 
     # if not os.path.isfile(data["lic_file"]):
@@ -268,7 +268,7 @@ def run_ltr_harvest(input_fasta, output_dir):
         os.makedirs(data["repeat_masker_output_dir"])
         run_repeatmasker_local(data["input_fasta"], data["repeat_masker_output_dir"], data["pred_out_file"])
 
-    print data["repeatmasker_out_file"]
+    print(data["repeatmasker_out_file"])
     if os.path.isfile(data["repeatmasker_out_file"]):
         with open(data["repeatmasker_out_file"]) as fh:
             content = fh.read()
@@ -280,14 +280,6 @@ def run_ltr_harvest(input_fasta, output_dir):
         data["pmasked"] = 0.0
 
     return data
-
-
-
-
-
-
-
-
 
 
 def run_process_repeatscout_results(input_fasta, output_dir):
@@ -314,10 +306,10 @@ def run_repeat_modeler(db_name, input_file, output_dir):
         'input_file': input_file,
     }
     command = "/home/akomissarov/libs/RepeatModeler/BuildDatabase -name %(db_name)s -engine ncbi %(input_file)s" % data
-    print command
+    print(command)
     os.system(command)
     command = "/home/akomissarov/libs/RepeatModeler/RepeatModeler -database %(db_name)s -engine ncbi -pa 30" % data
-    print command
+    print(command)
     print os.system(command)
 
 
