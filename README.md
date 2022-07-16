@@ -2136,6 +2136,7 @@ download_rna_sra_datasets_by_taxid(taxid, email, output_folder, threads=30, batc
 ```
 
 Download genomes and annotation from NCBI according to taxid.
+Return refseq and genbank datasets.
 
 ```python
 download_genome_assemblies_and_annotation_from_ncbi(taxid, output_folder, threads=30, only_refseq=True)
