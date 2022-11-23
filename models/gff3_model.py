@@ -58,11 +58,17 @@ class Gff3Model(AbstractModel):
         if not hasattr(self, "attributes"):
             self.attributes = {}     
         if self.attributes:
-            attr_keys = self.attributes.keys()
+            attr_keys = [key for key in self.attributes.keys() if not isinstance(self.attributes[key], dict)]
+            dict_attr_keys = [key for key in self.attributes.keys() if isinstance(self.attributes[key], dict)]
             attr_keys.sort()
             attr = []
             for k in attr_keys:
-              attr.append("%s=%s" % (k, self.attributes[k]))  
+                attr.append("%s=%s" % (k, self.attributes[k]))  
+            for k in dict_attr_keys:
+                data = []
+                for key in self.attributes[k]:
+                    data.append(f"{key}:{self.attributes[k][key]}")
+                attr.append("%s=%s" % (k, ",".join(data)))  
             self.raw_features = ";".join(attr)
         s.append(self.raw_features)
         s = "\t".join(s)
@@ -131,6 +137,13 @@ class Gff3FileIO(TabDelimitedFileIO):
                         if not item.strip():
                             continue
                         k, v = item.strip().split("=")
+                        if k == "Dbxref":
+                            try:
+                                v = dict([
+                                    (ref.split(":")[0], ":".join(ref.split(":")[1:])) for ref in v.split(",")
+                                    ])
+                            except:
+                                print(v)
                         _features[k] = v
                 data["attributes"] = _features
                 obj = Gff3Model()
@@ -142,9 +155,4 @@ class Gff3FileIO(TabDelimitedFileIO):
                 yield obj
 
 
-def sc_gff3_reader(gff3_file):
-    """
-    """
-    reader = Gff3FileIO()
-    for gff3_obj in reader.read_online(gff3_file):
-        yield gff3_obj
+
