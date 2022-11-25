@@ -179,9 +179,6 @@ def trf_search_in_dir_parallel(folder, verbose=True, file_suffix=".fa", output_f
     p = Pool(processes=threads)
     map_data = []
     for file_name in sc_iter_filepath_folder(folder, mask=file_suffix):
-        # if file_name.endswith("fsa_nt"):
-            # os.unlink(file_name)
-            # continue
         args = folder, verbose, file_suffix, output_folder, threads, file_name
         map_data.append(args)
     p.map(trf_worker, map_data)

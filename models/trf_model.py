@@ -210,7 +210,7 @@ class TRModel(AbstractModel):
         try:
             self.trf_l_ind = int(self.trf_l_ind)
         except:
-            print(self)
+            print("Error:", self)
 
         self.trf_r_ind = int(self.trf_r_ind)
         self.trf_period = int(self.trf_period)
