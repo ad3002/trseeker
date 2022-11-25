@@ -187,7 +187,7 @@ def trf_search_in_dir_parallel(folder, verbose=True, file_suffix=".fa", output_f
     p.map(trf_worker, map_data)
 
 
-def trf_search_by_splitting(fasta_file, threads=30, wdir=".", project="NaN"):
+def trf_search_by_splitting(fasta_file, threads=30, wdir=".", project="NaN", trf_path="/home/akomissarov/libs/trf", parser_program="./trf_parse_raw.py"):
     """ TRF search by splitting on fasta file in files.
     """
     folder_path = tempfile.mkdtemp(dir=wdir)
@@ -214,29 +214,33 @@ def trf_search_by_splitting(fasta_file, threads=30, wdir=".", project="NaN"):
 
     os.chdir(folder_path)
     
-    command = "ls %s | grep fa | xargs -P %s -I {} /home/akomissarov/libs/trf {} 2 5 7 80 10 50 2000 -l 20 -d -h" % (folder_path, threads)
+    command = f"ls {folder_path} | grep fa | xargs -P {threads} -I [] {trf_path} [] 2 5 7 80 10 50 2000 -l 20 -d -h"
     print(command)
     os.system(command)
 
     ### 3. Parse TRF
 
-    parser_programm = "trf_parse_raw.py"
-
-    command = "ls %s | grep dat | xargs -P %s -I {} %s -i {} -o {}.trf -p %s" % (folder_path, threads, parser_programm, project)
+    command = f"ls {folder_path} | grep dat | xargs -P {threads} -I [] {parser_program} -i {folder_path}/[] -o {folder_path}/[].trf -p {project}"
     print(command)
     os.system(command)
 
     ### 3. Aggregate data
 
-    command = "cat %s/*.trf > %s" % (folder_path, output_file)
-    print(command)
-    os.system(command)
+    print(f"Aggregate data to: {output_file}")
+    with open(output_file, "w") as fw:
+        for file_path in sc_iter_filepath_folder(folder_path):
+            if file_path.endswith(".trf"):
+                with open(file_path) as fh:
+                    fw.write(fh.read())
 
     os.chdir(current_dir)
 
-    ### 4. Remove temp folder
-    input("Remove: %s ?" % folder_path)
+    ## 4. Remove temp folder
+    if folder_path.count("/") <= 3:
+        input("Remove: %s ?" % folder_path)
     shutil.rmtree(folder_path)
+
+    return output_file
 
 
 
