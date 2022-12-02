@@ -9,9 +9,9 @@
 from trseeker.models.gff3_model import Gff3FileIO
 
 
-def sc_gff3_reader(gff3_file):
+def sc_gff3_reader(gff3_file, only_fields=None):
     """ Iter over gff3 file.
     """
     reader = Gff3FileIO()
-    for gff3_obj in reader.read_online(gff3_file):
+    for gff3_obj in reader.read_online(gff3_file, only_fields=only_fields):
         yield gff3_obj
