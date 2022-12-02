@@ -111,7 +111,7 @@ class Gff3FileIO(TabDelimitedFileIO):
         super(TabDelimitedFileIO, self).__init__(*args, **kwargs)
         self.headers = []
 
-    def read_online(self, file_name):
+    def read_online(self, file_name, only_fields=None):
         """ Overrided. Yield items online from data from input_file."""
 
         def skip_comments(iterable):
@@ -130,6 +130,8 @@ class Gff3FileIO(TabDelimitedFileIO):
 
         with open(file_name) as fh:
             for data in csv.DictReader(skip_comments(fh), fieldnames=fields, delimiter='\t', quoting=csv.QUOTE_NONE):
+                if only_fields and data["type"] not in only_fields:
+                    continue
                 _features = {}
                 if data["attributes"]:
                     data["raw_features"] = data["attributes"]
@@ -153,6 +155,3 @@ class Gff3FileIO(TabDelimitedFileIO):
                     trseeker_logger.error("Can't parse features for %s" % str(data))
                     continue
                 yield obj
-
-
-
