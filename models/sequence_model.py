@@ -9,12 +9,8 @@ from PyExp import AbstractModel
 from trseeker.tools.sequence_tools import get_revcomp, get_gc, check_gapped
 from trseeker.tools.sequence_tools import clear_sequence
 from trseeker.tools.parsers import parse_fasta_head, parse_chromosome_name
-from Bio import Entrez
-import os
 import re
 
-
-Entrez.email = "aleksey.komissarov@gmail.com"
 
 class SequenceModel(AbstractModel):
     """ Class for sequence wrapping
@@ -183,6 +179,9 @@ class SequenceModel(AbstractModel):
     def set_by_genbank(self, genbank_id):
       '''
       '''
+      from Bio import Entrez
+      Entrez.email = "youremail@gmail.com"
+      
       handle = Entrez.efetch(db="nucleotide", id=genbank_id, rettype="fasta", retmode="text")
       fasta = handle.read().split("\n")
       head = fasta[0]
