@@ -11,9 +11,14 @@
 from PyExp import AbstractModel
 from trseeker.seqio.tab_file import TabDelimitedFileIO
 import csv
+import sys
 import collections
 from PyExp import trseeker_logger
 
+if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+    from collections.abc import MutableMapping
+else:
+    from collections import MutableMapping
 
 class Gff3Model(AbstractModel):
     """ Class for gff3 data wrapping.
@@ -75,7 +80,7 @@ class Gff3Model(AbstractModel):
         return "%s\n" % s
 
 
-class Gff3FeatureDict(collections.MutableMapping):
+class Gff3FeatureDict(MutableMapping):
     """A dictionary for gff3 features
     """
 
